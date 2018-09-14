@@ -49,7 +49,7 @@ The FLERAS SFC specification follows the context-free grammar production rules:<
 12. NOPELEM -> OPELEM NOPELEM | OPELEM<br/>
 13. OPELEM -> OPEID1, OPEID2, ..., OPEIDN*<br/>
 14. EP -> EPID1, EPID2, ..., EPIDN*<br/>
-<br/>
+
 *Retrieved from the FLERAS request.
 
 ### How was it developed?
