@@ -1,25 +1,64 @@
-import nltk
+######## PARTIAL ORDER CLASS DESCRIPTION ########
+
+#PROJECT: NFV FLERAS (FLExible Resource Allocation Service) 
+#CREATED BY: VINICIUS FULBER GARCIA
+#CONTACT: vfulber@inf.ufsm.br
+
+#RECEIVES A PARTIAL ORDER SEGMENT AND ITS
+#ORDER AND COUPLING DEPENDENCIES TO PROCESS
+#AND VALIDATE THEM. THIS CLASS WAS DEVELOPED
+#TO BE A SFC TOPOLOGY SUB-CLASS.
+
+#THE CLASS STATUS ATTRIBUTE INDICATE ITS 
+#OPERATIONS RESULTS CODES:
+
+#NORMAL CODES ->
+#0: NO PARTIAL ORDER SEGMENT VALIDATED
+#1: VALID PARTIAL ORDER SEGMENT
+
+#ERROR CODES ->
+#-1 -> DEPENDENCY ELEMENT NOT PRESENT IN THE PARTIAL ORDER SEGMENT
+#-2 -> ELEMENTS ALREADY COUPLED AND THIS COUPLING IS NOT POSSIBLE (SAME COUP. GROUP)
+#-3 -> ELEMENTS ALREADY COUPLED AND THIS COUPLING IS NOT POSSIBLE (OTHER COUP. GROUP)
+#-4 -> FIRST ELEMENT IN A COUPLING AND THE SECOND COUPLE IS NOT POSSIBLE
+#-5 -> SECOND ELEMENT IN A COUPLING AND THE FIRST COUPLE IS NOT POSSIBLE
+#-6 -> ELEMENTS ARE COUPLED IN THE SAME GROUP AND THE ORDER DEPENDENCY DO NOT MATCH
+#-7 -> DUPLICATED ELEMENT IN THE DEPENDENCY
+#-8 -> CROSS DEPENDENCY ERROR (PREVIOUS DEPENDENCY INDICATES THAT THE SENCOND GROUP/ELEMENT MUST BE BEFORE THE FIRST)
+#-9 -> CROSS DEPENDENCY ERROR (PREVIOUS DEPENDENCY INDICATES THAT THE FIRST GROUP/ELEMENT MUST BE AFTER THE SECOND)
+
+#################################################
+
+######## PARTIAL ORDER CLASS BEGIN ########
 
 class PartialOrder:
-	__valid = False
+	__status = None
 	
 	__elements = None
 	__oDependencies = None
 	__cDependencies = None
 
+	######## CONSTRUCTOR ########
+
+	def __init__(self):
+
+		self.__status = 0
+
 	def __init__(self, porderPEs, porderODs, porderCDs):
 		
-		self.__elements = porderPEs
-		self.__oDependencies = porderODs
-		self.__cDependencies = porderCDs
+		self.poValidate(porderPEs, porderODs, porderCDs)
 
-	def __dependenciesElementsValidate(self):
+	######## PRIVATE METHODS ########
+
+	def __poDependenciesElementsValidate(self):
+
 		for cDependency in self.__cDependencies + self.__oDependencies:
 			if not cDependency[0] in self.__elements or not cDependency[1] in self.__elements:
+				self.__status = -1
 				return False
 		return True
 
-	def __couplingDepenciesProcess(self):
+	def __poCouplingDepenciesProcess(self):
 
 		hashID = 1
 		elementsHash = {}
@@ -40,6 +79,7 @@ class PartialOrder:
 					if beforeCoupling.index(cDependency[0]) == afterCoupling.index(cDependency[1]) - 1:
 						continue
 					else:
+						self.__status = -2
 						return False
 
 				if beforeCoupling[-1] == cDependency[0] and afterCoupling[0] == cDependency[1]:
@@ -49,10 +89,12 @@ class PartialOrder:
 					elementsCouplings.pop(afterKey)
 					continue
 				else:
+					self.__status = -3
 					return False
 
 			if beforeKey.startswith('%') and not afterKey.startswith('%'):
 				if elementsCouplings[beforeKey][-1] != cDependency[0]:
+					self.__status = -4
 					return False
 				elementsCouplings[beforeKey].append(afterKey)
 				elementsHash[afterKey] = beforeKey
@@ -60,6 +102,7 @@ class PartialOrder:
 
 			if not beforeKey.startswith('%') and afterKey.startswith('%'):
 				if elementsCouplings[afterKey][0] != cDependency[1]:
+					self.__status = -5
 					return False
 				elementsCouplings[afterKey].insert(0, beforeKey)
 				elementsHash[beforeKey] = afterKey
@@ -72,7 +115,7 @@ class PartialOrder:
 
 		return (elementsHash, elementsCouplings)
 
-	def __orderDepenciesProcess(self, couplingGroups):
+	def __poOrderDepenciesProcess(self, couplingGroups):
 
 		beforeElements = {}
 		afterElements = {}
@@ -94,12 +137,16 @@ class PartialOrder:
 					if elementsCouplings[beforeGroup].index(oDependency[0]) < elementsCouplings[beforeGroup].index(oDependency[1]):
 						return True
 					else:
+						self.__status = -6
 						return False
 				else:
+					self.__status = -7
 					return False
 			if beforeGroup in beforeElements[afterGroup]:
+				self.__status = -8
 				return False
 			if afterGroup in afterElements[beforeGroup]:
+				self.__status = -9
 				return False
 
 			beforeElements[beforeGroup].append(afterGroup)
@@ -107,21 +154,91 @@ class PartialOrder:
 			afterElements[afterGroup].append(beforeGroup)
 			afterElements[afterGroup] += afterElements[beforeGroup]
 
-		return True 
+		return True
 
-	def validate(self):
+	######## PUBLIC METHODS ######## 
 
-		if self.__dependenciesElementsValidate():
-			couplingGroups = self.__couplingDepenciesProcess()
+	def poValidate(self, porderPEs, porderODs, porderCDs):
+
+		self.__elements = porderPEs
+		self.__oDependencies = porderODs
+		self.__cDependencies = porderCDs
+
+		if self.__poDependenciesElementsValidate():
+			couplingGroups = self.__poCouplingDepenciesProcess()
 			if isinstance(couplingGroups, tuple):
-				if self.__orderDepenciesProcess(couplingGroups):
-					self.__valid = True
-					return True
-		return False
+				if self.__poOrderDepenciesProcess(couplingGroups):
+					self.__status = 1
 
+	def poValid(self):
+
+		if self.__status == 1:
+			return True
+		else:
+			return False
+
+	def poStatus(self):
+		
+		return self.__status
+
+	def poOPEs(self):
+		
+		if self.__status != 1:
+			return None
+
+		return self.__elements
+
+	def poOD(self):
+		
+		if self.__status != 1:
+			return None
+
+		return self.__oDependencies
+
+	def poCD(self):
+		
+		if self.__status != 1:
+			return None
+
+		return self.__cDependencies
+
+######## PARTIAL ORDER CLASS END ########
+
+#--------------------------------------------------
+
+######## SFC TOPOLOGY CLASS DESCRIPTION ########
+
+#PROJECT: NFV FLERAS (FLExible Resource Allocation Service) 
+#CREATED BY: VINICIUS FULBER GARCIA
+#CONTACT: vfulber@inf.ufsm.br
+
+#RECEIVES A SFC TOPOLOGY STRUCTURED USING THE
+#GRAMMAR SYTAX, IN ADDITION TO ITS OPERATIONAL
+#ELEMENTS LIST AND END POINTS LISTS. THESE DATA
+#CAN BE RECOVERED FROM THE SFC REQUEST CLASS.
+
+#THE CLASS STATUS ATTRIBUTE INDICATE ITS 
+#OPERATIONS RESULTS CODES:
+
+#NORMAL CODES ->
+#0: NO TOPOLOGY VALIDATED
+#1: VALID TOPOLOGY
+
+#ERROR CODES ->
+#-1 -> SYNTAX ERRO IN THE SFC TOPOLOGY
+#-2 (+ PARTIAL ORDER ERROR CODE) -> PARTIAL ORDER ERROR
+#	THIS CODE ERROR IS ALWAYS LESS THAN -2
+#		SUM 2 TO GET THE PARTIAL ORDER ERROR CODE
+#		SUBTRACT THE PARTIAL ORDER CODE TO GET THE SFC TOPOLOGY ERROR (-2)
+
+#################################################
+
+######## SFC TOPOLOGY CLASS BEGIN ########
+
+import nltk
 
 class SFCTopology:
-	__valid = False
+	__status = None
 
 	__sfcParser = None
 	__boundaryEPs = None
@@ -129,6 +246,8 @@ class SFCTopology:
 	
 	__sfcTopology = None
 	__sfcPorders = None
+
+	######## CONSTRUCTOR ########
 
 	def __init__(self, boundaryEPs, operationalPEs):
 
@@ -165,8 +284,11 @@ class SFCTopology:
 		self.__boundaryEPs = boundaryEPs
 		self.__operationalPEs = operationalPEs
 		self.__mainParser = nltk.ChartParser(nltk.CFG.fromstring(kernelGrammar + grammarPELEM + grammarEP))
+		self.__status = 0
 
-	def __getPorders(self):
+	######## PRIVATE METHODS ########
+
+	def __stPorders(self):
 
 		self.__sfcPorders = []
 		splittedSFC = self.__sfcTopology.split()
@@ -194,112 +316,43 @@ class SFCTopology:
 
 				self.__sfcPorders.append(PartialOrder(porderPEs, porderODs, porderCDs))
 
-	def requestTopology(self, sfcTopology):
+	######## PUBLIC METHODS ######## 
 
-		self.__valid = False
+	def stValidate(self, sfcTopology):
 		
+		self.__sfcTopology = None
+		self.__sfcPorders = None
+
 		if next(self.__mainParser.parse(sfcTopology.split()), None) == None:
+			self.__status = -1
 			return False
+
 		self.__sfcTopology = sfcTopology
-		
-		self.__getPorders()
+		self.__stPorders()
+
 		for porder in self.__sfcPorders:
-			if not porder.validate():
+			if not porder.poValid():
+				self.__status = -2 + porder.poStatus()
 				return False
 
 		return True
 
+	def stStatus(self):
 
-'''topoOpt = SFCTopology(["EP1", "EP2", "EP3", "EP4"], ["PE1", "PE2", "PE3", "PE4", "PE5", "PE6", "PE7", "PE8", "PE9", "PE10", "PE11"])
+		return self.__status
 
-sfcDefinition1 = "IP PE1 PE2 PE3 PE4 EP1"
-sfcDefinition2 = "IP [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE2 PE3 ) PE4 EP1"
-sfcDefinition3 = "IP [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE2 PE3 ) PE4 [ PE5 PE6 ] EP1"
-sfcDefinition4 = "IP [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 ) ( PE3 PE7 ) PE4 [ PE5 PE6 ] EP1"
-sfcDefinition5 = "IP [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 * ) ( PE3 PE7 ) PE4 [ PE5 PE6 ] EP1"
-sfcDefinition6 = "IP [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 * ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
-sfcDefinition7 = "IP [ PE1 PE2 PE3 PE4 ] ( PE1 PE2 * ) ( PE2 PE3 * ) ( PE3 PE4 ) PE5 [ PE6 PE7 ] EP1"
-sfcDefinition8 = "IP [ PE1 PE2 PE3 PE4 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE3 PE4 ) PE5 [ PE6 PE7 ] EP1"
-sfcDefinition9 = "IP [ PE1 PE2 PE3 PE4 ] ( PE1 PE2 * ) ( PE3 PE4 * ) ( PE2 PE3 * ) PE5 [ PE6 PE7 ] EP1"
-sfcDefinition10 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE5 PE2 ) EP1"
-sfcDefinition11 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE4 * ) EP1"
-sfcDefinition12 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE5 PE2 ) EP1"
-sfcDefinition13 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE7 PE2 ) ( PE5 PE7 ) EP1"
-sfcDefinition14 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { PE4 / PE5 } PE6 EP1"
-sfcDefinition15 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 / PE8 } PE9 EP1"
-sfcDefinition16 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 / PE8 } PE9 / PE10 } PE11 EP1"
-sfcDefinition17 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 ) { [ PE4 PE5 ] EP1 / PE6 { PE7 / PE8 } PE9 EP2 / PE10 EP3 }"
-sfcDefinition18 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE5 ) EP1"
-sfcDefinition19 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE1 PE3 ) EP1"
+	def stTopology():
+		
+		if self.__status != 1:
+			return None
 
-sfcError1 = "IP PE1 PE2 PE3 EP1 PE4 EP1"
-sfcError2 = "IP [ PE1 PE2 PE3 EP2 ] ( PE2 PE1 ) ( PE2 PE3 ) PE4 EP1"
-sfcError3 = "IP [ PE1 PE2 PE3 ] ( PE2 PE1 ) PE4 ( PE2 PE3 ) EP1"
-sfcError4 = "IP [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE2 EP1 ) PE4 EP1"
-sfcError5 = "IP [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE1 PE2 ) PE4 [ PE5 PE6 ] EP1"
-sfcError6 = "IP [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 ) ( PE2 PE7 ) PE4 [ PE5 PE6 ] EP1"
-sfcError7 = "IP [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE2 PE7 ) ( PE7 PE1 ) PE4 [ PE5 PE6 ] EP1"
-sfcError8 = "IP [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE3 PE2 * ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
-sfcError9 = "IP [ PE1 PE2 PE3 PE7 ] ( PE1 PE3 ) ( PE7 PE1 ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
-sfcError10 = "IP [ PE1 PE2 PE3 PE7 ] ( PE3 PE1 ) ( PE1 PE7 ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
-sfcError11 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE5 PE2 ) ( PE1 PE4 ) EP1"
-sfcError12 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE5 * ) EP1"
-sfcError13 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE7 PE1 ) ( PE2 PE7 ) EP1"
-sfcError14 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { PE4 / PE5 EP2 } PE6 EP1"
-sfcError15 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] } PE9 EP1"
-sfcError16 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 / PE8 EP2 } PE9 / PE10 } PE11 EP1"
-sfcError17 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 / PE8 EP2 } EP2 / PE10 } PE11 EP1"
-sfcError18 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 EP2 / PE8 EP3 } / PE10 } PE11 EP1"
-sfcError19 = "IP [ PE1 PE2 PE3 ] ( PE2 PE3 ) { [ PE4 PE5 ] EP1 / PE6 { PE7 / PE8 } EP2 / PE10 EP3 }"
-sfcError20 = "IP [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE2 ) EP1"
+		return self.__sfcTopology
 
-sfcBranch1 = "IP [ PE1 PE2 ] ( PE2 PE1 ) PE3 { PE4 EP1 / PE4 EP2 }"
-sfcBranch2 = "IP [ PE1 PE2 ] ( PE2 PE1 ) PE3 { [ PE4 PE5 ] EP1 / PE4 EP2 }"
-sfcBranch3 = "IP [ PE1 PE2 ] ( PE2 PE1 ) PE3 { [ PE4 PE5 ] EP1 / PE4 PE5 EP2 }"
+	def stPOrder():
 
-print "T1:" + str(topoOpt.requestTopology(sfcDefinition1))
-print "T2:" + str(topoOpt.requestTopology(sfcDefinition2))
-print "T3:" + str(topoOpt.requestTopology(sfcDefinition3))
-print "T4:" + str(topoOpt.requestTopology(sfcDefinition4))
-print "T5:" + str(topoOpt.requestTopology(sfcDefinition5))
-print "T6:" + str(topoOpt.requestTopology(sfcDefinition6))
-print "T7:" + str(topoOpt.requestTopology(sfcDefinition7))
-print "T8:" + str(topoOpt.requestTopology(sfcDefinition8))
-print "T9:" + str(topoOpt.requestTopology(sfcDefinition9))
-print "T10:" + str(topoOpt.requestTopology(sfcDefinition10))
-print "T11:" + str(topoOpt.requestTopology(sfcDefinition11))
-print "T12:" + str(topoOpt.requestTopology(sfcDefinition12))
-print "T13:" + str(topoOpt.requestTopology(sfcDefinition13))
-print "T14:" + str(topoOpt.requestTopology(sfcDefinition14))
-print "T15:" + str(topoOpt.requestTopology(sfcDefinition15))
-print "T16:" + str(topoOpt.requestTopology(sfcDefinition16))
-print "T17:" + str(topoOpt.requestTopology(sfcDefinition17))
-print "T18:" + str(topoOpt.requestTopology(sfcDefinition18))
-print "T19:" + str(topoOpt.requestTopology(sfcDefinition19))
-print " "
+		if self.__status != 1:
+			return None
 
-print "E1:" + str(topoOpt.requestTopology(sfcError1))
-print "E2:" + str(topoOpt.requestTopology(sfcError2))
-print "E3:" + str(topoOpt.requestTopology(sfcError3))
-print "E4:" + str(topoOpt.requestTopology(sfcError4))
-print "E5:" + str(topoOpt.requestTopology(sfcError5))
-print "E6:" + str(topoOpt.requestTopology(sfcError6))
-print "E7:" + str(topoOpt.requestTopology(sfcError7))
-print "E8:" + str(topoOpt.requestTopology(sfcError8))
-print "E9:" + str(topoOpt.requestTopology(sfcError9))
-print "E10:" + str(topoOpt.requestTopology(sfcError10))
-print "E11:" + str(topoOpt.requestTopology(sfcError11))
-print "E12:" + str(topoOpt.requestTopology(sfcError12))
-print "E13:" + str(topoOpt.requestTopology(sfcError13))
-print "E14:" + str(topoOpt.requestTopology(sfcError14))
-print "E15:" + str(topoOpt.requestTopology(sfcError15))
-print "E16:" + str(topoOpt.requestTopology(sfcError16))
-print "E17:" + str(topoOpt.requestTopology(sfcError17))
-print "E18:" + str(topoOpt.requestTopology(sfcError18))
-print "E19:" + str(topoOpt.requestTopology(sfcError19))
-print "E20:" + str(topoOpt.requestTopology(sfcError20))
-print " "
+		return self.__sfcPorders
 
-print "B1:" + str(topoOpt.requestTopology(sfcBranch1))
-print "B2:" + str(topoOpt.requestTopology(sfcBranch2))
-print "B3:" + str(topoOpt.requestTopology(sfcBranch3))'''
+######## SFC TOPOLOGY CLASS END ########
