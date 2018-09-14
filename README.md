@@ -33,8 +33,9 @@ The FLERAS' request model is structure by a YAML notation and presents three mai
 3.3.2. METRICS ID (Indicates the evaluation/update factor for each metric)<br/>
 3.4. EPS (List of EPs)<br/>
 3.4.1. ID (EP unique identifier)<br/>
-<br/>
+
 The FLERAS SFC specification follows the context-free grammar production rules:<br/>
+<br/>
 1. S -> "IP" OPBLOCK<br/>
 2. OPBLOCK -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EP<br/>
 3. ROPBLOCK -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK<br/>
