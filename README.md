@@ -1,7 +1,7 @@
 NFV FLERAS: NFV FLExible Resource Allocation System
 ========================================================
 
-\*Status: Development\*
+*Status: Development*
 
 ### What is FLERAS?
 
@@ -40,7 +40,7 @@ The FLERAS SFC specification follows the context-free grammar production rules:<
 3. ROPBLOCK -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK<br/>
 4. TPBLOCK -> PORDER | OPELEM<br/>
 5. PORDER -> "[" OPELEM NOPELEM "]" POEXCEPTION | "[" OPELEM NOPELEM "]"<br/>
-6. POEXCEPTION -> "(" OPELEM OPELEM ")" POEXCEPTION | "(" OPELEM OPELEM ")" | "(" OPELEM OPELEM "\*" ")" POEXCEPTION | "(" OPELEM OPELEM "\*" ")"<br/>
+6. POEXCEPTION -> "(" OPELEM OPELEM ")" POEXCEPTION | "(" OPELEM OPELEM ")" | "(" OPELEM OPELEM "*" ")" POEXCEPTION | "(" OPELEM OPELEM "*" ")"<br/>
 7. TBRANCH -> TPBLOCK "{" OPBLOCK NEXTTBRANCH "}"<br/>
 8. NEXTTBRANCH -> "/" OPBLOCK NEXTTBRANCH | "/" OPBLOCK<br/>
 9. NTBRANCH -> TPBLOCK "{" ROPBLOCK NEXTNTBRANCH "}" OPBLOCK<br/>
@@ -50,7 +50,7 @@ The FLERAS SFC specification follows the context-free grammar production rules:<
 13. OPELEM -> OPEID1, OPEID2, ..., OPEIDN<br/>
 14. EP -> EPID1, EPID2, ..., EPIDN<br/>
 <br/>
-\*Retrieved from the FLERAS request.
+*Retrieved from the FLERAS request.
 
 ### How was it developed?
 
