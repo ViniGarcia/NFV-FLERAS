@@ -35,7 +35,6 @@ The FLERAS' request model is structure by a YAML notation and presents three mai
 3.4.1. ID (EP unique identifier)<br/>
 
 The FLERAS SFC specification follows the context-free grammar production rules:<br/>
-<br/>
 1. S -> "IP" OPBLOCK<br/>
 2. OPBLOCK -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EP<br/>
 3. ROPBLOCK -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK<br/>
@@ -48,8 +47,8 @@ The FLERAS SFC specification follows the context-free grammar production rules:<
 10. INTBRANCH -> TPBLOCK "{" ROPBLOCK NEXTNTBRANCH "}" ROPBLOCK<br/>
 11. NEXTNTBRANCH -> "/" ROPBLOCK NEXTNTBRANCH | "/" ROPBLOCK<br/>
 12. NOPELEM -> OPELEM NOPELEM | OPELEM<br/>
-13. OPELEM -> OPEID1, OPEID2, ..., OPEIDN<br/>
-14. EP -> EPID1, EPID2, ..., EPIDN<br/>
+13. OPELEM -> OPEID1, OPEID2, ..., OPEIDN*<br/>
+14. EP -> EPID1, EPID2, ..., EPIDN*<br/>
 <br/>
 *Retrieved from the FLERAS request.
 
