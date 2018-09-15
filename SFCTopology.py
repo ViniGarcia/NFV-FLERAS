@@ -7,7 +7,7 @@
 #RECEIVES A PARTIAL ORDER SEGMENT AND ITS
 #ORDER AND COUPLING DEPENDENCIES TO PROCESS
 #AND VALIDATE THEM. THIS CLASS WAS DEVELOPED
-#TO BE A SFC TOPOLOGY SUB-CLASS.
+#TO BE A SFC TOPOLOGY AND EXPANSION META-CLASS.
 
 #THE CLASS STATUS ATTRIBUTE INDICATE ITS 
 #OPERATIONS RESULTS CODES:
@@ -37,6 +37,8 @@ class PartialOrder:
 	__elements = None
 	__oDependencies = None
 	__cDependencies = None
+
+	__combinations = None
 
 	######## CONSTRUCTOR ########
 
@@ -170,6 +172,13 @@ class PartialOrder:
 				if self.__poOrderDepenciesProcess(couplingGroups):
 					self.__status = 1
 
+	def poSetupCombinations(self, combinations):
+
+		if self.__status != 1:
+			return None
+
+		self.__combinations = combinations
+
 	def poValid(self):
 
 		if self.__status == 1:
@@ -201,6 +210,17 @@ class PartialOrder:
 			return None
 
 		return self.__cDependencies
+
+	def poCombinations(self):
+
+		if self.__status != 1:
+			return None
+
+		if self.__combinations == None:
+			return False
+		else:
+			return self.__combinations
+
 
 ######## PARTIAL ORDER CLASS END ########
 
@@ -335,20 +355,21 @@ class SFCTopology:
 				self.__status = -2 + porder.poStatus()
 				return False
 
+		self.__status = 1
 		return True
 
 	def stStatus(self):
 
 		return self.__status
 
-	def stTopology():
+	def stTopology(self):
 		
 		if self.__status != 1:
 			return None
 
 		return self.__sfcTopology
 
-	def stPOrder():
+	def stPOrder(self):
 
 		if self.__status != 1:
 			return None

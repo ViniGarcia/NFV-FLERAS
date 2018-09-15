@@ -28,7 +28,8 @@
 #-10 -> SOME BRANCH IS NOT WELL FORMED (TOPOLOGY)
 #-11 -> INVALID GOAL (GOAL FUNCTION)
 #-12 -> INVALID METRIC (GOAL FUNCTION)
-#-13 -> METRIC NOT INFORMED IN SOME OPERATIONAL ELEMENT (GOAL FUNCTIO/TOPOLOGY)
+#-13 -> INVALID METRIC EVALUATION (GOAL FUNCTION)
+#-14 -> METRIC NOT INFORMED IN SOME OPERATIONAL ELEMENT (GOAL FUNCTIO/TOPOLOGY)
 
 ###############################################
 
@@ -141,12 +142,15 @@ class SFCRequest:
 			if not "METRIC" in metric or not "WEIGHT" in metric or not "INPUT" in metric or not "EVALUATION" in metric:
 				self.__status = -12
 				return
+			if metric["EVALUATION"] != "MULT" and metric["EVALUATION"] != "DIV" and metric["EVALUATION"] != "SUB" and metric["EVALUATION"] != "SUM":
+				self.__status = -13
+				return 
 			functionMetrics.append(metric["METRIC"])
 
 		for element in self.__topology["OPELEMENTS"]:
 			for metric in functionMetrics:
 				if not metric in element:
-					self.__status = -13
+					self.__status = -14
 					return
 
 		self.__status = 1
