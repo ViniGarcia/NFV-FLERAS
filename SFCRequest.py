@@ -24,12 +24,15 @@
 #-6 -> INVALID OPERATIONAL ELEMENTS (TOPOLOGY)
 #-7 -> INVALID END POINTS (TOPOLOGY)
 #-8 -> INVALID TOPOLOGY ELEMENTS (TOPOLOGY)
-#-9 -> SOME BRANCH IS NOT INFORMED (TOPOLOGY)
-#-10 -> SOME BRANCH IS NOT WELL FORMED (TOPOLOGY)
-#-11 -> INVALID GOAL (GOAL FUNCTION)
-#-12 -> INVALID METRIC (GOAL FUNCTION)
-#-13 -> INVALID METRIC EVALUATION (GOAL FUNCTION)
-#-14 -> METRIC NOT INFORMED IN SOME OPERATIONAL ELEMENT (GOAL FUNCTIO/TOPOLOGY)
+#-9 -> INVALID GOAL (GOAL FUNCTION)
+#-10 -> INVALID METRIC (GOAL FUNCTION)
+#-11 -> INVALID METRIC EVALUATION (GOAL FUNCTION)
+#-12 -> METRIC NOT INFORMED IN SOME OPERATIONAL ELEMENT (GOAL FUNCTIO/TOPOLOGY)
+#-13 -> SOME BRANCH METRIC IS NOT PRESENT (TOPOLOGY)
+#-14 -> INVALID BRANCH ELEMENTS (TOPOLOGY)
+#-15 -> INVALID BRANCH UPDATE OPERATION (TOPOLOGY)
+#-16 -> SOME BRANCH IS NOT INFORMED (TOPOLOGY)
+#-17 -> SOME BRANCH IS NOT WELL FORMED (TOPOLOGY)
 
 ###############################################
 
@@ -124,33 +127,47 @@ class SFCRequest:
 			self.__status = -8
 			return
 
-		if splittedTopo.count('{') != len(self.__topology["BRANCHINGS"]):
-			self.__status = -9
-			return
-
-		for index in range(len(self.__topology["BRANCHINGS"])):
-			if len(self.__topology["BRANCHINGS"][index]) != branchSegments[index]:
-				self.__status = -10
-				return
-
 		if self.__objFunctions["GOAL"] != "MIN" and self.__objFunctions["GOAL"] != "MAX":
-			self.__status = -11
+			self.__status = -9
 			return
 
 		functionMetrics = []
 		for metric in self.__objFunctions["FUNCTION"]:
 			if not "METRIC" in metric or not "WEIGHT" in metric or not "INPUT" in metric or not "EVALUATION" in metric:
-				self.__status = -12
+				self.__status = -10
 				return
 			if metric["EVALUATION"] != "MULT" and metric["EVALUATION"] != "DIV" and metric["EVALUATION"] != "SUB" and metric["EVALUATION"] != "SUM":
-				self.__status = -13
+				self.__status = -11
 				return 
 			functionMetrics.append(metric["METRIC"])
 
 		for element in self.__topology["OPELEMENTS"]:
 			for metric in functionMetrics:
 				if not metric in element:
-					self.__status = -14
+					self.__status = -12
+					return
+
+		for metric in functionMetrics:
+			if not metric in self.__topology["BRANCHINGS"]:
+				self.__status = -13
+				return
+
+			if not "UPDATE" in self.__topology["BRANCHINGS"][metric] or not "FACTORS" in self.__topology["BRANCHINGS"][metric]:
+				self.__status = -14
+				return
+
+			updateOperation = self.__topology["BRANCHINGS"][metric]["UPDATE"]
+			if updateOperation != "MULT" and updateOperation != "DIV" and updateOperation != "SUB" and updateOperation != "SUM":
+				self.__status = -15
+				return
+
+			if splittedTopo.count('{') != len(self.__topology["BRANCHINGS"][metric]["FACTORS"]):
+				self.__status = -16
+				return
+
+			for index in range(len(self.__topology["BRANCHINGS"][metric]["FACTORS"])):
+				if len(self.__topology["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
+					self.__status = -17
 					return
 
 		self.__status = 1
@@ -210,5 +227,19 @@ class SFCRequest:
 			return None
 
 		return self.__topology["TOPOLOGY"]
+
+	def srGoal(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__objFunctions["GOAL"]
+
+	def srFunction(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__objFunctions["FUNCTION"]
 
 ######## SFC REQUEST CLASS END ########

@@ -63,8 +63,8 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 1. SFC topology validator (OK!!)<br/>
 2. SFC request validator (OK!!)<br/>
 3. SFC expansion tool (OK!!)<br/>
-4. SFC goal function creator (IN DEVELOPMENT!!)<br/>
-5. SFC generic composition method (WAITING)<br/>
+4. SFC goal function creator (OK!!)<br/>
+5. SFC generic composition method (IN DEVELOPMENT!!)<br/>
 6. SFC generic split and mapping method (WAITING)<br/>
 7. SFC generic selection method (WAITING)<br/>
 8. SFC registry architecture (WAITING)<br/>
@@ -74,7 +74,7 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 
 Contact us towards git issues requests or by the e-mail vfulber@inf.ufsm.br.
 
-### NIEP Research Group
+### FLERAS Research Group
 
 Vinícius Fülber Garcia (Federal University of Santa Maria - Brazil)<br/>
 Carlos Raniery Paula dos Santos (Federal University of Santa Maria - Brazil)

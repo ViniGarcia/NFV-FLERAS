@@ -17,9 +17,18 @@ FUNCTION:
     UPDATE: *metric1
 TOPOLOGY: !!str IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 PE7 ] / PE4 PE5 PE6 { PE2 PE7 / PE2 PE8 } PE9 / PE4 PE5 PE6 } PE11 PE1 { PE2 PE3 / PE2 PE4 } PE5 EP1
 BRANCHINGS: 
-  - [!!float 0.6, !!float 0.2, !!float 0.2]
-  - [!!float 0.9, !!float 1.0]
-  - [!!float 0.9, !!float 1.0]
+    *metric1:
+      UPDATE: !!str "MULT"
+      FACTORS:  
+        - [!!float 0.6, !!float 0.2, !!float 0.2]
+        - [!!float 0.9, !!float 1.0]
+        - [!!float 0.9, !!float 1.0]
+    *metric2: 
+      UPDATE: !!str "MULT"
+      FACTORS:  
+        - [!!float 0.6, !!float 0.2, !!float 0.2]
+        - [!!float 0.9, !!float 1.0]
+        - [!!float 0.9, !!float 1.0]
 OPELEMENTS:
   - ID: !!str PE1
     *metric1: !!float 1.0
