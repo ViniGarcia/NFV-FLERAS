@@ -1,0 +1,51 @@
+ID: !!str TopologyExample
+DESCRIPTION: > 
+  This is a simple example of a
+  generic SFC request with two 
+  goal function.
+GOAL: !!str "MIN"
+FUNCTION:
+  - METRIC: &metric1 !!str FlowRate
+    WEIGHT: !!float 0.8
+    INPUT: !!int 40
+    EVALUATION: !!str "MULT"
+    UPDATE: *metric1
+  - METRIC: &metric2 !!str MemoryUsage
+    WEIGHT: !!float 0.2
+    INPUT: !!int 40
+    EVALUATION: !!str "MULT"
+    UPDATE: *metric1
+TOPOLOGY: !!str IP [ PE1 PE2 ] { PE3 PE4 / PE5 PE6 } PE7 EP1
+BRANCHINGS: 
+    *metric1:
+      UPDATE: !!str "MULT"
+      FACTORS:  
+        - [!!float 0.5, !!float 0.5]
+    *metric2: 
+      UPDATE: !!str "MULT"
+      FACTORS:  
+        - [!!float 0.5, !!float 0.5]
+OPELEMENTS:
+  - ID: !!str PE1
+    *metric1: !!float 0.5
+    *metric2: !!int 5
+  - ID: !!str PE2
+    *metric1: !!float 1.0
+    *metric2: !!int 20
+  - ID: !!str PE3
+    *metric1: !!float 0.8
+    *metric2: !!int 10
+  - ID: !!str PE4
+    *metric1: !!float 0.6
+    *metric2: !!int 10
+  - ID: !!str PE5
+    *metric1: !!float 0.5
+    *metric2: !!int 10
+  - ID: !!str PE6
+    *metric1: !!float 1.0
+    *metric2: !!int 5
+  - ID: !!str PE7
+    *metric1: !!float 1.0
+    *metric2: !!int 5
+EPS:
+  - ID: !!str EP1
