@@ -64,8 +64,8 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 2. SFC request validator (OK!!)<br/>
 3. SFC expansion tool (OK!!)<br/>
 4. SFC goal function creator (OK!!)<br/>
-5. SFC generic composition method (IN DEVELOPMENT!!)<br/>
-6. SFC generic split and mapping method (WAITING)<br/>
+5. SFC generic composition method (OK!!)<br/>
+6. SFC generic split and mapping method (IN DEVELOPMENT!!)<br/>
 7. SFC generic selection method (WAITING)<br/>
 8. SFC registry architecture (WAITING)<br/>
 9. Graphical interface (WAITING)

@@ -33,6 +33,7 @@
 #-15 -> INVALID BRANCH UPDATE OPERATION (TOPOLOGY)
 #-16 -> SOME BRANCH IS NOT INFORMED (TOPOLOGY)
 #-17 -> SOME BRANCH IS NOT WELL FORMED (TOPOLOGY)
+#-18 -> NO BRANCH IN TOPOLOGY, BUT SOME BRANCH INFORMED IN REQUEST (TOPOLOGY)
 
 ###############################################
 
@@ -147,28 +148,36 @@ class SFCRequest:
 					self.__status = -12
 					return
 
-		for metric in functionMetrics:
-			if not metric in self.__topology["BRANCHINGS"]:
-				self.__status = -13
-				return
-
-			if not "UPDATE" in self.__topology["BRANCHINGS"][metric] or not "FACTORS" in self.__topology["BRANCHINGS"][metric]:
-				self.__status = -14
-				return
-
-			updateOperation = self.__topology["BRANCHINGS"][metric]["UPDATE"]
-			if updateOperation != "MULT" and updateOperation != "DIV" and updateOperation != "SUB" and updateOperation != "SUM":
-				self.__status = -15
-				return
-
-			if splittedTopo.count('{') != len(self.__topology["BRANCHINGS"][metric]["FACTORS"]):
-				self.__status = -16
-				return
-
-			for index in range(len(self.__topology["BRANCHINGS"][metric]["FACTORS"])):
-				if len(self.__topology["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
-					self.__status = -17
+		if '{' in splittedTopo:
+	
+			for metric in functionMetrics:
+				if not metric in self.__topology["BRANCHINGS"]:
+					self.__status = -13
 					return
+
+				if not "UPDATE" in self.__topology["BRANCHINGS"][metric] or not "FACTORS" in self.__topology["BRANCHINGS"][metric]:
+					self.__status = -14
+					return
+
+				updateOperation = self.__topology["BRANCHINGS"][metric]["UPDATE"]
+				if updateOperation != "MULT" and updateOperation != "DIV" and updateOperation != "SUB" and updateOperation != "SUM":
+					self.__status = -15
+					return
+
+				if splittedTopo.count('{') != len(self.__topology["BRANCHINGS"][metric]["FACTORS"]):
+					self.__status = -16
+					return
+
+				for index in range(len(self.__topology["BRANCHINGS"][metric]["FACTORS"])):
+					if len(self.__topology["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
+						self.__status = -17
+						return
+
+		else:
+
+			if len(self.__topology["BRANCHINGS"]) != 0:
+				self.__status = -18
+				return 
 
 		self.__status = 1
 
@@ -221,6 +230,13 @@ class SFCRequest:
 
 		return listOPEs
 
+	def srFullOPEs(self):
+
+		if self.__status != 1:
+			return None
+		
+		return self.__topology["OPELEMENTS"]
+
 	def srTopology(self):
 
 		if self.__status != 1:
@@ -242,4 +258,22 @@ class SFCRequest:
 
 		return self.__objFunctions["FUNCTION"]
 
+	def srWeights(self):
+
+		if self.__status != 1:
+			return None
+
+		weights = {}
+		for function in self.__objFunctions["FUNCTION"]:
+			weights[function["METRIC"]] = function["WEIGHT"]
+
+		return weights
+
+	def srBranches(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__topology["BRANCHINGS"]
+		
 ######## SFC REQUEST CLASS END ########
