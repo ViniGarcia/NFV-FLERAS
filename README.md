@@ -18,13 +18,13 @@ The FLERAS' request model is structure by a YAML notation and presents three mai
 1.1. ID (Request unique identifier)<br/>
 1.2. DESCRIPTION (Multi line request description)<br/>
 2. GOAL FUNCTION BLOCK<br/>
-2.1. GOAL (Minimize ("MIN") or maximize ("MAX") metrics)<br/>
-2.2. FUNCTION (Evaluation metrics description)<br/>
-2.2.1. METRIC (Metric unique identifier)<br/>
-2.2.2. WEIGHT (Value for weighted evaluation)<br/>
-2.2.3. INPUT (Initial metric value)<br/>
-2.2.4. EVALUATION (Metric evaluation operation ("MULT", "DIV", "SUM", "SUB"))<br/>
-2.2.5. UPDATE (Metric ID that the evaluation operation will update this metric)<br/>
+2.1. FUNCTION (Evaluation metrics description)<br/>
+2.1.1. METRIC (Metric unique identifier)<br/>
+2.1.2. GOAL (Minimize ("MIN") or maximize ("MAX") metric)<br/>
+2.1.3. WEIGHT (Value for weighted evaluation)<br/>
+2.1.4. INPUT (Initial metric value)<br/>
+2.1.5. EVALUATION (Metric evaluation operation ("MULT", "DIV", "SUM", "SUB"))<br/>
+2.1.6. UPDATE (Metric ID that the evaluation operation will update this metric)<br/>
 3. TOPOLOGY FUNCTION BLOCK<br/>
 3.1. TOPOLOGY (Topology defined with the context-free grammar described below)<br/>
 3.2. BRANCHINGS (List of lists indicating the expected traffic splitting in branchs segments - topology opening linear order)<br/>
