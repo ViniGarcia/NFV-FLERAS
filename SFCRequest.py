@@ -16,15 +16,15 @@
 #1: VALID REQUEST
 
 #ERROR CODES ->
-#-1 -> REQUEST METADA WAS SNOT INFORMED
-#-2 -> REQUEST TOPOLOGY WAS NOT INFORMED
-#-3 -> REQUEST GOAL FUNCTION WAS NOT INFORMED
-#-4 -> INVALID ID (METADATA)
-#-5 -> INVALID TOPOLOGY (TOPOLOGY)
-#-6 -> INVALID OPERATIONAL ELEMENTS (TOPOLOGY)
-#-7 -> INVALID END POINTS (TOPOLOGY)
-#-8 -> INVALID TOPOLOGY ELEMENTS (TOPOLOGY)
-#-9 -> INVALID GOAL (GOAL FUNCTION)
+#-1  -> REQUEST METADA WAS SNOT INFORMED
+#-2  -> REQUEST TOPOLOGY WAS NOT INFORMED
+#-3  -> REQUEST GOAL FUNCTION WAS NOT INFORMED
+#-4  -> INVALID ID (METADATA)
+#-5  -> INVALID TOPOLOGY (TOPOLOGY)
+#-6  -> INVALID OPERATIONAL ELEMENTS (TOPOLOGY)
+#-7  -> INVALID END POINTS (TOPOLOGY)
+#-8  -> INVALID TOPOLOGY ELEMENTS (TOPOLOGY)
+#-9  -> INVALID GOAL (GOAL FUNCTION)
 #-10 -> INVALID METRIC (GOAL FUNCTION)
 #-11 -> INVALID METRIC EVALUATION (GOAL FUNCTION)
 #-12 -> METRIC NOT INFORMED IN SOME OPERATIONAL ELEMENT (GOAL FUNCTIO/TOPOLOGY)
@@ -128,12 +128,11 @@ class SFCRequest:
 			self.__status = -8
 			return
 
-		if self.__objFunctions["GOAL"] != "MIN" and self.__objFunctions["GOAL"] != "MAX":
-			self.__status = -9
-			return
-
 		functionMetrics = []
 		for metric in self.__objFunctions["FUNCTION"]:
+			if metric["GOAL"] != "MIN" and metric["GOAL"] != "MAX":
+				self.__status = -9
+				return
 			if not "METRIC" in metric or not "WEIGHT" in metric or not "INPUT" in metric or not "EVALUATION" in metric:
 				self.__status = -10
 				return
@@ -200,8 +199,8 @@ class SFCRequest:
 			self.__metadata = {"ID":yamlParsed["ID"], "DESCRIPTION":yamlParsed["DESCRIPTION"]}
 		if "TOPOLOGY" in yamlParsed and "BRANCHINGS" in yamlParsed and "OPELEMENTS" in yamlParsed and "EPS" in yamlParsed:
 			self.__topology = {"TOPOLOGY":yamlParsed["TOPOLOGY"], "BRANCHINGS":yamlParsed["BRANCHINGS"], "OPELEMENTS":yamlParsed["OPELEMENTS"], "EPS":yamlParsed["EPS"]}
-		if "GOAL" in yamlParsed and "FUNCTION" in yamlParsed:
-			self.__objFunctions = {"GOAL":yamlParsed["GOAL"], "FUNCTION":yamlParsed["FUNCTION"]}
+		if "FUNCTION" in yamlParsed:
+			self.__objFunctions = {"FUNCTION":yamlParsed["FUNCTION"]}
 		self.__srValidate()
 
 	def srStatus(self):
@@ -249,7 +248,11 @@ class SFCRequest:
 		if self.__status != 1:
 			return None
 
-		return self.__objFunctions["GOAL"]
+		goals = {}
+		for function in self.__objFunctions["FUNCTION"]:
+			goals[function["METRIC"]] = function["GOAL"]
+
+		return goals
 
 	def srFunction(self):
 

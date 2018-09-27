@@ -32,7 +32,7 @@ class FLERASCLI(Cmd):
 		print("help -> show this message")
 		print("exit -> ends the execution")
 		print("setup path -> receives a sfc request path, validate and enable the commands below")
-		print("composition -> executes the generic composition method in already informed sfc request, it enables the topologies and advice commands")
+		print("compose -> executes the generic composition method in already informed sfc request, it enables the topologies and advice commands")
 		print("topologies -> show all composed topologies in addition to their goal functions indexes")
 		print("advice -> inidicates the best composed topology considering the goal function")
 		print ('######################################\n')

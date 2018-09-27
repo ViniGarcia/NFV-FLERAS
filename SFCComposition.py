@@ -169,11 +169,16 @@ class SFCComposition:
 	def __scWeightNormalizations(self):
 
 		weights = self.__sfcRequest.srWeights()
+		goals = self.__sfcRequest.srGoal()
 		
 		for index in self.__normalizedDicitionary:
 			sfcIndex = 0
 			for metric in weights:
-				sfcIndex += self.__normalizedDicitionary[index][metric] * weights[metric]
+				if goals[metric] == "MIN":
+					sfcIndex += (1 - self.__normalizedDicitionary[index][metric]) * weights[metric]
+					continue
+				if goals[metric] == "MAX":
+					sfcIndex += self.__normalizedDicitionary[index][metric] * weights[metric]
 			self.__indexesDictionary[index] = sfcIndex
 
 	######## PUBLIC METHODS ########
@@ -211,11 +216,7 @@ class SFCComposition:
 		if self.__status != 2:
 			return None
 
-		goal = self.__sfcRequest.srGoal()
-		if goal == "MIN":
-			key = min(self.__indexesDictionary, key = self.__indexesDictionary.get)
-		if goal == "MAX":
-			key = max(self.__indexesDictionary, key = self.__indexesDictionary.get)
+		key = max(self.__indexesDictionary, key = self.__indexesDictionary.get)
 
 		return self.__sfcDictionary[key]
 
