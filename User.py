@@ -13,6 +13,7 @@
 from os.path import isfile
 from cmd import Cmd
 
+from DomainsData import DomainsData
 from SFCRequest import SFCRequest
 from SFCTopology import SFCTopology
 from SFCExpansion import SFCExpansion
@@ -22,6 +23,7 @@ from SFCComposition import SFCComposition
 class FLERASCLI(Cmd):
 
 	prompt = "fleras> "
+	domains = None
 	request = None
 	topology = None
 	composition = None
@@ -31,13 +33,14 @@ class FLERASCLI(Cmd):
 		print("\n############### HELP #################")
 		print("help -> show this message")
 		print("exit -> ends the execution")
+		print("domais path -> receives a domain data description path, validate and enable its informations for setup")
 		print("setup path -> receives a sfc request path, validate and enable the commands below")
 		print("compose -> executes the generic composition method in already informed sfc request, it enables the topologies and advice commands")
 		print("topologies -> show all composed topologies in addition to their goal functions indexes")
 		print("advice -> inidicates the best composed topology considering the goal function")
 		print ('######################################\n')
 
-	def do_setup(self, args):
+	def do_domains(self, args):
 
 		if len(args) == 0:
 			return
@@ -46,13 +49,34 @@ class FLERASCLI(Cmd):
 			print("INVALID FILE")
 			return
 
-		self.request = SFCRequest(args)
+		self.domains = DomainsData(args)
+		if self.domains.ddStatus() != 1:
+			print("DOMAINS VALIDATION FAILED - ERROR " + str(self.domains.ddStatus()))
+			self.domains = None
+			return
+
+		print("SUCCESS!!")
+
+	def do_setup(self, args):
+
+		if len(args) == 0:
+			return
+
+		if self.domains == None:
+			print("DOMAINS SETUP IS NEEDED")
+			return
+
+		if not isfile(args):
+			print("INVALID FILE")
+			return
+
+		self.request = SFCRequest(args, self.domains.ddDomains())
 		if self.request.srStatus() != 1:
 			print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.srStatus()))
 			self.request = None
 			return
 		
-		self.topology = SFCTopology(self.request.srEPs(), self.request.srOPEs())
+		self.topology = SFCTopology(self.request.srEPs(), self.request.srOPEs(), self.domains.ddDomains())
 		self.topology.stValidate(self.request.srTopology())
 		if self.topology.stStatus() != 1:
 			print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.srStatus()))
@@ -81,7 +105,7 @@ class FLERASCLI(Cmd):
 			return
 
 		if self.composition == None:
-			print("COMPOSITION PROCESS IS NEEDED")
+			print("COMPOSE PROCESS IS NEEDED")
 			return
 
 		topologies = self.composition.scSFCIndexes()
@@ -97,7 +121,7 @@ class FLERASCLI(Cmd):
 			return
 
 		if self.composition == None:
-			print("COMPOSITION PROCESS IS NEEDED")
+			print("COMPOSE PROCESS IS NEEDED")
 			return
 
 		print("############### ADVICE #################")

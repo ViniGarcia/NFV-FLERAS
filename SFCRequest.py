@@ -45,10 +45,13 @@ import re
 
 class SFCRequest:
 
+	__status = None
+
 	__metadata = None
 	__topology = None
 	__objFunctions = None
-	__status = None
+
+	__domainsList = None
 
 	######## CONSTRUCTOR ########
 
@@ -56,9 +59,9 @@ class SFCRequest:
 
 		self.__status = 0
 
-	def __init__(self, requestFile):
+	def __init__(self, requestFile, domainsList):
 
-		self.srRequest(requestFile)
+		self.srRequest(requestFile, domainsList)
 
 	######## PRIVATE METHODS ########
 
@@ -110,7 +113,7 @@ class SFCRequest:
 			self.__status = -7
 			return
 
-		topoSymbols = ['{', '}', '(', ')', '[', ']', '/', '*', 'IP']
+		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IP']
 		topoOElemenets = [element["ID"] for element in self.__topology["OPELEMENTS"]]
 		topoEPoints = [point["ID"] for point in self.__topology["EPS"]]
 		splittedTopo = self.__topology["TOPOLOGY"].split()
@@ -124,6 +127,8 @@ class SFCRequest:
 			if splittedTopo[index] in topoOElemenets:
 				continue
 			if splittedTopo[index] in topoEPoints:
+				continue
+			if splittedTopo[index] in self.__domainsList:
 				continue
 			self.__status = -8
 			return
@@ -182,7 +187,13 @@ class SFCRequest:
 
 	######## PUBLIC METHODS ########
 
-	def srRequest(self, requestFile):
+	def srRequest(self, requestFile, domainsList):
+
+		if not isinstance(domainsList, list):
+			return
+		if not all(isinstance(domain, str) for domain in domainsList):
+			return
+		self.__domainsList = domainsList
 
 		if not os.path.isfile(requestFile):
 			return
@@ -206,6 +217,13 @@ class SFCRequest:
 	def srStatus(self):
 
 		return self.__status
+
+	def srDomains(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__domainsList
 
 	def srEPs(self):
 		

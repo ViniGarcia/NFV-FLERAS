@@ -37,14 +37,11 @@ class PartialOrder:
 	__elements = None
 	__oDependencies = None
 	__cDependencies = None
+	__iDependencies = None
 
 	__combinations = None
 
 	######## CONSTRUCTOR ########
-
-	def __init__(self):
-
-		self.__status = 0
 
 	def __init__(self, porderPEs, porderODs, porderCDs):
 		
@@ -52,6 +49,13 @@ class PartialOrder:
 
 	######## PRIVATE METHODS ########
 
+	def __poInfraDependenciesRemove(self):
+		
+		while '<' in self.__elements:
+			index = self.__elements.index('<')
+			self.__iDependencies.append((self.__elements[index-1], self.__elements[index+1]))
+			self.__elements = self.__elements[0:index] + self.__elements[index+3:len(self.__elements)]
+	
 	def __poDependenciesElementsValidate(self):
 
 		for cDependency in self.__cDependencies + self.__oDependencies:
@@ -165,17 +169,25 @@ class PartialOrder:
 		self.__elements = porderPEs
 		self.__oDependencies = porderODs
 		self.__cDependencies = porderCDs
+		self.__iDependencies = []
 
+		self.__poInfraDependenciesRemove()
 		if self.__poDependenciesElementsValidate():
 			couplingGroups = self.__poCouplingDepenciesProcess()
 			if isinstance(couplingGroups, tuple):
 				if self.__poOrderDepenciesProcess(couplingGroups):
 					self.__status = 1
 
+
 	def poSetupCombinations(self, combinations):
 
 		if self.__status != 1:
 			return None
+
+		for dependency in self.__iDependencies:
+			for combination in combinations:
+				index = combination.index(dependency[0])
+				combination.insert(index + 1, '< ' + dependency[1] + ' >')
 
 		self.__combinations = combinations
 
@@ -210,6 +222,14 @@ class PartialOrder:
 			return None
 
 		return self.__cDependencies
+
+	def poID(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__iDependencies
+
 
 	def poCombinations(self):
 
@@ -269,16 +289,16 @@ class SFCTopology:
 
 	######## CONSTRUCTOR ########
 
-	def __init__(self, boundaryEPs, operationalPEs):
+	def __init__(self, boundaryEPs, operationalPEs, availableDomains):
 
 		kernelGrammar = """
-			S 			 -> "IP" OPBLOCK
+			S 			 -> "IP" OPBLOCK | "IP" OPBLOCK "|" INFRADEP
 
 			OPBLOCK 	 -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EP
 			ROPBLOCK	 -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK
-			TPBLOCK  	 -> PORDER | PELEM
+			TPBLOCK  	 -> PORDER | MASKPELEM
 			
-			PORDER 		 -> "[" PELEM NPELEM "]" POEXCEPTION | "[" PELEM NPELEM "]"
+			PORDER 		 -> "[" MASKPELEM NPELEM "]" POEXCEPTION | "[" MASKPELEM NPELEM "]"
 			POEXCEPTION  -> "(" PELEM PELEM ")" POEXCEPTION | "(" PELEM PELEM ")" | "(" PELEM PELEM "*" ")" POEXCEPTION | "(" PELEM PELEM "*" ")"
 			
 			TBRANCH 	 -> TPBLOCK "{" OPBLOCK NEXTTBRANCH "}" 
@@ -288,7 +308,8 @@ class SFCTopology:
 			INTBRANCH	 -> TPBLOCK "{" ROPBLOCK NEXTNTBRANCH "}" ROPBLOCK
 			NEXTNTBRANCH -> "/" ROPBLOCK NEXTNTBRANCH | "/" ROPBLOCK
 
-			NPELEM 		 -> PELEM NPELEM | PELEM
+			NPELEM 		 -> MASKPELEM NPELEM | MASKPELEM
+			MASKPELEM	 -> PELEM | PELEM "<" DOMAIN ">"
 		"""
 
 		grammarPELEM = 'PELEM ->'
@@ -299,11 +320,17 @@ class SFCTopology:
 		grammarEP = 'EP ->'
 		for EP in boundaryEPs:
 			grammarEP += ' "' + EP + '" |'
-		grammarEP = grammarEP[:len(grammarEP)-1]
+		grammarEP = grammarEP[:len(grammarEP)-1] + '\n'
+
+		grammarDomain = 'DOMAIN ->'
+		if len(availableDomains) != 0:
+			for domain in availableDomains:
+				grammarDomain += ' "' + domain + '" |'
+			grammarDomain = grammarDomain[:len(grammarDomain)-1]
 
 		self.__boundaryEPs = boundaryEPs
 		self.__operationalPEs = operationalPEs
-		self.__mainParser = nltk.ChartParser(nltk.CFG.fromstring(kernelGrammar + grammarPELEM + grammarEP))
+		self.__mainParser = nltk.ChartParser(nltk.CFG.fromstring(kernelGrammar + grammarPELEM + grammarEP + grammarDomain))
 		self.__status = 0
 
 	######## PRIVATE METHODS ########

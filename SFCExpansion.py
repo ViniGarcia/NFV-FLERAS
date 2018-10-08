@@ -22,7 +22,9 @@ class Branch:
 
 	__originalSegment = None
 	__branchSegments = None
+	__branchDependencies = None
 	__branchMatches = None
+	__branchMatchesInfra = None
 	__branchMatchList = None
 	__branchStringList = None
 
@@ -56,10 +58,25 @@ class Branch:
 
 		return allSegments
 
+	def __bSepareDependencies(self):
+
+		branchDependencies = []
+		for bIndex in range(len(self.__branchSegments)):
+			segmentDependencies = {}
+			while '<' in self.__branchSegments[bIndex]:
+				index = self.__branchSegments[bIndex].index('<')
+				segmentDependencies[index-1] = self.__branchSegments[bIndex][index+1]
+				self.__branchSegments[bIndex] = self.__branchSegments[bIndex][0:index] + self.__branchSegments[bIndex][index+3:len(self.__branchSegments[bIndex])]
+			branchDependencies.append(segmentDependencies)
+
+		return branchDependencies
+
 	def __bMatchBranches(self):
 
 		self.__branchMatches = 0
-		self.__branchSegments = self.__bSepareSegments()	
+		self.__branchMatchesInfra = []
+		self.__branchSegments = self.__bSepareSegments()
+		self.__branchDependencies = self.__bSepareDependencies()
 		minimumSize = len(self.__branchSegments[0])	
 		for segment in self.__branchSegments:
 			if '{' in segment:
@@ -74,14 +91,24 @@ class Branch:
 
 		for index in range(minimumSize):
 			analysis = -1
-			for segment in self.__branchSegments:
+			dependency = False
+			for sIndex in range(len(self.__branchSegments)):
 				if analysis != -1:
-					if analysis != segment[index]:
+					if analysis != self.__branchSegments[sIndex][index]:
 						return
-				else:
-					analysis = segment[index]
+					if index in self.__branchDependencies[sIndex]:
+						if dependency:
+							if dependency != self.__branchDependencies[sIndex][index]:
+								return
+						else:
+							dependency = self.__branchDependencies[sIndex][index]
+				else:	
+					analysis = self.__branchSegments[sIndex][index]
+					if index in self.__branchDependencies[sIndex]:
+						dependency = self.__branchDependencies[sIndex][index]
 
 			self.__branchMatches += 1
+			self.__branchMatchesInfra.append(dependency)
 
 	def __bMergeMatches(self):
 
@@ -94,15 +121,25 @@ class Branch:
 
 			branchMatch = []
 			for index in range(bIndex):
-				branchMatch.append(allSegments[0][index])		
+				branchMatch.append(allSegments[0][index])
+				if self.__branchMatchesInfra[index]:
+					branchMatch.append('<')
+					branchMatch.append(self.__branchMatchesInfra[index])
+					branchMatch.append('>')
 			branchMatch.append('{')
 
-			branchMatch += allSegments[0][bIndex:]
-			allSegments.pop(0)
 			for subSegment in allSegments:
+				for index in range(bIndex):
+					if subSegment[1] == '<':
+						subSegment = subSegment[4:]
+					else:
+						subSegment = subSegment[1:]
+				branchMatch += subSegment
 				branchMatch.append('/')
-				branchMatch += subSegment[bIndex:]
+
+			branchMatch.pop()
 			branchMatch.append('}')
+
 			self.__branchMatchList.append(branchMatch)
 	
 	def __bStringMatches(self):
@@ -215,7 +252,7 @@ class SFCExpansion:
 				stringData.append(charList[index])
 
 			return ''.join(stringData)
-		
+
 	def __seValidatePermutation(self, permutation, oDependency, cDependency):
 
 		for dependency in cDependency:
@@ -264,7 +301,7 @@ class SFCExpansion:
 
 			for permutation in availablePermutations:
 				if self.__seValidatePermutation(permutation, segment.poOD(), segment.poCD()):
-					acceptedPermutations.append(permutation)
+					acceptedPermutations.append(list(permutation))
 
 			if len(acceptedPermutations) == 0:
 				self.__status = -2
@@ -339,7 +376,7 @@ class SFCExpansion:
 			for index in range(len(sfcBranches)):
 				branchInstance = Branch(sfcBranches[index])
 				if branchInstance.bStringList() != []:
-					allBranches.append(branchInstance.bStringList()) #Adicionar o segmento original tbm
+					allBranches.append(branchInstance.bStringList()) #Adicionar o segmento original também
 				else:
 					allBranches.append([None])
 

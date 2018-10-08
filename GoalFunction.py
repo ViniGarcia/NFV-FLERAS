@@ -45,7 +45,7 @@ class GoalFunction:
 			return metric["INPUT"] * value
 		if (metric["EVALUATION"] == "DIV"):
 			return metric["INPUT"] / value
-		if (metric["EVALUATION"] == "ADD"):
+		if (metric["EVALUATION"] == "SUM"):
 			return metric["INPUT"] + value
 		if (metric["EVALUATION"] == "SUB"):
 			return metric["INPUT"] - value
@@ -56,7 +56,7 @@ class GoalFunction:
 			update["INPUT"] = update["INPUT"] * value
 		if (operation["EVALUATION"] == "DIV"):
 			update["INPUT"] = update["INPUT"] / value
-		if (operation["EVALUATION"] == "ADD"):
+		if (operation["EVALUATION"] == "SUM"):
 			update["INPUT"] = update["INPUT"] + value
 		if (operation["EVALUATION"] == "SUB"):
 			update["INPUT"] = update["INPUT"] - value
@@ -86,7 +86,7 @@ class GoalFunction:
 				self.__sfcFunction[metric]["INPUT"] = self.__sfcFunction[metric]["INPUT"] * branchValues[metric]
 			if (branchOperations[metric] == "DIV"):
 				self.__sfcFunction[metric]["INPUT"] = self.__sfcFunction[metric]["INPUT"] / branchValues[metric]
-			if (branchOperations[metric] == "ADD"):
+			if (branchOperations[metric] == "SUM"):
 				self.__sfcFunction[metric]["INPUT"] = self.__sfcFunction[metric]["INPUT"] + branchValues[metric]
 			if (branchOperations[metric] == "SUB"):
 				self.__sfcFunction[metric]["INPUT"] = self.__sfcFunction[metric]["INPUT"] - branchValues[metric]

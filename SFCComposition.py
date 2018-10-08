@@ -30,6 +30,7 @@ class SFCComposition:
 	__status = None
 
 	__sfcRequest = None
+	__sfcOriginal = None
 	__sfcDictionary = None
 
 	__oElementsData = None
@@ -49,6 +50,15 @@ class SFCComposition:
 			self.__status = 0
 
 	######## PRIVATE METHODS ########
+
+	def __scDependenciesRemove(self):
+
+		for key in self.__sfcDictionary:
+
+			while '<' in self.__sfcDictionary[key]:
+				iIndex = self.__sfcDictionary[key].index('<')
+				fIndex = self.__sfcDictionary[key].index('>')
+				self.__sfcDictionary[key] = self.__sfcDictionary[key][0:iIndex] + self.__sfcDictionary[key][fIndex+2:len(self.__sfcDictionary[key])]
 
 	def __scBranchesPrepare(self):
 
@@ -186,9 +196,12 @@ class SFCComposition:
 	def scSetup(self, sfcRequest, sfcList):
 
 		self.__sfcRequest = sfcRequest
+		self.__sfcOriginal = {}
 		self.__sfcDictionary = {}
 		for index in range(len(sfcList)):
+			self.__sfcOriginal[index] = sfcList[index]
 			self.__sfcDictionary[index] = sfcList[index]
+		self.__scDependenciesRemove()
 		self.__scBranchesPrepare()
 		self.__scOElementsPrepare()
 
@@ -218,7 +231,7 @@ class SFCComposition:
 
 		key = max(self.__indexesDictionary, key = self.__indexesDictionary.get)
 
-		return self.__sfcDictionary[key]
+		return self.__sfcOriginal[key]
 
 	def scSFCIndexes(self):
 
@@ -226,8 +239,8 @@ class SFCComposition:
 			return None
 
 		resultList = []
-		for index in self.__sfcDictionary:
-			resultList.append((self.__sfcDictionary[index], self.__indexesDictionary[index]))
+		for key in self.__sfcDictionary:
+			resultList.append((self.__sfcOriginal[key], self.__indexesDictionary[key]))
 
 		return resultList
 
@@ -240,7 +253,7 @@ class SFCComposition:
 		if self.__status != 1:
 			return None
 
-		return self.__sfcDictionary
+		return self.__sfcOriginal
 
 	def scAggregation(self):
 
