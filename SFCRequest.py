@@ -246,7 +246,28 @@ class SFCRequest:
 
 		return self.__domainsList
 
-	def srEPs(self):
+	def srMetadata(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__metadata
+
+	def srEspecification(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__especification
+
+	def srComposition(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__composition
+
+	def srEspecificationEP(self):
 		
 		if self.__status != 1:
 			return None
@@ -257,7 +278,7 @@ class SFCRequest:
 
 		return listEPs
 
-	def srOPEs(self):
+	def srEspecificationOE(self):
 
 		if self.__status != 1:
 			return None
@@ -268,28 +289,28 @@ class SFCRequest:
 
 		return listOPEs
 
-	def srFullOPEs(self):
+	def srEspecificationFullOE(self):
 
 		if self.__status != 1:
 			return None
 		
 		return self.__especification["OPELEMENTS"]
 
-	def srTopology(self):
+	def srEspecificationTopology(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__especification["TOPOLOGY"]
 
-	def srBranches(self):
+	def srEspecificationBranches(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__especification["BRANCHINGS"]
 
-	def srGoal(self):
+	def srCompositionGoal(self):
 
 		if self.__status != 1:
 			return None
@@ -300,14 +321,7 @@ class SFCRequest:
 
 		return goals
 
-	def srFunction(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__composition
-
-	def srWeights(self):
+	def srCompositionWeights(self):
 
 		if self.__status != 1:
 			return None
@@ -317,5 +331,5 @@ class SFCRequest:
 			weights[metric["METRIC"]] = metric["WEIGHT"]
 
 		return weights
-		
+
 ######## SFC REQUEST CLASS END ########

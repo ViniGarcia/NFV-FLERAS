@@ -80,8 +80,8 @@ class FLERASCLI(Cmd):
 			self.request = None
 			return
 		
-		self.topology = SFCTopology(self.request.srEPs(), self.request.srOPEs(), self.domains.ddDomains())
-		self.topology.stValidate(self.request.srTopology())
+		self.topology = SFCTopology(self.request.srEspecificationEP(), self.request.srEspecificationOE(), self.domains.ddDomains())
+		self.topology.stValidate(self.request.srEspecificationTopology())
 		if self.topology.stStatus() != 1:
 			print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.srStatus()))
 			self.request = None

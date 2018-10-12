@@ -17,19 +17,19 @@ COMPOSITION:
     EVALUATION: !!str "MULT"
     UPDATE: *metric1
 INTEGRATION:
-  - POLITIC: !!str RTT
+  - POLICY: !!str RTT01
     MIN: !!int 0
     MAX: !!int 100
     TYPE: !!str AGGREGATE
     GOAL: !!str MIN
     WEIGHT: !!float 0.5
-  - POLITIC: !!str RTT
+  - POLICY: !!str RTT02
     MIN: !!int 0
     MAX: !!int 20
     TYPE: !!str IMEDIATE
     GOAL: !!str MIN
     WEIGHT: !!float 0.3
-  - POLITIC: !!str COST
+  - POLICY: !!str COST
     MIN: !!int 0
     MAX: !!int 1000
     TYPE: !!str DOMAIN

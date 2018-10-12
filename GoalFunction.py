@@ -68,7 +68,7 @@ class GoalFunction:
 		self.__sfcFunction = {}
 		self.__evaluationAggregate = {}
 
-		for metric in sfcRequest.srFunction():
+		for metric in sfcRequest.srComposition():
 			self.__sfcFunction[metric["METRIC"]] = metric.copy()
 			self.__evaluationAggregate[metric["METRIC"]] = 0
 
