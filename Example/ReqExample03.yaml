@@ -3,7 +3,7 @@ DESCRIPTION: >
   This is a simple example of a
   generic SFC request with two 
   goal function.
-FUNCTION:
+COMPOSITION:
   - METRIC: &metric1 !!str FlowRate
     GOAL: !!str "MIN"
     WEIGHT: !!float 0.8
@@ -16,40 +16,60 @@ FUNCTION:
     INPUT: !!int 40
     EVALUATION: !!str "MULT"
     UPDATE: *metric1
-TOPOLOGY: !!str IP [ PE1 PE2 ] { PE3 EP1 / PE4 { PE5 / PE6 } PE7 EP2 }
-BRANCHINGS: 
-    *metric1:
-      UPDATE: !!str "MULT"
-      FACTORS:  
-        - [!!float 0.5, !!float 0.5]
-        - [!!float 0.5, !!float 0.5]
-    *metric2: 
-      UPDATE: !!str "MULT"
-      FACTORS:  
-        - [!!float 0.5, !!float 0.5]
-        - [!!float 0.5, !!float 0.5]
-OPELEMENTS:
-  - ID: !!str PE1
-    *metric1: !!float 1.0
-    *metric2: !!int 5
-  - ID: !!str PE2
-    *metric1: !!float 1.0
-    *metric2: !!int 5
-  - ID: !!str PE3
-    *metric1: !!float 0.5
-    *metric2: !!int 10
-  - ID: !!str PE4
-    *metric1: !!float 0.2
-    *metric2: !!int 5
-  - ID: !!str PE5
-    *metric1: !!float 0.5
-    *metric2: !!int 10
-  - ID: !!str PE6
-    *metric1: !!float 1.0
-    *metric2: !!int 2
-  - ID: !!str PE7
-    *metric1: !!float 1.0
-    *metric2: !!int 5
-EPS:
-  - ID: !!str EP1
-  - ID: !!str EP2
+INTEGRATION:
+  - POLITIC: !!str RTT
+    MIN: !!int 0
+    MAX: !!int 100
+    TYPE: !!str AGGREGATE
+    GOAL: !!str MIN
+    WEIGHT: !!float 0.5
+  - POLITIC: !!str RTT
+    MIN: !!int 0
+    MAX: !!int 20
+    TYPE: !!str IMEDIATE
+    GOAL: !!str MIN
+    WEIGHT: !!float 0.3
+  - POLITIC: !!str COST
+    MIN: !!int 0
+    MAX: !!int 1000
+    TYPE: !!str DOMAIN
+    GOAL: !!str MIN
+    WEIGHT: !!float 0.2
+ESPECIFICATION:
+  TOPOLOGY: !!str IP [ PE1 PE2 ] { PE3 EP1 / PE4 { PE5 / PE6 } PE7 EP2 }
+  BRANCHINGS: 
+      *metric1:
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.5, !!float 0.5]
+          - [!!float 0.5, !!float 0.5]
+      *metric2: 
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.5, !!float 0.5]
+          - [!!float 0.5, !!float 0.5]
+  OPELEMENTS:
+    - ID: !!str PE1
+      *metric1: !!float 1.0
+      *metric2: !!int 5
+    - ID: !!str PE2
+      *metric1: !!float 1.0
+      *metric2: !!int 5
+    - ID: !!str PE3
+      *metric1: !!float 0.5
+      *metric2: !!int 10
+    - ID: !!str PE4
+      *metric1: !!float 0.2
+      *metric2: !!int 5
+    - ID: !!str PE5
+      *metric1: !!float 0.5
+      *metric2: !!int 10
+    - ID: !!str PE6
+      *metric1: !!float 1.0
+      *metric2: !!int 2
+    - ID: !!str PE7
+      *metric1: !!float 1.0
+      *metric2: !!int 5
+  EPS:
+    - ID: !!str EP1
+    - ID: !!str EP2

@@ -16,7 +16,7 @@
 #1: VALID REQUEST
 
 #ERROR CODES ->
-#-1  -> REQUEST METADA WAS SNOT INFORMED
+#-1  -> REQUEST METADA WAS NOT INFORMED
 #-2  -> REQUEST TOPOLOGY WAS NOT INFORMED
 #-3  -> REQUEST GOAL FUNCTION WAS NOT INFORMED
 #-4  -> INVALID ID (METADATA)
@@ -27,13 +27,16 @@
 #-9  -> INVALID GOAL (GOAL FUNCTION)
 #-10 -> INVALID METRIC (GOAL FUNCTION)
 #-11 -> INVALID METRIC EVALUATION (GOAL FUNCTION)
-#-12 -> METRIC NOT INFORMED IN SOME OPERATIONAL ELEMENT (GOAL FUNCTIO/TOPOLOGY)
+#-12 -> METRIC NOT INFORMED IN SOME OPERATIONAL ELEMENT (GOAL FUNCTION/TOPOLOGY)
 #-13 -> SOME BRANCH METRIC IS NOT PRESENT (TOPOLOGY)
 #-14 -> INVALID BRANCH ELEMENTS (TOPOLOGY)
 #-15 -> INVALID BRANCH UPDATE OPERATION (TOPOLOGY)
 #-16 -> SOME BRANCH IS NOT INFORMED (TOPOLOGY)
 #-17 -> SOME BRANCH IS NOT WELL FORMED (TOPOLOGY)
 #-18 -> NO BRANCH IN TOPOLOGY, BUT SOME BRANCH INFORMED IN REQUEST (TOPOLOGY)
+#-19 -> INVALID POLICY (INTEGRATION)
+#-20 -> INVALID POLICY TYPE (INTEGRATION)
+#-21 -> INVALID POLICY GOAL (INTEGRATION)
 
 ###############################################
 
@@ -48,8 +51,9 @@ class SFCRequest:
 	__status = None
 
 	__metadata = None
-	__topology = None
-	__objFunctions = None
+	__especification = None
+	__composition = None
+	__integration = None
 
 	__domainsList = None
 
@@ -92,10 +96,10 @@ class SFCRequest:
 		if self.__metadata == None:
 			self.__status = -1
 			return
-		if self.__topology == None:
+		if self.__especification == None:
 			self.__status = -2
 			return
-		if self.__objFunctions == None:
+		if self.__composition == None:
 			self.__status = -3
 			return
 
@@ -103,20 +107,20 @@ class SFCRequest:
 			self.__status = -4
 			return
 
-		if len(self.__topology["TOPOLOGY"]) == 0:
+		if len(self.__especification["TOPOLOGY"]) == 0:
 			self.__status = -5
 			return
-		if len(self.__topology["OPELEMENTS"]) == 0:
+		if len(self.__especification["OPELEMENTS"]) == 0:
 			self.__status = -6
 			return
-		if len(self.__topology["EPS"]) == 0:
+		if len(self.__especification["EPS"]) == 0:
 			self.__status = -7
 			return
 
 		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IP']
-		topoOElemenets = [element["ID"] for element in self.__topology["OPELEMENTS"]]
-		topoEPoints = [point["ID"] for point in self.__topology["EPS"]]
-		splittedTopo = self.__topology["TOPOLOGY"].split()
+		topoOElemenets = [element["ID"] for element in self.__especification["OPELEMENTS"]]
+		topoEPoints = [point["ID"] for point in self.__especification["EPS"]]
+		splittedTopo = self.__especification["TOPOLOGY"].split()
 
 		branchSegments = []
 		for index in range(len(splittedTopo)):
@@ -134,7 +138,7 @@ class SFCRequest:
 			return
 
 		functionMetrics = []
-		for metric in self.__objFunctions["FUNCTION"]:
+		for metric in self.__composition:
 			if metric["GOAL"] != "MIN" and metric["GOAL"] != "MAX":
 				self.__status = -9
 				return
@@ -146,7 +150,7 @@ class SFCRequest:
 				return 
 			functionMetrics.append(metric["METRIC"])
 
-		for element in self.__topology["OPELEMENTS"]:
+		for element in self.__especification["OPELEMENTS"]:
 			for metric in functionMetrics:
 				if not metric in element:
 					self.__status = -12
@@ -155,33 +159,46 @@ class SFCRequest:
 		if '{' in splittedTopo:
 	
 			for metric in functionMetrics:
-				if not metric in self.__topology["BRANCHINGS"]:
+				if not metric in self.__especification["BRANCHINGS"]:
 					self.__status = -13
 					return
 
-				if not "UPDATE" in self.__topology["BRANCHINGS"][metric] or not "FACTORS" in self.__topology["BRANCHINGS"][metric]:
+				if not "UPDATE" in self.__especification["BRANCHINGS"][metric] or not "FACTORS" in self.__especification["BRANCHINGS"][metric]:
 					self.__status = -14
 					return
 
-				updateOperation = self.__topology["BRANCHINGS"][metric]["UPDATE"]
+				updateOperation = self.__especification["BRANCHINGS"][metric]["UPDATE"]
 				if updateOperation != "MULT" and updateOperation != "DIV" and updateOperation != "SUB" and updateOperation != "SUM":
 					self.__status = -15
 					return
 
-				if splittedTopo.count('{') != len(self.__topology["BRANCHINGS"][metric]["FACTORS"]):
+				if splittedTopo.count('{') != len(self.__especification["BRANCHINGS"][metric]["FACTORS"]):
 					self.__status = -16
 					return
 
-				for index in range(len(self.__topology["BRANCHINGS"][metric]["FACTORS"])):
-					if len(self.__topology["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
+				for index in range(len(self.__especification["BRANCHINGS"][metric]["FACTORS"])):
+					if len(self.__especification["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
 						self.__status = -17
 						return
 
 		else:
 
-			if len(self.__topology["BRANCHINGS"]) != 0:
+			if len(self.__especification["BRANCHINGS"]) != 0:
 				self.__status = -18
-				return 
+				return
+
+		if self.__integration != None:
+
+			for policy in self.__integration:
+				if not "POLICY" in policy or not "MIN" in policy or not "MAX" in policy or not "TYPE" in policy or not "GOAL" in policy or not "WEIGHT" in policy:
+					self.__status = -19
+					return
+				if policy["TYPE"] != "AGGREGATE" and policy["TYPE"] != "IMEDIATE" and policy["TYPE"] != "DOMAIN":
+					self.__status = -20
+					return
+				if policy["GOAL"] != "MIN" and policy["GOAL"] != "MAX":
+					self.__status = -21
+					return
 
 		self.__status = 1
 
@@ -208,10 +225,14 @@ class SFCRequest:
 		
 		if "ID" in yamlParsed and "DESCRIPTION" in yamlParsed:
 			self.__metadata = {"ID":yamlParsed["ID"], "DESCRIPTION":yamlParsed["DESCRIPTION"]}
-		if "TOPOLOGY" in yamlParsed and "BRANCHINGS" in yamlParsed and "OPELEMENTS" in yamlParsed and "EPS" in yamlParsed:
-			self.__topology = {"TOPOLOGY":yamlParsed["TOPOLOGY"], "BRANCHINGS":yamlParsed["BRANCHINGS"], "OPELEMENTS":yamlParsed["OPELEMENTS"], "EPS":yamlParsed["EPS"]}
-		if "FUNCTION" in yamlParsed:
-			self.__objFunctions = {"FUNCTION":yamlParsed["FUNCTION"]}
+		if "ESPECIFICATION" in yamlParsed:
+			if "TOPOLOGY" in yamlParsed["ESPECIFICATION"] and "BRANCHINGS" in yamlParsed["ESPECIFICATION"] and "OPELEMENTS" in yamlParsed["ESPECIFICATION"] and "EPS" in yamlParsed["ESPECIFICATION"]:	
+				self.__especification = yamlParsed["ESPECIFICATION"]
+		if "COMPOSITION" in yamlParsed:
+			self.__composition = yamlParsed["COMPOSITION"]
+		if "INTEGRATION" in yamlParsed:
+			self.__integration = yamlParsed["INTEGRATION"]
+
 		self.__srValidate()
 
 	def srStatus(self):
@@ -231,7 +252,7 @@ class SFCRequest:
 			return None
 
 		listEPs = []
-		for EP in self.__topology["EPS"]:
+		for EP in self.__especification["EPS"]:
 			listEPs.append(EP["ID"])
 
 		return listEPs
@@ -242,7 +263,7 @@ class SFCRequest:
 			return None
 		
 		listOPEs = []
-		for OPEs in self.__topology["OPELEMENTS"]:
+		for OPEs in self.__especification["OPELEMENTS"]:
 			listOPEs.append(OPEs["ID"])
 
 		return listOPEs
@@ -252,14 +273,21 @@ class SFCRequest:
 		if self.__status != 1:
 			return None
 		
-		return self.__topology["OPELEMENTS"]
+		return self.__especification["OPELEMENTS"]
 
 	def srTopology(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__topology["TOPOLOGY"]
+		return self.__especification["TOPOLOGY"]
+
+	def srBranches(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__especification["BRANCHINGS"]
 
 	def srGoal(self):
 
@@ -267,8 +295,8 @@ class SFCRequest:
 			return None
 
 		goals = {}
-		for function in self.__objFunctions["FUNCTION"]:
-			goals[function["METRIC"]] = function["GOAL"]
+		for metric in self.__composition:
+			goals[metric["METRIC"]] = metric["GOAL"]
 
 		return goals
 
@@ -277,7 +305,7 @@ class SFCRequest:
 		if self.__status != 1:
 			return None
 
-		return self.__objFunctions["FUNCTION"]
+		return self.__composition
 
 	def srWeights(self):
 
@@ -285,16 +313,9 @@ class SFCRequest:
 			return None
 
 		weights = {}
-		for function in self.__objFunctions["FUNCTION"]:
-			weights[function["METRIC"]] = function["WEIGHT"]
+		for metric in self.__composition:
+			weights[metric["METRIC"]] = metric["WEIGHT"]
 
 		return weights
-
-	def srBranches(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__topology["BRANCHINGS"]
 		
 ######## SFC REQUEST CLASS END ########

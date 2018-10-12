@@ -33,7 +33,7 @@ class FLERASCLI(Cmd):
 		print("\n############### HELP #################")
 		print("help -> show this message")
 		print("exit -> ends the execution")
-		print("domais path -> receives a domain data description path, validate and enable its informations for setup")
+		print("domains path -> receives a domain data description path, validate and enable its informations for setup")
 		print("setup path -> receives a sfc request path, validate and enable the commands below")
 		print("compose -> executes the generic composition method in already informed sfc request, it enables the topologies and advice commands")
 		print("topologies -> show all composed topologies in addition to their goal functions indexes")
@@ -54,6 +54,10 @@ class FLERASCLI(Cmd):
 			print("DOMAINS VALIDATION FAILED - ERROR " + str(self.domains.ddStatus()))
 			self.domains = None
 			return
+
+		self.request = None
+		self.topology = None
+		self.composition = None
 
 		print("SUCCESS!!")
 
@@ -81,6 +85,8 @@ class FLERASCLI(Cmd):
 		if self.topology.stStatus() != 1:
 			print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.srStatus()))
 			self.request = None
+
+		self.composition = None
 
 		print("SUCCESS!!")
 

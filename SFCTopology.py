@@ -292,7 +292,7 @@ class SFCTopology:
 	def __init__(self, boundaryEPs, operationalPEs, availableDomains):
 
 		kernelGrammar = """
-			S 			 -> "IP" OPBLOCK | "IP" OPBLOCK "|" INFRADEP
+			S 			 -> "IP" OPBLOCK
 
 			OPBLOCK 	 -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EP
 			ROPBLOCK	 -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK
