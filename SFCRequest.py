@@ -51,8 +51,7 @@
 #-33  -> A POLICY HAS MINIMUM VALIUE GREATER THAN MAXIMUM VALUE
 #-34  -> INVALID POLICY WEIGHT
 #-35  -> INVALID IMMEDIATE POLICIES WEIGHT SUMMARY
-#-36  -> INVALID AGGREGATE POLICIES WEIGHT SUMMARY
-#-37  -> INVALID DATA TYPE IN DEPLOYMENT BLOCK
+#-36  -> INVALID DATA TYPE IN DEPLOYMENT BLOCK
 
 ###############################################
 
@@ -167,26 +166,23 @@ class SFCRequest:
 				immWeights += policy["WEIGHT"]
 			else:
 				aggWeights += policy["WEIGHT"]
-		if immWeights != 1:
+		if immWeights + aggWeights != 1:
 			self.__status = -35
-			return False
-		if aggWeights != 1:
-			self.__status = -36
 			return False
 
 		for data in self.__deployment:
 			if not isinstance(self.__deployment[data]["FLAVOUR"]["MEMORY"], int):
-				self.__status = -37
+				self.__status = -36
 				return False
 			if not isinstance(self.__deployment[data]["FLAVOUR"]["NET_IFACES"], int):
-				self.__status = -37
+				self.__status = -36
 				return False
 			if not isinstance(self.__deployment[data]["FLAVOUR"]["CPUS"], int):
-				self.__status = -37
+				self.__status = -36
 				return False
 			for metric in self.__deployment[data]["BENCHMARK"]:
 				if not isinstance(self.__deployment[data]["BENCHMARK"][metric], int) and not isinstance(self.__deployment[data]["BENCHMARK"][metric], float):
-					self.__status = -37
+					self.__status = -36
 					return False
 
 		return True

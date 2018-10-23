@@ -66,14 +66,14 @@ POLICIES:
       MAX: !!int 1000
       TYPE: !!str DOMAIN
       GOAL: !!str MIN
-      WEIGHT: !!float 0.5
+      WEIGHT: !!float 0.3
   AGGREGATE:
     - ID: !!str RTT
       MIN: !!int 0
       MAX: !!int 100
       TYPE: !!str TRANSITION
       GOAL: !!str MIN
-      WEIGHT: !!float 1.0
+      WEIGHT: !!float 0.2
 DEPLOYMENT:
   *OE1:
     FLAVOUR:

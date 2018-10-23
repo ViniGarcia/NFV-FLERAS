@@ -44,7 +44,7 @@ class SFCComposition:
 
 	def __init__(self, sfcRequest, sfcList):
 
-		if sfcRequest != None or sfcList == None:
+		if sfcRequest != None and sfcList != None:
 			self.scSetup(sfcRequest, sfcList)
 		else:
 			self.__status = 0

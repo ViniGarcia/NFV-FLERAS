@@ -21,6 +21,10 @@
 #-3: SOME OF MAIN KEYS IS NOT PRESENT IN THE YAML
 #-4: SOME DOMAIN IS NOT INFORMED IN A LOCAL METRIC
 #-5: SOME DOMAIN IS NOT INFORMED IN A TRANSITION METRIC
+#-6: SOME DOMAIN IS NOT INFORMED IN RESOURCES
+#-7: SOME RESOURCE IS NOT INFORMED IN A DOMAIN
+#-8: SOME RESOURCE HAS INVALID TYPE IN A DOMAIN
+#-9: SOME RESOURCE HAS INVALID VALUE IN A DOMAIN
 
 ###############################################
 
@@ -33,6 +37,7 @@ class DomainsData:
 	__status = None
 
 	__domainsIDs = None
+	__domainsResources = None
 	__localMetrics = None
 	__transitionsMetrics = None
 
@@ -49,7 +54,7 @@ class DomainsData:
 
 	def __ddValidate(self, domainYaml):
 		
-		if not "DOMAINS" in domainYaml or not "LOCAL" in domainYaml or not "TRANSITION" in domainYaml:
+		if not "DOMAINS" in domainYaml or not "RESOURCES" in domainYaml or not "LOCAL" in domainYaml or not "TRANSITION" in domainYaml:
 			self.__status = -3
 			return False
 
@@ -65,7 +70,32 @@ class DomainsData:
 			for domain in domainsList:
 				if domain not in metric:
 					self.__status = -5
-					return False	
+					return False
+
+		for domain in domainsList:
+			if not domain in domainYaml["RESOURCES"]:
+				self.__status = -6
+				return False
+
+			if not "MEMORY" in domainYaml["RESOURCES"][domain] or not "NET_IFACES" in domainYaml["RESOURCES"][domain] or not "CPUS" in domainYaml["RESOURCES"][domain]:
+				self.__status = -7
+				return False
+
+			if not isinstance(domainYaml["RESOURCES"][domain]["MEMORY"], int) and not isinstance(domainYaml["RESOURCES"][domain]["MEMORY"], float):
+				self.__status = -8
+				return False
+
+			if not isinstance(domainYaml["RESOURCES"][domain]["NET_IFACES"], int):
+				self.__status = -8
+				return False
+
+			if not isinstance(domainYaml["RESOURCES"][domain]["CPUS"], int):
+				self.__status = -8
+				return False
+
+			if domainYaml["RESOURCES"][domain]["CPUS"] < 0 or domainYaml["RESOURCES"][domain]["NET_IFACES"] < 0 or domainYaml["RESOURCES"][domain]["MEMORY"] < 0:
+				self.__status = -9
+				return False				
 
 		return True
 
@@ -88,6 +118,7 @@ class DomainsData:
 
 		if self.__ddValidate(domainYaml):
 			self.__domainsIDs = domainYaml["DOMAINS"]
+			self.__domainsResources = domainYaml["RESOURCES"]
 			self.__localMetrics = domainYaml["LOCAL"]
 			self.__transitionsMetrics = domainYaml["TRANSITION"]
 			self.__status = 1
@@ -104,6 +135,13 @@ class DomainsData:
 			return
 
 		return self.__domainsIDs
+
+	def ddResources(self):
+
+		if self.__status != 1:
+			return
+
+		return self.__domainsResources
 
 	def  ddLocalMetrics(self):	
 		
@@ -132,13 +170,21 @@ class DomainsData:
 		if self.__status != 1:
 			return
 
-		return self.__localMetrics
+		localMetrics = {}
+		for metric in self.__localMetrics:
+			localMetrics[metric["ID"]] = metric
+
+		return localMetrics
 
 	def ddTransitionValues(self):
 
 		if self.__status != 1:
 			return
 
-		return self.__transitionsMetrics
+		transitionMetrics = {}
+		for metric in self.__transitionsMetrics:
+			transitionMetrics[metric["ID"]] = metric
+
+		return transitionMetrics
 		
 ######## DOMAINS DATA CLASS END ########
