@@ -1,43 +1,40 @@
-ID: !!str TopologyExample
-DESCRIPTION: > 
-  This is a simple example of a
-  generic SFC request with two 
-  goal function.
-COMPOSITION:
-  - METRIC: &metric1 !!str FlowRate
-    GOAL: !!str "MIN"
-    WEIGHT: !!float 0.8
-    INPUT: !!int 40
-    EVALUATION: !!str "MULT"
-    UPDATE: *metric1
-  - METRIC: &metric2 !!str MemoryUsage
-    GOAL: !!str "MIN"
-    WEIGHT: !!float 0.2
-    INPUT: !!int 40
-    EVALUATION: !!str "MULT"
-    UPDATE: *metric1
-INTEGRATION:
-  - POLICY: !!str RTT01
-    MIN: !!int 0
-    MAX: !!int 100
-    TYPE: !!str AGGREGATE
-    GOAL: !!str MIN
-    WEIGHT: !!float 0.5
-  - POLICY: !!str RTT02
-    MIN: !!int 0
-    MAX: !!int 20
-    TYPE: !!str IMEDIATE
-    GOAL: !!str MIN
-    WEIGHT: !!float 0.3
-  - POLICY: !!str COST
-    MIN: !!int 0
-    MAX: !!int 1000
-    TYPE: !!str DOMAIN
-    GOAL: !!str MIN
-    WEIGHT: !!float 0.2
-ESPECIFICATION:
-  TOPOLOGY: !!str IP [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 PE7 ] / PE4 PE5 PE6 { PE2 PE7 / PE2 PE8 } PE9 / PE4 PE5 PE6 } PE11 PE1 { PE2 PE3 / PE2 PE4 } PE5 EP1
-  BRANCHINGS: 
+METADATA:
+  ID: !!str TopologyExample
+  DESCRIPTION: > 
+    This is a simple example of a
+    generic SFC request with two 
+    goal function.
+SERVICE:
+  TOPOLOGY: !!str IP [ NF1 NF2 NF3 ] ( NF2 NF3 * ) { [ NF4 NF5 NF7 ] / NF4 NF5 NF6 { NF2 NF7 / NF2 NF8 } NF9 / NF4 NF5 NF6 } NF11 NF1 { NF2 NF3 / NF2 NF4 } NF5 ON1
+  OELEMENTS:
+    - !!str &OE1 NF1
+    - !!str &OE2 NF2
+    - !!str &OE3 NF3
+    - !!str &OE4 NF4
+    - !!str &OE5 NF5
+    - !!str &OE6 NF6
+    - !!str &OE7 NF7
+    - !!str &OE8 NF8
+    - !!str &OE9 NF9
+    - !!str &OE10 NF10
+    - !!str &OE11 NF11
+  OUTNODES:
+    - !!str ON1
+GOAL_FUNCTION:
+    METRICS:
+      - ID: &metric1 !!str FlowRate
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.8
+        INPUT: !!int 40
+        EVALUATION: !!str "MULT"
+        UPDATE: *metric1
+      - ID: &metric2 !!str MemoryUsage
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.2
+        INPUT: !!int 40
+        EVALUATION: !!str "MULT"
+        UPDATE: *metric1
+    BRANCHINGS: 
       *metric1:
         UPDATE: !!str "MULT"
         FACTORS:  
@@ -50,39 +47,113 @@ ESPECIFICATION:
           - [!!float 0.6, !!float 0.2, !!float 0.2]
           - [!!float 0.9, !!float 1.0]
           - [!!float 0.9, !!float 1.0]
-  OPELEMENTS:
-    - ID: !!str PE1
+POLICIES:
+  IMMEDIATE:
+    - ID: !!str RTT
+      MIN: !!int 0
+      MAX: !!int 20
+      TYPE: !!str TRANSITION
+      GOAL: !!str MIN
+      WEIGHT: !!float 0.5
+    - ID: !!str COST
+      MIN: !!int 0
+      MAX: !!int 1000
+      TYPE: !!str DOMAIN
+      GOAL: !!str MIN
+      WEIGHT: !!float 0.5
+  AGGREGATE:
+    - ID: !!str RTT
+      MIN: !!int 0
+      MAX: !!int 100
+      TYPE: !!str TRANSITION
+      GOAL: !!str MIN
+      WEIGHT: !!float 1.0
+DEPLOYMENT:
+  *OE1:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 5
-    - ID: !!str PE2
+      *metric2: !!float 5
+  *OE2:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 5
-    - ID: !!str PE3
+      *metric2: !!float 5
+  *OE3:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 0.8
-      *metric2: !!int 10
-    - ID: !!str PE4
+      *metric2: !!float 10
+  *OE4:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 0.6
-      *metric2: !!int 12
-    - ID: !!str PE5
+      *metric2: !!float 12
+  *OE5:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 0.5
-      *metric2: !!int 20
-    - ID: !!str PE6
+      *metric2: !!float 20
+  *OE6:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 6
-    - ID: !!str PE7
+      *metric2: !!float 6
+  *OE7:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 5
-    - ID: !!str PE8
+      *metric2: !!float 5
+  *OE8:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 0.9
-      *metric2: !!int 10
-    - ID: !!str PE9
+      *metric2: !!float 10
+  *OE9:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 15
-    - ID: !!str PE10
+      *metric2: !!float 15
+  *OE10:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 10
-    - ID: !!str PE11
+      *metric2: !!float 10
+  *OE11:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 20
-  EPS:
-    - ID: !!str EP1
+      *metric2: !!float 20

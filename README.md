@@ -17,22 +17,45 @@ The FLERAS' request model is structure by a YAML notation and presents three mai
 1. METADATA BLOCK<br/>
 1.1. ID (Request unique identifier)<br/>
 1.2. DESCRIPTION (Multi line request description)<br/>
-2. GOAL FUNCTION BLOCK<br/>
-2.1. FUNCTION (Evaluation metrics description)<br/>
-2.1.1. METRIC (Metric unique identifier)<br/>
-2.1.2. GOAL (Minimize ("MIN") or maximize ("MAX") metric)<br/>
-2.1.3. WEIGHT (Value for weighted evaluation)<br/>
-2.1.4. INPUT (Initial metric value)<br/>
-2.1.5. EVALUATION (Metric evaluation operation ("MULT", "DIV", "SUM", "SUB"))<br/>
-2.1.6. UPDATE (Metric ID that the evaluation operation will update this metric)<br/>
-3. TOPOLOGY FUNCTION BLOCK<br/>
-3.1. TOPOLOGY (Topology defined with the context-free grammar described below)<br/>
-3.2. BRANCHINGS (List of lists indicating the expected traffic splitting in branchs segments - topology opening linear order)<br/>
-3.3. OPELEMENTS<br/>
-3.3.1. ID (Operational element unique ID)<br/>
-3.3.2. METRICS ID (Indicates the evaluation/update factor for each metric)<br/>
-3.4. EPS (List of EPs)<br/>
-3.4.1. ID (EP unique identifier)<br/>
+2. SERVICE BLOCK<br/>
+2.1. TOPOLOGY (Topology defined with the context-free grammar described below)<br/>
+2.2. OELEMENTS (List of operacional elements IDs)<br/>
+2.3. OUTNODES (List of output nodes IDs)<br/>
+3. GOAL FUNCTION BLOCK<br/>
+3.1. METRICS (List of metric objects that composes the goal function)<br/>
+3.1.1. ID (Metric unique identifier)<br/>
+3.1.2. GOAL (Minimize ("MIN") or maximize ("MAX") metric)<br/>
+3.1.3. WEIGHT (Value for weighted evaluation)<br/>
+3.1.4. INPUT (Initial metric value)<br/>
+3.1.5. EVALUATION (Metric evaluation operation ("MULT", "DIV", "SUM", "SUB"))<br/>
+3.1.6. UPDATE (Metric ID that the evaluation operation will update this metric)<br/> 
+3.2. BRANCHINGS (List of evaluation data division between segments of ramifications for every metric)<br/>
+3.2.1. METRIC (Some metric ID)<br/>
+3.2.1.1. UPDATE (Metric evaluatin data division operation ("MULT", "DIV", "SUM", "SUB"))<br/>
+3.2.1.2. FACTORS (Metric evaluation data division factors, a list with one factor for each segment in the branchings and one list per branching)<br/>
+4. POLICIES ()<br/>
+4.1. IMMEDIATE ()<br/>
+4.1.1. ID ()<br/>
+4.1.2. MIN ()<br/>
+4.1.3. MAX ()<br/>
+4.1.4. TYPE ()<br/>
+4.1.5. GOAL ()<br/>
+4.1.6. WEIGHT ()<br/>
+4.2. AGGREGATE ()<br/>
+4.2.1. ID ()<br/>
+4.2.2. MIN ()<br/>
+4.2.3. MAX ()<br/>
+4.2.4. TYPE ()<br/>
+4.2.5. GOAL ()<br/>
+4.2.6. WEIGHT ()<br/>
+5. DEPLOYMENT ()<br/>
+5.1. OELEMENT ()<br/>
+5.1.1. FLAVOUR ()<br/>
+5.1.1.1. MEMORY ()<br/>
+5.1.1.2. NET_IFACES ()<br/>
+5.1.1.3. CPUS ()<br/>
+5.1.2. BENCHMARK ()<br/>
+5.1.2.1. METRIC () <br/>
 
 The FLERAS SFC specification follows the context-free grammar production rules:<br/>
 1. S -> "IP" OPBLOCK<br/>
