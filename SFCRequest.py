@@ -387,6 +387,13 @@ class SFCRequest:
 
 		return self.__function
 
+	def srPolicies(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__policies
+
 	def srServiceON(self):
 		
 		if self.__status != 1:
@@ -413,6 +420,17 @@ class SFCRequest:
 			serviceBecnhmark.append(metricBenchmark)
 
 		return serviceBecnhmark
+
+	def srServiceFlavours(self):
+
+		if self.__status != 1:
+			return None
+		
+		serviceFlavous = {}
+		for symbol in self.__deployment:
+			serviceFlavous[symbol] = self.__deployment[symbol]["FLAVOUR"]
+
+		return serviceFlavous
 
 	def srServiceTopology(self):
 
@@ -449,5 +467,17 @@ class SFCRequest:
 			weights[metric["ID"]] = metric["WEIGHT"]
 
 		return weights
+
+	def srPoliciesMetrics(self):
+
+		if self.__status != 1:
+			return None
+
+		metrics = {"DOMAIN":[], "TRANSITION":[]}
+		for policy in self.__policies["IMMEDIATE"] + self.__policies["AGGREGATE"]:
+			if not policy["ID"] in metrics[policy["TYPE"]]:
+				metrics[policy["TYPE"]].append(policy["ID"])
+
+		return metrics
 
 ######## SFC REQUEST CLASS END ########

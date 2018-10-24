@@ -20,11 +20,16 @@
 
 #ERROR CODES ->
 #-1: UNKNOW DOMAINS PRESENT IN REQUEST LIST
+#-2: UNKNOW DOMAIN POLICY METRIC IN REQUEST
+#-3: UNKNOW TRANSITION POLICY METRIC IN REQUEST
 
 #################################################
 
+from itertools import islice
+
 from SFCRequest import SFCRequest
 from DomainsData import DomainsData
+from GreedyMethod import GreedyMethod
 
 class SFCSplitAndMap:
 	__status = None
@@ -34,6 +39,12 @@ class SFCSplitAndMap:
 
 	__domMatrix = None
 	__domTopologies = None
+
+	__immediateDictionary = None
+	__aggregateDictionary = None
+	__flavoursDictionary = None
+
+	__processor = None
 
 	######## CONSTRUCTOR ########
 
@@ -85,11 +96,72 @@ class SFCSplitAndMap:
 			self.__status = -1
 			return False
 
+	def __ssamCheckPolicies(self):
+
+		requestPolicies = self.__sfcRequest.srPoliciesMetrics()
+		domainsLMetrics = self.__domData.ddLocalMetrics()
+		domainsTMetrics = self.__domData.ddTransitionMetrics()
+
+		if set(requestPolicies["DOMAIN"]) <= set(domainsLMetrics):
+			if set(requestPolicies["TRANSITION"]) <= set(domainsTMetrics):
+				return True
+			else:
+				self.__status = -3
+				return False
+		else:
+			self.__status = -2	
+			return False
+
+	def __ssamCheckTopology(self, topology):
+
+		validSymbols = self.__sfcRequest.srServiceOE() + self.__sfcRequest.srServiceON() + self.__sfcRequest.srDomains() + ['<', '>', '{', '}', '/', 'IP']
+		splittedTopo = topology.split()
+		
+		for symbol in splittedTopo:
+			if not symbol in validSymbols:
+				return False
+
+		return True
+
+	def __ssamOrganizeData(self):
+
+		immPolicies = {"LOCAL": {}, "TRANSITION":{}}
+		aggPolicies = {"LOCAL": {}, "TRANSITION":{}}
+		rawPolicies = self.__sfcRequest.srPolicies()
+
+		for policy in rawPolicies["IMMEDIATE"]:
+			if policy["TYPE"] == "DOMAIN":
+				immPolicies["LOCAL"][policy["ID"]] = policy
+			if policy["TYPE"] == "TRANSITION":
+				immPolicies["TRANSITION"][policy["ID"]] = policy
+
+		for policy in rawPolicies["AGGREGATE"]:
+			if policy["TYPE"] == "DOMAIN":
+				aggPolicies["LOCAL"][policy["ID"]] = policy
+			if policy["TYPE"] == "TRANSITION":
+				aggPolicies["TRANSITION"][policy["ID"]] = policy
+
+		self.__immediateDictionary = immPolicies
+		self.__aggregateDictionary = aggPolicies
+		self.__flavoursDictionary = self.__sfcRequest.srServiceFlavours()
+
+	def __ssamPreprocessTopology(self, topology):
+
+		dependencies = {}
+		cleanedTopo = []
+		splittedTopo = topology.split()
+
+		iterator = iter(range(len(splittedTopo)))
+		for index in iterator:
+			if splittedTopo[index] == '<':
+				dependencies[len(cleanedTopo)-1] = splittedTopo[index+1]
+				next(islice(iterator, 2, 2), None)
+			else:
+				cleanedTopo.append(splittedTopo[index])
+
+		return [cleanedTopo, dependencies]
+
 	######## PUBLIC METHODS ########
-
-	def ssamStatus(self):
-
-		return self.__status
 
 	def ssamSetup(self, sfcRequest, domData):
 
@@ -98,13 +170,31 @@ class SFCSplitAndMap:
 
 		self.__domMatrix = self.__ssamCreateMatrix()
 		if self.__ssamCheckDomains():
-			self.__status = 1
+			if self.__ssamCheckPolicies():
+				self.__ssamOrganizeData() 
+				self.__status = 1
+
+	def ssamGreedyRequest(self, topologiesList):
+
+		if self.__status < 1:
+			return
+
+		self.__processor = GreedyMethod(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
+
+		for topology in topologiesList:
+			if self.__ssamCheckTopology(topology):
+				topoData = self.__ssamPreprocessTopology(topology)
+				self.__processor.gmProcess(topoData[0], topoData[1])
+
+	def ssamStatus(self):
+
+		return self.__status
 
 
 ######## SFC SPLIT MAP CLASS END ########
 
-# TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
+#TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
 # domains = DomainsData("Example/DomExample01.yaml")
-# request = SFCRequest('Example/ReqExample03.yaml', domains.ddDomains().copy())
+# request = SFCRequest('Example/ReqExample05.yaml', domains.ddDomains().copy())
 # mapping = SFCSplitAndMap(request, domains)
-# print(mapping.ssamStatus())
+# mapping.ssamGreedyRequest(["IP NF1 < D01 > NF2 { NF3 < D01 > NF2 ON1 / NF3 < D01 > NF4 { NF5 / NF6 } NF7 ON2 }"])
