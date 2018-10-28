@@ -29,7 +29,7 @@ from itertools import islice
 
 from SFCRequest import SFCRequest
 from DomainsData import DomainsData
-from GreedyMethod import GreedyMethod
+from OptimalSM import OptimalSM
 
 class SFCSplitAndMap:
 	__status = None
@@ -154,7 +154,7 @@ class SFCSplitAndMap:
 		iterator = iter(range(len(splittedTopo)))
 		for index in iterator:
 			if splittedTopo[index] == '<':
-				dependencies[len(cleanedTopo)-1] = splittedTopo[index+1]
+				dependencies[len(cleanedTopo)-1] = [splittedTopo[index+1]]
 				next(islice(iterator, 2, 2), None)
 			else:
 				cleanedTopo.append(splittedTopo[index])
@@ -168,23 +168,23 @@ class SFCSplitAndMap:
 		self.__sfcRequest = sfcRequest
 		self.__domData = domData
 
-		self.__domMatrix = self.__ssamCreateMatrix()
+		self.__ssamCreateMatrix()
 		if self.__ssamCheckDomains():
 			if self.__ssamCheckPolicies():
 				self.__ssamOrganizeData() 
 				self.__status = 1
 
-	def ssamGreedyRequest(self, topologiesList):
+	def ssamOptimalRequest(self, topologiesList):
 
 		if self.__status < 1:
 			return
 
-		self.__processor = GreedyMethod(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
+		self.__processor = OptimalSM(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
 
 		for topology in topologiesList:
 			if self.__ssamCheckTopology(topology):
 				topoData = self.__ssamPreprocessTopology(topology)
-				self.__processor.gmProcess(topoData[0], topoData[1])
+				self.__processor.osmProcess(self.__sfcRequest.srServiceOE(), topoData[0], topoData[1])
 
 	def ssamStatus(self):
 
@@ -194,7 +194,7 @@ class SFCSplitAndMap:
 ######## SFC SPLIT MAP CLASS END ########
 
 #TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
-# domains = DomainsData("Example/DomExample01.yaml")
-# request = SFCRequest('Example/ReqExample05.yaml', domains.ddDomains().copy())
-# mapping = SFCSplitAndMap(request, domains)
-# mapping.ssamGreedyRequest(["IP NF1 < D01 > NF2 { NF3 < D01 > NF2 ON1 / NF3 < D01 > NF4 { NF5 / NF6 } NF7 ON2 }"])
+domains = DomainsData("Example/DomExample01.yaml")
+request = SFCRequest('Example/ReqExample06.yaml', domains.ddDomains().copy())
+mapping = SFCSplitAndMap(request, domains)
+mapping.ssamOptimalRequest(["IP NF1 < D01 > NF2 NF3 ON1"])

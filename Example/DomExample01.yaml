@@ -4,7 +4,7 @@ DOMAINS:
   - !!str &domain3 D03
 RESOURCES:
   *domain1:
-    MEMORY: !!int 10240
+    MEMORY: !!int 1024
     NET_IFACES: !!int 20
     CPUS: !!int 15
   *domain2:
@@ -24,9 +24,9 @@ TRANSITION:
   - ID: !!str RTT
     *domain1:
       *domain2: !!int 100
-      *domain3: !!int 150
+      *domain3: !!int 10
     *domain2:
-      *domain1: !!int 200
+      *domain1: !!int 10
     *domain3:
-      *domain1: !!int 50
-      *domain2: !!int 120
+      *domain1: !!int 10
+      *domain2: !!int 10
