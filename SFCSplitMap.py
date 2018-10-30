@@ -46,6 +46,10 @@ class SFCSplitAndMap:
 
 	__processor = None
 
+	__evaluatedTopologies = None
+	__topolgoiesData = None
+	__topologiesIndex = None
+
 	######## CONSTRUCTOR ########
 
 	def __init__(self, sfcRequest, domData):
@@ -181,20 +185,51 @@ class SFCSplitAndMap:
 
 		self.__processor = OptimalSM(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
 
+		topologiesData = {'DIST':[], 'AGG':[]}
 		for topology in topologiesList:
 			if self.__ssamCheckTopology(topology):
 				topoData = self.__ssamPreprocessTopology(topology)
 				self.__processor.osmProcess(self.__sfcRequest.srServiceOE(), topoData[0], topoData[1])
+				topoResult = self.__processor.osmBestDistributionData()
+				topologiesData['DIST'].append(topoResult[0])
+				topologiesData['AGG'].append(topoResult[1])
+
+		self.__evaluatedTopologies = topologiesList
+		self.__topologiesData = topologiesData
+		self.__topologiesIndex = self.__processor.osmEvaluateGroup(topologiesData)
+		self.__status = 2
 
 	def ssamStatus(self):
 
 		return self.__status
 
+	def ssamBestDistribution(self):
+
+		if self.__status != 2:
+			return None
+
+		key = self.__topologiesIndex.index(max(self.__topologiesIndex))
+
+		return (self.__evaluatedTopologies[key], self.__topologiesData['DIST'][key])
+		
+	def ssamDistributionsIndex(self):
+		
+		if self.__status != 2:
+			return None
+
+		resultList = []
+		for index in range(len(self.__evaluatedTopologies)):
+			resultList.append((self.__evaluatedTopologies[index], self.__topologiesData['DIST'][index], self.__topologiesIndex[index]))
+
+		return resultList
 
 ######## SFC SPLIT MAP CLASS END ########
 
 #TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
-domains = DomainsData("Example/DomExample01.yaml")
-request = SFCRequest('Example/ReqExample06.yaml', domains.ddDomains().copy())
-mapping = SFCSplitAndMap(request, domains)
-mapping.ssamOptimalRequest(["IP NF1 < D01 > NF2 NF3 ON1"])
+#TO DO: IT IS NOT CONSIDERING BRANCHINGS FOR THE INITAL SEGMENTS ELEMENTS (REFEERING TO THE PREVIOUS OE) - IT MUST BE ADAPTED IN THE CODE!!!!
+# domains = DomainsData("Example/DomExample01.yaml")
+# request = SFCRequest('Example/ReqExample07.yaml', domains.ddDomains().copy())
+# mapping = SFCSplitAndMap(request, domains)
+# mapping.ssamOptimalRequest(["IP NF1 < D01 > NF2 { NF3 ON1 / NF4 ON2 }","IP NF2 NF1 < D01 > { NF3 ON1 / NF4 ON2 }"])
+# print(mapping.ssamBestDistribution())
+# print(mapping.ssamDistributionsIndex())

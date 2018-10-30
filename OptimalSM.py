@@ -36,6 +36,9 @@ class OptimalSM:
 	__currentInteractions = None
 	__currentIndexes = None
 
+	__absoluteValues = None
+	__distributionsEval = None
+
 	######## CONSTRUCTOR ########
 
 	def __init__(self, sfcImmPolicies, sfcAggPolicies, sfcFlavours, domMatrix):
@@ -186,6 +189,71 @@ class OptimalSM:
 
 		return acceptedCombinations
 
+	def __osmSeparePolicies(self, polCombinations):
+
+		policies = {'AGGREGATE':{}, 'IMMEDIATE':{}}
+
+		if len(polCombinations['AGG']) > 0:
+			for policy in polCombinations['AGG'][0]['AGGREGATE'].keys():
+				policies['AGGREGATE'][policy] = []
+			for policy in polCombinations['AGG'][0]['IMMEDIATE'].keys():
+				policies['IMMEDIATE'][policy] = []
+
+			for combination in polCombinations['AGG']:
+				for policy in combination['AGGREGATE']:
+					policies['AGGREGATE'][policy].append(combination['AGGREGATE'][policy])
+				for policy in combination['IMMEDIATE']:
+					policies['IMMEDIATE'][policy].append(combination['IMMEDIATE'][policy])
+		
+		return policies
+
+	def __osmNormalizeCombinations(self, absoluteValues):
+
+		normCombinations = self.__osmSeparePolicies(absoluteValues)
+
+		for type in normCombinations:
+			for policy in normCombinations[type]:
+				maxValue = max(normCombinations[type][policy])
+				minValue = min(normCombinations[type][policy])
+				gapValue = maxValue - minValue
+
+				if gapValue != 0:
+					for index in range(len(normCombinations[type][policy])):
+						normCombinations[type][policy][index] = (normCombinations[type][policy][index] - minValue) / gapValue
+				else:
+					for index in range(len(normCombinations[type][policy])):
+						normCombinations[type][policy][index] = 0
+
+		return normCombinations
+
+	def __osmEvaluateCombinations(self, absoluteValues, normCombinations):
+
+		evalCombinations = [0 for i in range(len(absoluteValues['DIST']))]
+
+		for category in self.__sfcImmPolicies:
+			for policy in self.__sfcImmPolicies[category]:
+				if self.__sfcImmPolicies[category][policy]['GOAL'] == 'MIN':
+					for index in range(len(normCombinations["IMMEDIATE"][policy])):
+						normCombinations["IMMEDIATE"][policy][index] = (1 - normCombinations["IMMEDIATE"][policy][index]) * self.__sfcImmPolicies[category][policy]['WEIGHT']
+						evalCombinations[index] += normCombinations["IMMEDIATE"][policy][index]
+				else:
+					for index in range(len(normCombinations["IMMEDIATE"][policy])):
+						normCombinations["IMMEDIATE"][policy][index] = (1 - normCombinations["IMMEDIATE"][policy][index]) * self.__sfcImmPolicies[category][policy]['WEIGHT']
+						evalCombinations[index] += normCombinations["IMMEDIATE"][policy][index]
+
+		for category in self.__sfcAggPolicies:
+			for policy in self.__sfcAggPolicies[category]:
+				if self.__sfcAggPolicies[category][policy]['GOAL'] == 'MIN':
+					for index in range(len(normCombinations["AGGREGATE"][policy])):
+						normCombinations["AGGREGATE"][policy][index] = (1 - normCombinations["AGGREGATE"][policy][index]) * self.__sfcAggPolicies[category][policy]['WEIGHT']
+						evalCombinations[index] += normCombinations["AGGREGATE"][policy][index]
+				else:
+					for index in range(len(normCombinations["AGGREGATE"][policy])):
+						normCombinations["AGGREGATE"][policy][index] = (1 - normCombinations["AGGREGATE"][policy][index]) * self.__sfcAggPolicies[category][policy]['WEIGHT']
+						evalCombinations[index] += normCombinations["AGGREGATE"][policy][index]
+
+		normCombinations['GENERAL'] = evalCombinations
+		return normCombinations
 
 	######## PUBLIC METHODS ########
 
@@ -201,9 +269,41 @@ class OptimalSM:
 
 		self.__currentTopology = topology
 		self.__osmInteractions(elements, dependencies, list(self.__domMatrix.keys()))
-		domCombinations = self.__osmCombineDomains()
-		resCombinations = self.__osmCombineResources(domCombinations)
-		polCombinations = self.__osmCombinePolicies(resCombinations)
-		print(polCombinations)
+		self.__absoluteValues = self.__osmCombinePolicies(self.__osmCombineResources(self.__osmCombineDomains()))
+		self.__distributionsEval = self.__osmEvaluateCombinations(self.__absoluteValues, self.__osmNormalizeCombinations(self.__absoluteValues))
+		self.__status = 2
+
+	def osmEvaluateGroup(self, analysisData):
+
+		 return self.__osmEvaluateCombinations(analysisData, self.__osmNormalizeCombinations(analysisData))['GENERAL']
+	
+	def osmBestDistribution(self):
+
+		if self.__status != 2:
+			return None
+
+		key = self.__distributionsEval['GENERAL'].index(max(self.__distributionsEval['GENERAL']))
+
+		return self.__absoluteValues['DIST'][key]
+
+	def osmBestDistributionData(self):
+
+		if self.__status != 2:
+			return None
+
+		key = self.__distributionsEval['GENERAL'].index(max(self.__distributionsEval['GENERAL']))
+
+		return (self.__absoluteValues['DIST'][key], self.__absoluteValues['AGG'][key])
+
+	def osmDistributionsIndex(self):
+
+		if self.__status != 2:
+			return None
+
+		resultList = []
+		for index in range(len(self.__absoluteValues['DIST'])):
+			resultList.append((self.__absoluteValues['DIST'][index], self.__distributionsEval['GENERAL'][index]))
+
+		return resultList
 
 ######## OPTIMAL SM CLASS END ########

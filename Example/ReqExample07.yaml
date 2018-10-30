@@ -1,0 +1,107 @@
+METADATA:
+  ID: !!str TopologyExample6
+  DESCRIPTION: > 
+    This is a simple example of a
+    generic SFC request with theree 
+    metrics goal function.
+SERVICE:
+  TOPOLOGY: !!str IP [ NF1 < D01 > NF2 ] { NF3 ON1 / NF4 ON2 }
+  OELEMENTS:
+    - !!str &OE1 NF1
+    - !!str &OE2 NF2
+    - !!str &OE3 NF3
+    - !!str &OE4 NF4
+  OUTNODES:
+    - !!str ON1
+    - !!str ON2
+GOAL_FUNCTION:
+    METRICS:
+      - ID: &metric1 !!str FlowRate
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.3
+        INPUT: !!int 40
+        EVALUATION: !!str "MULT"
+        UPDATE: *metric1
+      - ID: &metric2 !!str MemoryUsage
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.2
+        INPUT: !!int 40
+        EVALUATION: !!str "MULT"
+        UPDATE: *metric1
+      - ID: &metric3 !!str Size
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.5
+        INPUT: !!int 0
+        EVALUATION: !!str "SUM"
+        UPDATE: *metric3
+    BRANCHINGS: 
+      *metric1:
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.5, !!float 0.5]
+      *metric2: 
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.5, !!float 0.5]
+      *metric3: 
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.5, !!float 0.5]
+POLICIES:
+  IMMEDIATE:
+    - ID: !!str RTT
+      MIN: !!int 0
+      MAX: !!int 20
+      TYPE: !!str TRANSITION
+      GOAL: !!str MIN
+      WEIGHT: !!float 0.2
+    - ID: !!str COST
+      MIN: !!int 0
+      MAX: !!int 1000
+      TYPE: !!str DOMAIN
+      GOAL: !!str MIN
+      WEIGHT: !!float 0.3
+  AGGREGATE:
+    - ID: !!str RTT
+      MIN: !!int 0
+      MAX: !!int 100
+      TYPE: !!str TRANSITION
+      GOAL: !!str MIN
+      WEIGHT: !!float 0.5
+DEPLOYMENT:
+  *OE1:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
+      *metric1: !!float 1.1
+      *metric2: !!int 5
+      *metric3: !!int 1
+  *OE2:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
+      *metric1: !!float 1.0
+      *metric2: !!int 5
+      *metric3: !!int 1
+  *OE3:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
+      *metric1: !!float 0.5
+      *metric2: !!int 10
+      *metric3: !!int 1
+  *OE4:
+    FLAVOUR:
+      MEMORY: !!int 256
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
+      *metric1: !!float 0.5
+      *metric2: !!int 10
+      *metric3: !!int 1
