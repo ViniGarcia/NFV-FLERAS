@@ -120,27 +120,28 @@ class Branch:
 			allSegments = self.__bSepareSegments()
 
 			branchMatch = []
+			branchBase = []
 			for index in range(bIndex):
 				branchMatch.append(allSegments[0][index])
 				if self.__branchMatchesInfra[index]:
 					branchMatch.append('<')
 					branchMatch.append(self.__branchMatchesInfra[index])
 					branchMatch.append('>')
-			branchMatch.append('{')
 
+			branchBase.append('{')
 			for subSegment in allSegments:
 				for index in range(bIndex):
 					if subSegment[1] == '<':
 						subSegment = subSegment[4:]
 					else:
 						subSegment = subSegment[1:]
-				branchMatch += subSegment
-				branchMatch.append('/')
+				branchBase += subSegment
+				branchBase.append('/')
 
-			branchMatch.pop()
-			branchMatch.append('}')
+			branchBase.pop()
+			branchBase.append('}')
 
-			self.__branchMatchList.append(branchMatch)
+			self.__branchMatchList.append((branchMatch, branchBase))
 	
 	def __bStringMatches(self):
 
@@ -149,13 +150,21 @@ class Branch:
 		originalBranch = self.__originalSegment.copy()
 		originalBranch.insert(0, '{')
 		originalBranch.append('}')
-		self.__branchMatchList.append(originalBranch)
+		self.__branchMatchList.append(([], originalBranch))
 		for match in self.__branchMatchList:
-			stringMatch = [match[0]]
-			for index in range(1, len(match)):
-				stringMatch.append(' ')
-				stringMatch.append(match[index])
-			self.__branchStringList.append(''.join(stringMatch))
+			if match[0] != []:
+				stringBranchMatch = [match[0][0]]
+			else:
+				stringBranchMatch = []
+			for index in range(1, len(match[0])):
+				stringBranchMatch.append(' ')
+				stringBranchMatch.append(match[0][index])
+			stringBaseMatch = [match[1][0]]
+			for index in range(1, len(match[1])):
+				stringBaseMatch.append(' ')
+				stringBaseMatch.append(match[1][index])
+
+			self.__branchStringList.append((''.join(stringBranchMatch), ''.join(stringBaseMatch)))
 
 	######## PUBLIC METHODS ########
 
@@ -335,7 +344,15 @@ class SFCExpansion:
 
 	def __seRestructBranch(self, base, combination):
 
-	
+		##################### SOLVE HERE ######################
+		# temporary = []
+		# for comb in combination:
+		# 	if comb[0] == '':
+		# 		temporary.append(comb[1])
+		# 	else:
+		# 		temporary.append(comb[0] + ' ' + comb[1])
+		########################################################
+
 		for cIndex in range(len(combination)):
 			
 			if combination[cIndex] == None:
@@ -345,7 +362,11 @@ class SFCExpansion:
 			skipBrace = 0
 			start = -1
 
+			splittedMerge = combination[cIndex][0].split()
+			splittedBody = combination[cIndex][1].split()
+
 			for index in range(len(base)):
+
 				if base[index] == '{':
 					if actualBranch == cIndex:
 						start = index
@@ -353,6 +374,7 @@ class SFCExpansion:
 						if start != -1:
 							skipBrace += 1
 					actualBranch += 1
+					continue
 
 				if base[index] == '}':
 					if start != -1:
@@ -362,7 +384,10 @@ class SFCExpansion:
 							stop = index
 							break
 
-			base = base[:start] + combination[cIndex] + base[stop+1:]
+			if base[start-1][0] == '<' and base[start-1][-1] == '>':
+				base = base[:start-2] + splittedMerge +  base[start-2:start] + splittedBody + base[stop+1:]
+			else:
+				base = base[:start-1] + splittedMerge +  [base[start-1]] + splittedBody + base[stop+1:]
 
 		return base
 
@@ -376,14 +401,13 @@ class SFCExpansion:
 			for index in range(len(sfcBranches)):
 				branchInstance = Branch(sfcBranches[index])
 				if branchInstance.bStringList() != []:
-					allBranches.append(branchInstance.bStringList()) #Adicionar o segmento original também
+					allBranches.append(branchInstance.bStringList())
 				else:
 					allBranches.append([None])
 
-			base = self.__seStringfy(pOrder)
 			combinationList = list(itertools.product(*allBranches))
 			for combination in combinationList:
-				availableSFCs.append(self.__seRestructBranch(base, combination))
+				availableSFCs.append(self.__seStringfy(self.__seRestructBranch(pOrder, combination)))
 
 		return availableSFCs
 
