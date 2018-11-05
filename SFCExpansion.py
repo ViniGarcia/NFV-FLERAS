@@ -21,22 +21,28 @@ class Branch:
 	__status = None
 
 	__originalSegment = None
+	__boundaryEPs = None
 	__branchSegments = None
 	__branchDependencies = None
-	__branchMatches = None
-	__branchMatchesInfra = None
-	__branchMatchList = None
-	__branchStringList = None
+	
+	__beginMatches = None
+	__beginMatchesInfra = None
+	__beginMatchList = None
+	__beginStringList = None
+
+	__endMatches = None
+	__endMatchesInfra = None
+	__endMatchList = None
+	__endStringList = None
 
 	######## CONSTRUCTOR ########
 
-	def __init__(self):
+	def __init__(self, branchSegment, boundaryEPs):
 
-		self.__status = 0
-
-	def __init__(self, branchSegment):
-
-		self.bAnalyze(branchSegment)
+		if branchSegment == None or boundaryEPs == None:
+			self.__status = 0
+		else:			
+			self.bAnalyze(branchSegment, boundaryEPs)
 
 	######## PRIVATE METHODS ########
 
@@ -71,12 +77,19 @@ class Branch:
 
 		return branchDependencies
 
-	def __bMatchBranches(self):
+	def __bNonTerminalBranch(self):
 
-		self.__branchMatches = 0
-		self.__branchMatchesInfra = []
-		self.__branchSegments = self.__bSepareSegments()
-		self.__branchDependencies = self.__bSepareDependencies()
+		for ep in self.__boundaryEPs:
+			if ep in self.__originalSegment:
+				return False
+		
+		return True
+
+	def __bBeginMatchBranches(self):
+
+		self.__beginMatches = 0
+		self.__beginMatchesInfra = []
+		
 		minimumSize = len(self.__branchSegments[0])	
 		for segment in self.__branchSegments:
 			if '{' in segment:
@@ -92,6 +105,7 @@ class Branch:
 		for index in range(minimumSize):
 			analysis = -1
 			dependency = False
+
 			for sIndex in range(len(self.__branchSegments)):
 				if analysis != -1:
 					if analysis != self.__branchSegments[sIndex][index]:
@@ -107,26 +121,28 @@ class Branch:
 					if index in self.__branchDependencies[sIndex]:
 						dependency = self.__branchDependencies[sIndex][index]
 
-			self.__branchMatches += 1
-			self.__branchMatchesInfra.append(dependency)
+			self.__beginMatches += 1
+			self.__beginMatchesInfra.append(dependency)
 
-	def __bMergeMatches(self):
+	def __bBeginMergeMatches(self):
 
-		self.__branchMatchList = []
-		if self.__branchMatches == 0:
+		self.__beginMatchList = []
+		if self.__beginMatches == 0:
 			return
 
-		for bIndex in range(1, self.__branchMatches+1):
+		for bIndex in range(1, self.__beginMatches+1):
 			allSegments = self.__bSepareSegments()
 
 			branchMatch = []
 			branchBase = []
+			modIndex = 0
 			for index in range(bIndex):
-				branchMatch.append(allSegments[0][index])
-				if self.__branchMatchesInfra[index]:
+				branchMatch.append(allSegments[0][modIndex + index])
+				if self.__beginMatchesInfra[index]:
 					branchMatch.append('<')
-					branchMatch.append(self.__branchMatchesInfra[index])
+					branchMatch.append(self.__beginMatchesInfra[index])
 					branchMatch.append('>')
+					modIndex += 3
 
 			branchBase.append('{')
 			for subSegment in allSegments:
@@ -141,17 +157,17 @@ class Branch:
 			branchBase.pop()
 			branchBase.append('}')
 
-			self.__branchMatchList.append((branchMatch, branchBase))
+			self.__beginMatchList.append((branchMatch, branchBase))
 	
-	def __bStringMatches(self):
+	def __bBeginStringMatches(self):
 
-		self.__branchStringList = []
+		self.__beginStringList = []
 
 		originalBranch = self.__originalSegment.copy()
 		originalBranch.insert(0, '{')
 		originalBranch.append('}')
-		self.__branchMatchList.append(([], originalBranch))
-		for match in self.__branchMatchList:
+		self.__beginMatchList.append(([], originalBranch))
+		for match in self.__beginMatchList:
 			if match[0] != []:
 				stringBranchMatch = [match[0][0]]
 			else:
@@ -164,42 +180,173 @@ class Branch:
 				stringBaseMatch.append(' ')
 				stringBaseMatch.append(match[1][index])
 
-			self.__branchStringList.append((''.join(stringBranchMatch), ''.join(stringBaseMatch)))
+			self.__beginStringList.append((''.join(stringBranchMatch), ''.join(stringBaseMatch)))
+
+	def __bEndMatchBranches(self):
+		
+		self.__endMatches = 0
+		self.__endMatchesInfra = []
+
+		if not self.__bNonTerminalBranch():
+			return
+
+		minimumSize = len(self.__branchSegments[0])
+		for segment in self.__branchSegments:
+			if '}' in segment:
+				size = segment[::-1].index('}')
+			else:
+				size = len(segment) - 1
+
+			if size == 0:
+				return
+			if size < minimumSize:
+				minimumSize = size
+
+		for index in range(minimumSize):
+			analysis = -1
+			dependency = False
+
+			for sIndex in range(len(self.__branchSegments)):
+				eIndex = (len(self.__branchSegments[sIndex]) - 1) - index
+				if analysis != -1:
+					if analysis != self.__branchSegments[sIndex][eIndex]:
+						return
+					if eIndex in self.__branchDependencies[sIndex]:
+						if dependency:
+							if dependency != self.__branchDependencies[sIndex][eIndex]:
+								return
+						else:
+							dependency = self.__branchDependencies[sIndex][eIndex]
+				else:	
+					analysis = self.__branchSegments[sIndex][eIndex]
+					if eIndex in self.__branchDependencies[sIndex]:
+						dependency = self.__branchDependencies[sIndex][eIndex]
+
+			self.__endMatches += 1
+			self.__endMatchesInfra.append(dependency)
+
+	def __bEndMergeMatches(self):
+
+		self.__endMatchList = []
+		if self.__endMatches == 0:
+			return
+
+		for bIndex in range(1, self.__endMatches+1):
+			allSegments = self.__bSepareSegments()
+			
+			branchMatch = []
+			branchBase = []
+			modIndex = 0
+			for index in range(bIndex):
+				if self.__endMatchesInfra[index]:
+					branchMatch.insert(0, '>')
+					branchMatch.insert(0, self.__endMatchesInfra[index])
+					branchMatch.insert(0, '<')
+					modIndex += 3
+				branchMatch.insert(0, allSegments[0][(len(allSegments[0]) - 1) - index - modIndex])
+
+			branchBase.append('{')
+			for subSegment in allSegments:
+				for index in range(bIndex):
+					if subSegment[-1] == '>':
+						subSegment = subSegment[:len(subSegment)-4]
+					else:
+						subSegment = subSegment[:len(subSegment)-1]
+				branchBase += subSegment
+				branchBase.append('/')
+
+			branchBase.pop()
+			branchBase.append('}')
+
+			self.__endMatchList.append((branchMatch, branchBase))
+
+	def __bEndStringMatches(self):
+
+		self.__endStringList = []
+
+		originalBranch = self.__originalSegment.copy()
+		originalBranch.insert(0, '{')
+		originalBranch.append('}')
+		self.__endMatchList.append(([], originalBranch))
+		for match in self.__endMatchList:
+			if match[0] != []:
+				stringBranchMatch = [match[0][0]]
+			else:
+				stringBranchMatch = []
+			for index in range(1, len(match[0])):
+				stringBranchMatch.append(' ')
+				stringBranchMatch.append(match[0][index])
+			stringBaseMatch = [match[1][0]]
+			for index in range(1, len(match[1])):
+				stringBaseMatch.append(' ')
+				stringBaseMatch.append(match[1][index])
+
+			self.__endStringList.append((''.join(stringBranchMatch), ''.join(stringBaseMatch)))
 
 	######## PUBLIC METHODS ########
 
-	def bAnalyze(self, originalSegment):
+	def bAnalyze(self, originalSegment, boundaryEPs):
 
 		self.__originalSegment = originalSegment
-		self.__bMatchBranches()
-		self.__bMergeMatches()
-		self.__bStringMatches()
+		self.__boundaryEPs = boundaryEPs
+		self.__branchSegments = self.__bSepareSegments()
+		self.__branchDependencies = self.__bSepareDependencies()
+		
+		self.__bBeginMatchBranches()
+		self.__bBeginMergeMatches()
+		self.__bBeginStringMatches()
+		
+		self.__bEndMatchBranches()
+		self.__bEndMergeMatches()
+		self.__bEndStringMatches()
+		
 		self.__status = 1
 
 	def bStatus(self):
 
 		return self.__status
 
-	def bMatches(self):
+	def bBeginMatches(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__branchMatches
+		return self.__beginMatches
 
-	def bMatchList(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__branchMatchList
-
-	def bStringList(self):
+	def bBeginMatchList(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__branchStringList
+		return self.__beginMatchList
+
+	def bBeginStringList(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__beginStringList
+
+	def bEndMatches(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__endMatches
+
+	def bEndMatchList(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__endMatchList
+
+	def bEndStringList(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__endStringList
 
 ######## BRANCH CLASS END ########
 
@@ -243,13 +390,12 @@ class SFCExpansion:
 
 	######## CONSTRUCTOR ########
 
-	def __init__(self):
-
-		self.__status = 0
-
 	def __init__(self, sfcTopology):
 		
-		self.seExpand(sfcTopology)
+		if sfcTopology == None:
+			self.__status = 0
+		else:
+			self.seExpand(sfcTopology)
 
 	######## PRIVATE METHODS ########
 
@@ -342,38 +488,26 @@ class SFCExpansion:
 
 		return sfcBranches
 
-	def __seRestructBranch(self, base, combination):
-
-		##################### SOLVE HERE ######################
-		# temporary = []
-		# for comb in combination:
-		# 	if comb[0] == '':
-		# 		temporary.append(comb[1])
-		# 	else:
-		# 		temporary.append(comb[0] + ' ' + comb[1])
-		########################################################
+	def __seRestructBranchBegin(self, base, combination):
 
 		for cIndex in range(len(combination)):
 			
 			if combination[cIndex] == None:
 				continue
 
-			actualBranch = 0
+			currentBranch = 0
 			skipBrace = 0
 			start = -1
-
-			splittedMerge = combination[cIndex][0].split()
-			splittedBody = combination[cIndex][1].split()
 
 			for index in range(len(base)):
 
 				if base[index] == '{':
-					if actualBranch == cIndex:
+					if currentBranch == cIndex:
 						start = index
 					else:
 						if start != -1:
 							skipBrace += 1
-					actualBranch += 1
+					currentBranch += 1
 					continue
 
 				if base[index] == '}':
@@ -385,9 +519,48 @@ class SFCExpansion:
 							break
 
 			if base[start-1][0] == '<' and base[start-1][-1] == '>':
-				base = base[:start-2] + splittedMerge +  base[start-2:start] + splittedBody + base[stop+1:]
+				base = base[:start-2] + combination[cIndex][0] +  base[start-2:start] + combination[cIndex][1] + base[stop+1:]
 			else:
-				base = base[:start-1] + splittedMerge +  [base[start-1]] + splittedBody + base[stop+1:]
+				base = base[:start-1] + combination[cIndex][0] +  [base[start-1]] + combination[cIndex][1] + base[stop+1:]
+
+		return base
+
+	def __seRestructBranchEnd(self, base, combination):
+
+		nonTerminal = []
+		boundaryEPs = self.__sfcTopology.stBoundaryEPs()
+		flag = True
+		skip = 0
+
+		index = 0
+		while index < len(base):
+			
+			if base[index] == '{':
+				if flag:
+					start = index
+					flag = False
+				else:
+					skip += 1
+				index += 1
+				continue
+
+			if base[index] == '}':
+				if not flag:
+					if skip != 0:
+						skip -= 1
+					else:
+						if not base[index-1] in boundaryEPs and not base[index-1] == '}':
+							nonTerminal.append((start, index))
+						index = start
+						flag = True
+			index += 1
+
+		for cIndex in range(len(combination)):
+			
+			if combination[cIndex] == None:
+				continue
+
+			base = base[:nonTerminal[cIndex][0]] + combination[cIndex][1] + combination[cIndex][0] + base[nonTerminal[cIndex][1]+1:]
 
 		return base
 
@@ -397,17 +570,31 @@ class SFCExpansion:
 
 		for pOrder in self.__sfcPOrder:
 			sfcBranches = self.__seSeparateBranches(pOrder)
-			allBranches = []
+			allBeginBranches = []
+			allEndBranches = []
 			for index in range(len(sfcBranches)):
-				branchInstance = Branch(sfcBranches[index])
-				if branchInstance.bStringList() != []:
-					allBranches.append(branchInstance.bStringList())
+				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.stBoundaryEPs())
+				
+				if branchInstance.bBeginMatchList() != []:
+					allBeginBranches.append(branchInstance.bBeginMatchList())
 				else:
-					allBranches.append([None])
+					allBeginBranches.append([None])
 
-			combinationList = list(itertools.product(*allBranches))
+				if branchInstance.bEndMatchList() != []:
+					allEndBranches.append(branchInstance.bEndMatchList())
+				else:
+					allEndBranches.append([None])
+
+			combinationList = list(itertools.product(*allBeginBranches))
 			for combination in combinationList:
-				availableSFCs.append(self.__seStringfy(self.__seRestructBranch(pOrder, combination)))
+				availableSFCs.append(self.__seStringfy(self.__seRestructBranchBegin(pOrder, combination)))
+			
+			#TO DO: THIS PROCESS CAN BE OPTIMIZED IN TWO WAYS, BOTH IN THE BRANCH CLASS ->
+				#REMOVING DUPLICATES OF SAME TOPOLOGY (OCCURING DUE THE INSERTION OF ORIGINAL BRANCH IN BEGIN AND END PROCESSING - BRANCH CLASS)
+				#MERGING THE BEGIN ANALYSIS WITH THE END ANALYSIS (IN OTHER WORDS, USE ALSO BEGIN REDUCTED TOPOLOGIES TO CALCULATE ITHER POSSIBILITIES)
+			combinationList = list(itertools.product(*allEndBranches))
+			for combination in combinationList:
+					availableSFCs.append(self.__seStringfy(self.__seRestructBranchEnd(pOrder, combination)))
 
 		return availableSFCs
 

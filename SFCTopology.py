@@ -396,6 +396,13 @@ class SFCTopology:
 
 		return self.__sfcTopology
 
+	def stBoundaryEPs(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__boundaryEPs
+
 	def stPOrder(self):
 
 		if self.__status != 1:

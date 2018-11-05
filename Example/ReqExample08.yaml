@@ -1,11 +1,11 @@
 METADATA:
-  ID: !!str TopologyExample
+  ID: !!str TopologyExample5
   DESCRIPTION: > 
     This is a simple example of a
-    generic SFC request with two 
-    goal function.
+    generic SFC request with theree 
+    metrics goal function.
 SERVICE:
-  TOPOLOGY: !!str IP [ NF1 NF2 NF3 ] ( NF2 NF3 * ) { [ NF4 NF5 NF7 ] / NF4 NF5 NF6 { NF2 NF7 / NF2 NF8 } NF9 / NF4 NF5 NF6 } NF11 NF1 { NF2 NF4 / NF3 NF4 } NF5 ON1
+  TOPOLOGY: !!str IP [ NF1 < D01 > NF2 ] { NF3 < D01 > NF2 NF5 < D02 > / NF3 < D01 > NF4 NF5 < D02 > } NF6 ON1
   OELEMENTS:
     - !!str &OE1 NF1
     - !!str &OE2 NF2
@@ -13,18 +13,14 @@ SERVICE:
     - !!str &OE4 NF4
     - !!str &OE5 NF5
     - !!str &OE6 NF6
-    - !!str &OE7 NF7
-    - !!str &OE8 NF8
-    - !!str &OE9 NF9
-    - !!str &OE10 NF10
-    - !!str &OE11 NF11
   OUTNODES:
     - !!str ON1
+    - !!str ON2
 GOAL_FUNCTION:
     METRICS:
       - ID: &metric1 !!str FlowRate
         GOAL: !!str "MIN"
-        WEIGHT: !!float 0.8
+        WEIGHT: !!float 0.3
         INPUT: !!int 40
         EVALUATION: !!str "MULT"
         UPDATE: *metric1
@@ -34,19 +30,25 @@ GOAL_FUNCTION:
         INPUT: !!int 40
         EVALUATION: !!str "MULT"
         UPDATE: *metric1
+      - ID: &metric3 !!str Size
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.5
+        INPUT: !!int 0
+        EVALUATION: !!str "SUM"
+        UPDATE: *metric3
     BRANCHINGS: 
       *metric1:
         UPDATE: !!str "MULT"
         FACTORS:  
-          - [!!float 0.6, !!float 0.2, !!float 0.2]
-          - [!!float 0.9, !!float 1.0]
-          - [!!float 0.9, !!float 1.0]
+          - [!!float 0.5, !!float 0.5]
       *metric2: 
         UPDATE: !!str "MULT"
         FACTORS:  
-          - [!!float 0.6, !!float 0.2, !!float 0.2]
-          - [!!float 0.9, !!float 1.0]
-          - [!!float 0.9, !!float 1.0]
+          - [!!float 0.5, !!float 0.5]
+      *metric3: 
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.5, !!float 0.5]
 POLICIES:
   IMMEDIATE:
     - ID: !!str RTT
@@ -75,8 +77,9 @@ DEPLOYMENT:
       NET_IFACES: !!int 2
       CPUS: !!int 1
     BENCHMARK:
-      *metric1: !!float 1.0
-      *metric2: !!float 5
+      *metric1: !!float 1.1
+      *metric2: !!int 5
+      *metric3: !!int 1
   *OE2:
     FLAVOUR:
       MEMORY: !!int 512
@@ -84,23 +87,26 @@ DEPLOYMENT:
       CPUS: !!int 1
     BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!float 5
+      *metric2: !!int 5
+      *metric3: !!int 1
   *OE3:
     FLAVOUR:
       MEMORY: !!int 512
       NET_IFACES: !!int 2
       CPUS: !!int 1
     BENCHMARK:
-      *metric1: !!float 0.8
-      *metric2: !!float 10
+      *metric1: !!float 0.5
+      *metric2: !!int 10
+      *metric3: !!int 1
   *OE4:
     FLAVOUR:
       MEMORY: !!int 512
       NET_IFACES: !!int 2
       CPUS: !!int 1
     BENCHMARK:
-      *metric1: !!float 0.6
-      *metric2: !!float 12
+      *metric1: !!float 0.2
+      *metric2: !!int 5
+      *metric3: !!int 1
   *OE5:
     FLAVOUR:
       MEMORY: !!int 512
@@ -108,7 +114,8 @@ DEPLOYMENT:
       CPUS: !!int 1
     BENCHMARK:
       *metric1: !!float 0.5
-      *metric2: !!float 20
+      *metric2: !!int 10
+      *metric3: !!int 1
   *OE6:
     FLAVOUR:
       MEMORY: !!int 512
@@ -116,44 +123,5 @@ DEPLOYMENT:
       CPUS: !!int 1
     BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!float 6
-  *OE7:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 1.0
-      *metric2: !!float 5
-  *OE8:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 0.9
-      *metric2: !!float 10
-  *OE9:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 1.0
-      *metric2: !!float 15
-  *OE10:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 1.0
-      *metric2: !!float 10
-  *OE11:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 1.0
-      *metric2: !!float 20
+      *metric2: !!int 2
+      *metric3: !!int 1
