@@ -263,6 +263,8 @@ class Branch:
 	def __bEndStringMatches(self):
 
 		self.__endStringList = []
+		if self.__endMatches == 0:
+			return
 
 		originalBranch = self.__originalSegment.copy()
 		originalBranch.insert(0, '{')
@@ -596,7 +598,7 @@ class SFCExpansion:
 			for combination in combinationList:
 					availableSFCs.append(self.__seStringfy(self.__seRestructBranchEnd(pOrder, combination)))
 
-		return availableSFCs
+		return list(set(availableSFCs))
 
 	######## PUBLIC METHODS ######## 
 

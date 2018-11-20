@@ -1,38 +1,38 @@
 METADATA:
-  ID: !!str TopologyExample8
+  ID: !!str TopologyExample9
   DESCRIPTION: > 
     This is a simple example of a
     generic SFC request with theree 
     metrics goal function.
 SERVICE:
-  TOPOLOGY: !!str IP [ NF1 < D01 > NF2 ] { NF3 < D01 > NF2 NF5 < D02 > / NF3 < D01 > NF4 NF5 < D02 > } NF6 ON1
+  TOPOLOGY: !!str IP [ EO1 EO2 EO3 ] ( EO2 EO3 ) { EO4 < D01 > EO5 NS1 / EO4 < D01 > EO6 NS2 }
   OELEMENTS:
-    - !!str &OE1 NF1
-    - !!str &OE2 NF2
-    - !!str &OE3 NF3
-    - !!str &OE4 NF4
-    - !!str &OE5 NF5
-    - !!str &OE6 NF6
+    - !!str &OE1 EO1
+    - !!str &OE2 EO2
+    - !!str &OE3 EO3
+    - !!str &OE4 EO4
+    - !!str &OE5 EO5
+    - !!str &OE6 EO6
   OUTNODES:
-    - !!str ON1
-    - !!str ON2
+    - !!str NS1
+    - !!str NS2
 GOAL_FUNCTION:
     METRICS:
-      - ID: &metric1 !!str FlowRate
+      - ID: &metric1 !!str TxTrafego
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.5
+        INPUT: !!int 40
+        EVALUATION: !!str "MULT"
+        UPDATE: *metric1
+      - ID: &metric2 !!str Memoria
         GOAL: !!str "MIN"
         WEIGHT: !!float 0.3
         INPUT: !!int 40
         EVALUATION: !!str "MULT"
         UPDATE: *metric1
-      - ID: &metric2 !!str MemoryUsage
-        GOAL: !!str "MIN"
+      - ID: &metric3 !!str Tamanho
+        GOAL: !!str "MAX"
         WEIGHT: !!float 0.2
-        INPUT: !!int 40
-        EVALUATION: !!str "MULT"
-        UPDATE: *metric1
-      - ID: &metric3 !!str Size
-        GOAL: !!str "MIN"
-        WEIGHT: !!float 0.5
         INPUT: !!int 0
         EVALUATION: !!str "SUM"
         UPDATE: *metric3
@@ -123,5 +123,5 @@ DEPLOYMENT:
       CPUS: !!int 1
     BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!int 2
+      *metric2: !!int 5
       *metric3: !!int 1
