@@ -114,7 +114,8 @@ class GoalFunction:
 		
 		for metric in self.__sfcFunction:
 			updater = self.__sfcFunction[metric]["UPDATE"]
-			self.__gfUpdateMetric(self.__sfcFunction[metric], self.__sfcFunction[updater], elementValues[updater])
+			if updater != "STATIC":
+				self.__gfUpdateMetric(self.__sfcFunction[metric], self.__sfcFunction[updater], elementValues[updater])
 
 	def gfProcess(self, elementValues):
 		
