@@ -16,6 +16,7 @@
 #NORMAL CODES ->
 #0: DOMAINS MATRIX AND REQUEST MUST BE INFORMED
 #1: READY TO SPLIT AND MAP TOPOLOGIES
+#2: GENERATED DISTRBUTIONS EVALUATION AVAILABLE
 
 #################################################
 
@@ -36,8 +37,7 @@ class OptimalSM:
 	__currentInteractions = None
 	__currentIndexes = None
 
-	__absoluteValues = None
-	__distributionsEval = None
+	__distEvaluations = None
 
 	######## CONSTRUCTOR ########
 
@@ -66,29 +66,60 @@ class OptimalSM:
 		ordered = []
 		for index in self.__currentIndexes:
 			ordered.append(self.__currentInteractions[index])
-		
 		fullCombinations = list(product(*ordered))
+		print("PRODUTO INICIAL: ", len(fullCombinations))
+		
 		acceptedCombinations = []
-
 		transitionPolicies = list(set(list(self.__sfcImmPolicies["TRANSITION"].keys()) + list(self.__sfcAggPolicies["TRANSITION"].keys())))
 
 		for distribution in fullCombinations:
 			accept = True
-			for index in range(len(distribution)-1):
-				if distribution[index] != distribution[index+1]:
-					for policy in transitionPolicies:
-						if self.__domMatrix[distribution[index]][distribution[index+1]][policy] == None:
-							accept = False
+			domIndex = 0
+			domLast = [0]
+			domSaves = [[0]]
+			lastSaves = []
+
+			for index in self.__currentIndexes:
+				for lastDomain in domLast:
+					if distribution[lastDomain] != distribution[domIndex]:
+						for policy in transitionPolicies:
+							if self.__domMatrix[distribution[lastDomain]][distribution[domIndex]][policy] == None:
+								accept = False
+								break
+						if not accept:
 							break
-					if not accept:
-						break
+				if not accept:
+					break
+
+				if self.__currentTopology[index+1] == '{':
+					lastSaves.append([])
+					domSaves.append(domIndex)
+					domLast = [domIndex]
+					domIndex += 1
+					continue
+				if self.__currentTopology[index+1] == '}' or (len(self.__currentTopology) >= index+3 and self.__currentTopology[index+2] == '}'):
+					domSaves.pop(-1)
+					domLast = lastSaves.pop(-1)
+					domIndex += 1
+					continue
+				if self.__currentTopology[index+1] == '/' or (len(self.__currentTopology) > index+3 and self.__currentTopology[index+2] == '/'):
+					lastSaves[-1].append(domIndex)
+					domLast = [domSaves[-1]]
+					domIndex += 1
+					continue
+				else:	
+					domLast = [domIndex]
+					domIndex += 1
+
 			if accept:
 				acceptedCombinations.append(distribution)
 
+		print("TRANSIÇÕES POSSIVEIS: ", len(acceptedCombinations))
 		return acceptedCombinations
 
 	def __osmCombineResources(self, domCombinations):
 
+		printTest = {'MEMORY':0, 'NET_IFACES':0, 'CPUS':0}
 		acceptedCombinations = []
 
 		resourceBase = {}
@@ -104,17 +135,22 @@ class OptimalSM:
 					if resourceAnalysis[distribution[domIndex]][resource] >= self.__sfcFlavours[self.__currentTopology[index]][resource]:
 						resourceAnalysis[distribution[domIndex]][resource] -= self.__sfcFlavours[self.__currentTopology[index]][resource]
 					else:
+						printTest[resource] += 1
 						accept = False
+						break
 				if not accept:
 					break
 				domIndex += 1
 			if accept:
 				acceptedCombinations.append(distribution)
 
+		print("RECURSOS: ", len(acceptedCombinations))
+		print("DROPS RECURSOS: ", printTest)
 		return acceptedCombinations
 
 	def __osmCombinePolicies(self, resCombinations):
 
+		printDrops = {'IMMEDIATE':0, 'AGGREGATE':0}
 		acceptedCombinations = {"DIST":[], "AGG":[]}
 
 		aggregationsBase = {"AGGREGATE":{}, "IMMEDIATE":{}}
@@ -122,51 +158,65 @@ class OptimalSM:
 			aggregationsBase["AGGREGATE"][key] = 0
 		for key in list(self.__sfcImmPolicies['LOCAL'].keys()) + list(self.__sfcImmPolicies['TRANSITION'].keys()):
 			aggregationsBase["IMMEDIATE"][key] = 0
-		
+
 		for distribution in resCombinations:
 			aggregationsAnalysis = copy.deepcopy(aggregationsBase)
-			domIndex = 0
-			domLast = 0
 			accept = True
+			domIndex = 0
+			domLast = [0]
+			domSaves = [[0]]
+			lastSaves = []
+
+			transitionsQuantity = 0
+			elementsQuantity = len(distribution)
+
 			for index in self.__currentIndexes:
-				if distribution[domLast] != distribution[domIndex]:
-					for policy in self.__sfcImmPolicies['TRANSITION']:
-						domValue = self.__domMatrix[distribution[domLast]][distribution[domIndex]][policy]
-						policyMin = self.__sfcImmPolicies['TRANSITION'][policy]['MIN']
-						policyMax = self.__sfcImmPolicies['TRANSITION'][policy]['MAX']
+
+				for lastDomain in domLast:
+					if distribution[lastDomain] != distribution[domIndex]:
+						transitionsQuantity += 1
+						for policy in self.__sfcImmPolicies['TRANSITION']:
+							domValue = self.__domMatrix[distribution[lastDomain]][distribution[domIndex]][policy]
+							policyMin = self.__sfcImmPolicies['TRANSITION'][policy]['MIN']
+							policyMax = self.__sfcImmPolicies['TRANSITION'][policy]['MAX']
+
+							if domValue >= policyMin and domValue <= policyMax:
+								aggregationsAnalysis['IMMEDIATE'][policy] += domValue
+							else:
+								printDrops['IMMEDIATE'] += 1
+								accept = False
+								break					
+						if not accept:
+							break
+
+						for policy in self.__sfcAggPolicies['TRANSITION']:
+							domValue = self.__domMatrix[distribution[lastDomain]][distribution[domIndex]][policy]
+							policyMin = self.__sfcAggPolicies['TRANSITION'][policy]['MIN']
+							policyMax = self.__sfcAggPolicies['TRANSITION'][policy]['MAX']
+
+							aggregationsAnalysis['AGGREGATE'][policy] += domValue
+							if aggregationsAnalysis['AGGREGATE'][policy] < policyMin or aggregationsAnalysis['AGGREGATE'][policy] > policyMax:
+								printDrops['AGGREGATE'] += 1
+								accept = False
+								break
+						if not accept:
+							break
+
+					for policy in self.__sfcImmPolicies['LOCAL']:
+						domValue = self.__domMatrix[distribution[domIndex]][distribution[domIndex]]['LOCAL'][policy]
+						policyMin = self.__sfcImmPolicies['LOCAL'][policy]['MIN']
+						policyMax = self.__sfcImmPolicies['LOCAL'][policy]['MAX']
 
 						if domValue >= policyMin and domValue <= policyMax:
 							aggregationsAnalysis['IMMEDIATE'][policy] += domValue
 						else:
-							accept = False
-							break					
-					if not accept:
-						break
-
-					for policy in self.__sfcAggPolicies['TRANSITION']:
-						domValue = self.__domMatrix[distribution[domLast]][distribution[domIndex]][policy]
-						policyMin = self.__sfcAggPolicies['TRANSITION'][policy]['MIN']
-						policyMax = self.__sfcAggPolicies['TRANSITION'][policy]['MAX']
-
-						aggregationsAnalysis['AGGREGATE'][policy] += domValue
-						if aggregationsAnalysis['AGGREGATE'][policy] < policyMin or aggregationsAnalysis['AGGREGATE'][policy] > policyMax:
+							printDrops['IMMEDIATE'] += 1
 							accept = False
 							break
 					if not accept:
 						break
-
-				for policy in self.__sfcImmPolicies['LOCAL']:
-					domValue = self.__domMatrix[distribution[domIndex]][distribution[domIndex]]['LOCAL'][policy]
-					policyMin = self.__sfcImmPolicies['LOCAL'][policy]['MIN']
-					policyMax = self.__sfcImmPolicies['LOCAL'][policy]['MAX']
-
-					if domValue >= policyMin and domValue <= policyMax:
-						aggregationsAnalysis['IMMEDIATE'][policy] += domValue
-					else:
-						accept = False
-						break
 				if not accept:
-					break
+					break 
 
 				for policy in self.__sfcAggPolicies['LOCAL']:
 					domValue = self.__domMatrix[distribution[domIndex]][distribution[domIndex]]['LOCAL'][policy]
@@ -175,85 +225,45 @@ class OptimalSM:
 
 					aggregationsAnalysis['AGGREGATE'][policy] += domValue
 					if aggregationsAnalysis['AGGREGATE'][policy] < policyMin or aggregationsAnalysis['AGGREGATE'][policy] > policyMax:
+						printDrops['AGGREGATE'] += 1
 						accept = False
 						break
 				if not accept:
 					break	
 
-				domLast = domIndex
-				domIndex += 1
+				if self.__currentTopology[index+1] == '{':
+					lastSaves.append([])
+					domSaves.append(domIndex)
+					domLast = [domIndex]
+					domIndex += 1
+					continue
+				if self.__currentTopology[index+1] == '}' or (len(self.__currentTopology) >= index+3 and self.__currentTopology[index+2] == '}'):
+					domSaves.pop(-1)
+					domLast = lastSaves.pop(-1)
+					domIndex += 1
+					continue
+				if self.__currentTopology[index+1] == '/' or (len(self.__currentTopology) > index+3 and self.__currentTopology[index+2] == '/'):
+					lastSaves[-1].append(domIndex)
+					domLast = [domSaves[-1]]
+					domIndex += 1
+					continue
+				else:	
+					domLast = [domIndex]
+					domIndex += 1
 
 			if accept:
+				for policy in self.__sfcImmPolicies["LOCAL"]:
+					aggregationsAnalysis["IMMEDIATE"][policy] = aggregationsAnalysis["IMMEDIATE"][policy] / elementsQuantity
+				for policy in self.__sfcImmPolicies["TRANSITION"]:
+					aggregationsAnalysis["IMMEDIATE"][policy] = aggregationsAnalysis["IMMEDIATE"][policy] / transitionsQuantity
+
 				acceptedCombinations["DIST"].append(distribution)
 				acceptedCombinations["AGG"].append(aggregationsAnalysis)
 
+		print('POLITICAS: ', len(acceptedCombinations["DIST"]))
+		print('DROPS POLITICAS: ', printDrops)
+
 		return acceptedCombinations
-
-	def __osmSeparePolicies(self, polCombinations):
-
-		policies = {'AGGREGATE':{}, 'IMMEDIATE':{}}
-
-		if len(polCombinations['AGG']) > 0:
-			for policy in polCombinations['AGG'][0]['AGGREGATE'].keys():
-				policies['AGGREGATE'][policy] = []
-			for policy in polCombinations['AGG'][0]['IMMEDIATE'].keys():
-				policies['IMMEDIATE'][policy] = []
-
-			for combination in polCombinations['AGG']:
-				for policy in combination['AGGREGATE']:
-					policies['AGGREGATE'][policy].append(combination['AGGREGATE'][policy])
-				for policy in combination['IMMEDIATE']:
-					policies['IMMEDIATE'][policy].append(combination['IMMEDIATE'][policy])
-		
-		return policies
-
-	def __osmNormalizeCombinations(self, absoluteValues):
-
-		normCombinations = self.__osmSeparePolicies(absoluteValues)
-
-		for type in normCombinations:
-			for policy in normCombinations[type]:
-				maxValue = max(normCombinations[type][policy])
-				minValue = min(normCombinations[type][policy])
-				gapValue = maxValue - minValue
-
-				if gapValue != 0:
-					for index in range(len(normCombinations[type][policy])):
-						normCombinations[type][policy][index] = (normCombinations[type][policy][index] - minValue) / gapValue
-				else:
-					for index in range(len(normCombinations[type][policy])):
-						normCombinations[type][policy][index] = 0
-
-		return normCombinations
-
-	def __osmEvaluateCombinations(self, absoluteValues, normCombinations):
-
-		evalCombinations = [0 for i in range(len(absoluteValues['DIST']))]
-
-		for category in self.__sfcImmPolicies:
-			for policy in self.__sfcImmPolicies[category]:
-				if self.__sfcImmPolicies[category][policy]['GOAL'] == 'MIN':
-					for index in range(len(normCombinations["IMMEDIATE"][policy])):
-						normCombinations["IMMEDIATE"][policy][index] = (1 - normCombinations["IMMEDIATE"][policy][index]) * self.__sfcImmPolicies[category][policy]['WEIGHT']
-						evalCombinations[index] += normCombinations["IMMEDIATE"][policy][index]
-				else:
-					for index in range(len(normCombinations["IMMEDIATE"][policy])):
-						normCombinations["IMMEDIATE"][policy][index] = (1 - normCombinations["IMMEDIATE"][policy][index]) * self.__sfcImmPolicies[category][policy]['WEIGHT']
-						evalCombinations[index] += normCombinations["IMMEDIATE"][policy][index]
-
-		for category in self.__sfcAggPolicies:
-			for policy in self.__sfcAggPolicies[category]:
-				if self.__sfcAggPolicies[category][policy]['GOAL'] == 'MIN':
-					for index in range(len(normCombinations["AGGREGATE"][policy])):
-						normCombinations["AGGREGATE"][policy][index] = (1 - normCombinations["AGGREGATE"][policy][index]) * self.__sfcAggPolicies[category][policy]['WEIGHT']
-						evalCombinations[index] += normCombinations["AGGREGATE"][policy][index]
-				else:
-					for index in range(len(normCombinations["AGGREGATE"][policy])):
-						normCombinations["AGGREGATE"][policy][index] = (1 - normCombinations["AGGREGATE"][policy][index]) * self.__sfcAggPolicies[category][policy]['WEIGHT']
-						evalCombinations[index] += normCombinations["AGGREGATE"][policy][index]
-
-		normCombinations['GENERAL'] = evalCombinations
-		return normCombinations
 
 	######## PUBLIC METHODS ########
 
@@ -269,41 +279,19 @@ class OptimalSM:
 
 		self.__currentTopology = topology
 		self.__osmInteractions(elements, dependencies, list(self.__domMatrix.keys()))
-		self.__absoluteValues = self.__osmCombinePolicies(self.__osmCombineResources(self.__osmCombineDomains()))
-		self.__distributionsEval = self.__osmEvaluateCombinations(self.__absoluteValues, self.__osmNormalizeCombinations(self.__absoluteValues))
+		self.__distEvaluations = self.__osmCombinePolicies(self.__osmCombineResources(self.__osmCombineDomains()))
 		self.__status = 2
-
-	def osmEvaluateGroup(self, analysisData):
-
-		 return self.__osmEvaluateCombinations(analysisData, self.__osmNormalizeCombinations(analysisData))['GENERAL']
+		print("")
 	
-	def osmBestDistribution(self):
+	def osmStatus(self):
+
+		return self.__status
+
+	def osmEvaluation(self):
 
 		if self.__status != 2:
 			return None
 
-		key = self.__distributionsEval['GENERAL'].index(max(self.__distributionsEval['GENERAL']))
-
-		return self.__absoluteValues['DIST'][key]
-
-	def osmBestDistributionData(self):
-
-		if self.__status != 2:
-			return None
-
-		key = self.__distributionsEval['GENERAL'].index(max(self.__distributionsEval['GENERAL']))
-
-		return (self.__absoluteValues['DIST'][key], self.__absoluteValues['AGG'][key])
-
-	def osmDistributionsIndex(self):
-
-		if self.__status != 2:
-			return None
-
-		resultList = []
-		for index in range(len(self.__absoluteValues['DIST'])):
-			resultList.append((self.__absoluteValues['DIST'][index], self.__distributionsEval['GENERAL'][index]))
-
-		return resultList
+		return self.__distEvaluations
 
 ######## OPTIMAL SM CLASS END ########

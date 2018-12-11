@@ -18,19 +18,19 @@ GOAL_FUNCTION:
     METRICS:
       - ID: &metric1 !!str TxTrafego
         GOAL: !!str "MIN"
-        WEIGHT: !!float 0.333
+        WEIGHT: !!float 0.3334
         INPUT: !!int 100
         EVALUATION: !!str "MULT"
         UPDATE: *metric1
       - ID: &metric2 !!str TxRequisicao
         GOAL: !!str "MIN"
-        WEIGHT: !!float 0.333
-        INPUT: !!int 100
+        WEIGHT: !!float 0.3333
+        INPUT: !!int 200
         EVALUATION: !!str "SUB"
         UPDATE: !!str "STATIC"
       - ID: &metric3 !!str Tamanho
         GOAL: !!str "MIN"
-        WEIGHT: !!float 0.334
+        WEIGHT: !!float 0.3333
         INPUT: !!int 0
         EVALUATION: !!str "SUM"
         UPDATE: !!str "STATIC"
@@ -76,7 +76,7 @@ DEPLOYMENT:
       CPUS: !!int 1
     BENCHMARK:
       *metric1: !!float 0.33
-      *metric2: !!float 1023.3991
+      *metric2: !!float 200
       *metric3: !!int 1
   *OE2:
     FLAVOUR:
@@ -85,7 +85,7 @@ DEPLOYMENT:
       CPUS: !!int 1
     BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!float 1038.8371
+      *metric2: !!float 200
       *metric3: !!int 1
   *OE3:
     FLAVOUR:

@@ -1,0 +1,32 @@
+DOMAINS:
+  - !!str &domain1 DOM1
+  - !!str &domain2 DOM2
+  - !!str &domain3 DOM3
+RESOURCES:
+  *domain1:
+    MEMORY: !!int 1280
+    NET_IFACES: !!int 10
+    CPUS: !!int 6
+  *domain2:
+    MEMORY: !!int 5120
+    NET_IFACES: !!int 6
+    CPUS: !!int 4
+  *domain3:
+    MEMORY: !!int 2048
+    NET_IFACES: !!int 5
+    CPUS: !!int 3
+LOCAL: 
+  - ID: !!str COST
+    *domain1: !!int 100
+    *domain2: !!int 150
+    *domain3: !!int 250
+TRANSITION:
+  - ID: !!str RTT
+    *domain1:
+      *domain2: !!int 100
+    *domain2:
+      *domain1: !!int 10
+      *domain3: !!int 20
+    *domain3:
+      *domain1: !!int 10
+      *domain2: !!int 15

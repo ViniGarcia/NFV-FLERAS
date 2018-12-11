@@ -1,36 +1,34 @@
 METADATA:
-  ID: !!str TopologyExample12
+  ID: !!str TopologyExample15
   DESCRIPTION: > 
-    Test service especification.
+    Example service especification.
 SERVICE:
-  TOPOLOGY: !!str IP EO1 EO2 { [ EO3 EO5 EO6 ] ( EO3 EO5 * ) / [ EO4 EO5 EO6 ] ( EO4 EO5 * ) } EO7 NS
+  TOPOLOGY: !!str IP EO1 < DOM3 > { EO2 EO3 NS1 / EO2 EO4 NS2 }
   OELEMENTS:
     - !!str &OE1 EO1
     - !!str &OE2 EO2
     - !!str &OE3 EO3
     - !!str &OE4 EO4
-    - !!str &OE5 EO5
-    - !!str &OE6 EO6
-    - !!str &OE7 EO7
   OUTNODES:
-    - !!str NS
+    - !!str NS1
+    - !!str NS2
 GOAL_FUNCTION:
     METRICS:
       - ID: &metric1 !!str TxTrafego
         GOAL: !!str "MIN"
-        WEIGHT: !!float 0.333
+        WEIGHT: !!float 0.3334
         INPUT: !!int 100
         EVALUATION: !!str "MULT"
         UPDATE: *metric1
       - ID: &metric2 !!str TxRequisicao
         GOAL: !!str "MIN"
-        WEIGHT: !!float 0.333
-        INPUT: !!int 100
+        WEIGHT: !!float 0.3333
+        INPUT: !!int 200
         EVALUATION: !!str "SUB"
         UPDATE: !!str "STATIC"
       - ID: &metric3 !!str Tamanho
         GOAL: !!str "MIN"
-        WEIGHT: !!float 0.334
+        WEIGHT: !!float 0.3333
         INPUT: !!int 0
         EVALUATION: !!str "SUM"
         UPDATE: !!str "STATIC"
@@ -51,41 +49,41 @@ POLICIES:
   IMMEDIATE:
     - ID: !!str RTT
       MIN: !!int 0
-      MAX: !!int 20
+      MAX: !!int 15
       TYPE: !!str TRANSITION
       GOAL: !!str MIN
       WEIGHT: !!float 0.5
     - ID: !!str COST
       MIN: !!int 0
-      MAX: !!int 1000
+      MAX: !!int 500
       TYPE: !!str DOMAIN
       GOAL: !!str MIN
       WEIGHT: !!float 0.3
   AGGREGATE:
-    - ID: !!str RTT
+    - ID: !!str COST
       MIN: !!int 0
-      MAX: !!int 100
-      TYPE: !!str TRANSITION
+      MAX: !!int 900
+      TYPE: !!str DOMAIN
       GOAL: !!str MIN
       WEIGHT: !!float 0.2
 DEPLOYMENT:
   *OE1:
     FLAVOUR:
       MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 0.33
-      *metric2: !!float 1023.3991
-      *metric3: !!int 1
-  *OE2:
-    FLAVOUR:
-      MEMORY: !!int 512
       NET_IFACES: !!int 3
       CPUS: !!int 1
     BENCHMARK:
+      *metric1: !!float 0.33
+      *metric2: !!float 200
+      *metric3: !!int 1
+  *OE2:
+    FLAVOUR:
+      MEMORY: !!int 1536
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+    BENCHMARK:
       *metric1: !!float 1.0
-      *metric2: !!float 1038.8371
+      *metric2: !!float 200
       *metric3: !!int 1
   *OE3:
     FLAVOUR:
@@ -98,37 +96,10 @@ DEPLOYMENT:
       *metric3: !!int 1
   *OE4:
     FLAVOUR:
-      MEMORY: !!int 512
+      MEMORY: !!int 1024
       NET_IFACES: !!int 2
       CPUS: !!int 1
     BENCHMARK:
       *metric1: !!float 1.0
       *metric2: !!float 95.9090
-      *metric3: !!int 1
-  *OE5:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 0.66
-      *metric2: !!float 78.9368
-      *metric3: !!int 1
-  *OE6:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 2
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 0.66
-      *metric2: !!float 84.4564
-      *metric3: !!int 1
-  *OE7:
-    FLAVOUR:
-      MEMORY: !!int 512
-      NET_IFACES: !!int 3
-      CPUS: !!int 1
-    BENCHMARK:
-      *metric1: !!float 1.0
-      *metric2: !!float 87.7749
       *metric3: !!int 1

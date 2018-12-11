@@ -22,6 +22,7 @@
 #-1: UNKNOW DOMAINS PRESENT IN REQUEST LIST
 #-2: UNKNOW DOMAIN POLICY METRIC IN REQUEST
 #-3: UNKNOW TRANSITION POLICY METRIC IN REQUEST
+#-4: INVALID SYMBOL IN A PROVIDED TOPOLOGY
 
 #################################################
 
@@ -44,12 +45,6 @@ class SFCSplitAndMap:
 	__aggregateDictionary = None
 	__flavoursDictionary = None
 
-	__processor = None
-
-	__evaluatedTopologies = None
-	__topolgoiesData = None
-	__topologiesIndex = None
-
 	######## CONSTRUCTOR ########
 
 	def __init__(self, sfcRequest, domData):
@@ -59,7 +54,7 @@ class SFCSplitAndMap:
 		else:
 			self.__status = 0
 
-	######## PRIVATE METHODS ########
+	######## PRIVATE VALIDATION METHODS ########
 
 	def __ssamCreateMatrix(self):
 		
@@ -165,6 +160,102 @@ class SFCSplitAndMap:
 
 		return [cleanedTopo, dependencies]
 
+	######## PRIVATE EVALUATION METHODS ########
+
+	def __ssamPreprocessEvaluations(self, evaluations):
+
+		preprocess = {}
+
+		for topology in evaluations:
+			policies = {'AGGREGATE':{}, 'IMMEDIATE':{}}
+			if len(evaluations[topology]['AGG']) > 0:
+				for policy in evaluations[topology]['AGG'][0]['AGGREGATE'].keys():
+					policies['AGGREGATE'][policy] = []
+				for policy in evaluations[topology]['AGG'][0]['IMMEDIATE'].keys():
+					policies['IMMEDIATE'][policy] = []
+
+				for combination in evaluations[topology]['AGG']:
+					for policy in combination['AGGREGATE']:
+						policies['AGGREGATE'][policy].append(combination['AGGREGATE'][policy])
+					for policy in combination['IMMEDIATE']:
+						policies['IMMEDIATE'][policy].append(combination['IMMEDIATE'][policy])
+
+			preprocess[topology] = policies
+		
+		return preprocess
+
+	def __ssamNormalizeEvaluations(self, evaluations):
+
+		normalizations = self.__ssamPreprocessEvaluations(evaluations)
+		iterations = {'AGGREGATE':list(normalizations[list(normalizations.keys())[0]]['AGGREGATE'].keys()), 'IMMEDIATE':list(normalizations[list(normalizations.keys())[0]]['IMMEDIATE'].keys())}
+
+		for category in iterations:
+			for policy in iterations[category]:
+				globalMax = None
+				globalMin = None
+
+				for topology in normalizations:
+					if globalMax == None:	
+						globalMax = max(normalizations[topology][category][policy])
+						globalMin = min(normalizations[topology][category][policy])
+					else:
+						if max(normalizations[topology][category][policy]) > globalMax:
+							globalMax = max(normalizations[topology][category][policy])
+						if min(normalizations[topology][category][policy]) < globalMin:
+							globalMin = min(normalizations[topology][category][policy])
+
+				absDistance = globalMax - globalMin
+				if absDistance != 0:
+					for topology in normalizations:
+						for index in range(len(normalizations[topology][category][policy])):
+							normalizations[topology][category][policy][index] = (normalizations[topology][category][policy][index] - globalMin) / absDistance
+				else:
+					for topology in normalizations:
+						for index in range(len(normalizations[topology][category][policy])):
+							normalizations[topology][category][policy][index] = 0
+
+		return normalizations
+
+	def __ssamGenerateIndex(self, evaluations, normalizations):
+
+		indexes = {}
+		for topology in evaluations:
+
+			indexes[topology] = [0 for i in range(len(evaluations[topology]['DIST']))]
+
+			for category in self.__immediateDictionary:
+				for policy in self.__immediateDictionary[category]:
+					for index in range(len(normalizations[topology]["IMMEDIATE"][policy])):
+						if self.__immediateDictionary[category][policy]['GOAL'] == 'MIN':
+							normalizations[topology]["IMMEDIATE"][policy][index] = (1 - normalizations[topology]["IMMEDIATE"][policy][index]) * self.__immediateDictionary[category][policy]['WEIGHT']
+						else:
+							normalizations[topology]["IMMEDIATE"][policy][index] = normalizations[topology]["IMMEDIATE"][policy][index] * self.__immediateDictionary[category][policy]['WEIGHT']
+						indexes[topology][index] += normalizations[topology]["IMMEDIATE"][policy][index]
+
+			for category in self.__aggregateDictionary:
+				for policy in self.__aggregateDictionary[category]:
+					for index in range(len(normalizations[topology]["AGGREGATE"][policy])):
+						if self.__aggregateDictionary[category][policy]['GOAL'] == 'MIN':
+							normalizations[topology]["AGGREGATE"][policy][index] = (1 - normalizations[topology]["AGGREGATE"][policy][index]) * self.__aggregateDictionary[category][policy]['WEIGHT']
+						else:
+							normalizations[topology]["AGGREGATE"][policy][index] = normalizations[topology]["AGGREGATE"][policy][index] * self.__aggregateDictionary[category][policy]['WEIGHT']
+						indexes[topology][index] += normalizations[topology]["AGGREGATE"][policy][index]
+
+		evaluations['DAI'] = indexes
+		return indexes
+
+	def __ssamHarmonizeIndexes(self, topologiesList, TAI, DAI):
+
+		UI = {}
+		for topology in topologiesList:
+			UI[topology] = []
+
+			for evaluation in DAI[topology]:
+				UI[topology].append((evaluation + TAI[topology])/2)
+
+		return UI
+
+
 	######## PUBLIC METHODS ########
 
 	def ssamSetup(self, sfcRequest, domData):
@@ -178,58 +269,43 @@ class SFCSplitAndMap:
 				self.__ssamOrganizeData() 
 				self.__status = 1
 
-	def ssamOptimalRequest(self, topologiesList):
+	def ssamOptimalRequest(self, topologiesList, topoligiesTAI):
 
 		if self.__status < 1:
 			return
 
-		self.__processor = OptimalSM(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
-
-		topologiesData = {'DIST':[], 'AGG':[]}
+		evaluations = {}
+		processor = OptimalSM(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
 		for topology in topologiesList:
 			if self.__ssamCheckTopology(topology):
-				topoData = self.__ssamPreprocessTopology(topology)
-				self.__processor.osmProcess(self.__sfcRequest.srServiceOE(), topoData[0], topoData[1])
-				topoResult = self.__processor.osmBestDistributionData()
-				topologiesData['DIST'].append(topoResult[0])
-				topologiesData['AGG'].append(topoResult[1])
+				arguments = self.__ssamPreprocessTopology(topology)
+				processor.osmProcess(self.__sfcRequest.srServiceOE(), arguments[0], arguments[1])
+				evaluations[topology] = processor.osmEvaluation()
+			else:
+				self.__status = -4
+				return
 
-		self.__evaluatedTopologies = topologiesList
-		self.__topologiesData = topologiesData
-		self.__topologiesIndex = self.__processor.osmEvaluateGroup(topologiesData)
+		normalizations = self.__ssamNormalizeEvaluations(evaluations)
+		DAI = self.__ssamGenerateIndex(evaluations, normalizations)
+
+		if topoligiesTAI != None:
+			
+			TAI = {}
+			for index in range(len(topologiesList)):
+				TAI[topologiesList[index]] = topoligiesTAI[index]
+			UI = self.__ssamHarmonizeIndexes(topologiesList, TAI, DAI)
+			print(UI)
+
 		self.__status = 2
 
 	def ssamStatus(self):
 
 		return self.__status
 
-	def ssamBestDistribution(self):
-
-		if self.__status != 2:
-			return None
-
-		key = self.__topologiesIndex.index(max(self.__topologiesIndex))
-
-		return (self.__evaluatedTopologies[key], self.__topologiesData['DIST'][key])
-		
-	def ssamDistributionsIndex(self):
-		
-		if self.__status != 2:
-			return None
-
-		resultList = []
-		for index in range(len(self.__evaluatedTopologies)):
-			resultList.append((self.__evaluatedTopologies[index], self.__topologiesData['DIST'][index], self.__topologiesIndex[index]))
-
-		return resultList
-
 ######## SFC SPLIT MAP CLASS END ########
 
 #TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
-#TO DO: IT IS NOT CONSIDERING BRANCHINGS FOR THE INITAL SEGMENTS ELEMENTS (REFEERING TO THE PREVIOUS OE) - IT MUST BE ADAPTED IN THE CODE!!!!
-# domains = DomainsData("Example/DomExample01.yaml")
-# request = SFCRequest('Example/ReqExample07.yaml', domains.ddDomains().copy())
-# mapping = SFCSplitAndMap(request, domains)
-# mapping.ssamOptimalRequest(["IP NF1 < D01 > NF2 { NF3 ON1 / NF4 ON2 }","IP NF2 NF1 < D01 > { NF3 ON1 / NF4 ON2 }"])
-# print(mapping.ssamBestDistribution())
-# print(mapping.ssamDistributionsIndex())
+#domains = DomainsData("Example/DomExample03.yaml")
+#request = SFCRequest('Example/ReqExample15.yaml', domains.ddDomains().copy())
+#mapping = SFCSplitAndMap(request, domains)
+#mapping.ssamOptimalRequest(["IP EO2 EO1 < DOM3 > { EO3 NS1 / EO4 NS2 }","IP EO1 < DOM3 > { EO2 EO3 NS1 / EO2 EO4 NS2 }"], [0.5, 0.8])
