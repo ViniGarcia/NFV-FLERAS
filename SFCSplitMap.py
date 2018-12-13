@@ -54,6 +54,61 @@ class SFCSplitAndMap:
 		else:
 			self.__status = 0
 
+	######## PRIVATE DEBBUGING METHODS ########	
+
+	def __ssamGenerateReport(self, evaluations, normalizations, DAI, UI):
+
+		bestIndexes = []
+		idNr = 0
+
+		if evaluations != None and normalizations != None and DAI != None and UI != None:
+			for key in evaluations:
+				if key == "DAI":
+					continue
+
+				DAIbestIndex = 0
+				DAIbestIDs = []
+				UIbestIndex = 0
+				UIbestIDs = []
+
+				for dIndex in range(len(evaluations[key]["DIST"])):
+					print(idNr, "-", key, "/", evaluations[key]["DIST"][dIndex], ":")
+					print("  AGGREGATE(ABS) ->")
+					for metric in evaluations[key]["AGG"][dIndex]["AGGREGATE"]:
+						print("    ", metric, ":", evaluations[key]["AGG"][dIndex]["AGGREGATE"][metric])
+					print("  IMMEDIATE(ABS) ->")
+					for metric in evaluations[key]["AGG"][dIndex]["IMMEDIATE"]:
+						print("    ", metric, ":", evaluations[key]["AGG"][dIndex]["IMMEDIATE"][metric])
+					print("  AGGREGATE(NOR) ->")
+					for metric in normalizations[key]["AGGREGATE"]:
+						print("    ", metric, ":", normalizations[key]["AGGREGATE"][metric][dIndex])
+					print("  IMMEDIATE(NOR) ->")
+					for metric in normalizations[key]["IMMEDIATE"]:
+						print("    ", metric, ":", normalizations[key]["IMMEDIATE"][metric][dIndex])
+					print("  DAI -> ", DAI[key][dIndex])
+					print("  UI -> ", UI[key][dIndex])
+
+					if DAIbestIndex == DAI[key][dIndex]:
+						DAIbestIDs.append(idNr)
+					else:
+						if DAIbestIndex < DAI[key][dIndex]:
+							DAIbestIndex = DAI[key][dIndex]
+							DAIbestIDs = [idNr]
+					if UIbestIndex == UI[key][dIndex]:
+						UIbestIDs.append(idNr)
+					else:
+						if UIbestIndex < UI[key][dIndex]:
+							UIbestIndex = UI[key][dIndex]
+							UIbestIDs = [idNr]
+					idNr += 1
+
+				bestIndexes.append({"TOPOLOGY":key, "DAI":DAIbestIndex, "DAIDIST":DAIbestIDs, "UI":UIbestIndex, "UIDIST":UIbestIDs})
+
+			print("\n------ BEST INDEXES SUMMARY ------\n")
+			for summary in bestIndexes:
+				print(summary,"\n")
+			print("-----------------------------------")
+
 	######## PRIVATE VALIDATION METHODS ########
 
 	def __ssamCreateMatrix(self):
@@ -279,7 +334,7 @@ class SFCSplitAndMap:
 		for topology in topologiesList:
 			if self.__ssamCheckTopology(topology):
 				arguments = self.__ssamPreprocessTopology(topology)
-				processor.osmProcess(self.__sfcRequest.srServiceOE(), arguments[0], arguments[1])
+				processor.osmProcess(self.__sfcRequest.srServiceOE(), self.__sfcRequest.srServiceON(), arguments[0], arguments[1])
 				evaluations[topology] = processor.osmEvaluation()
 			else:
 				self.__status = -4
@@ -294,8 +349,8 @@ class SFCSplitAndMap:
 			for index in range(len(topologiesList)):
 				TAI[topologiesList[index]] = topoligiesTAI[index]
 			UI = self.__ssamHarmonizeIndexes(topologiesList, TAI, DAI)
-			print(UI)
 
+		self.__ssamGenerateReport(evaluations, normalizations, DAI, UI)
 		self.__status = 2
 
 	def ssamStatus(self):
@@ -305,7 +360,8 @@ class SFCSplitAndMap:
 ######## SFC SPLIT MAP CLASS END ########
 
 #TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
-#domains = DomainsData("Example/DomExample03.yaml")
-#request = SFCRequest('Example/ReqExample15.yaml', domains.ddDomains().copy())
-#mapping = SFCSplitAndMap(request, domains)
+domains = DomainsData("Example/DomExample04.yaml")
+request = SFCRequest('Example/ReqExample14.yaml', domains.ddDomains().copy())
+mapping = SFCSplitAndMap(request, domains)
+mapping.ssamOptimalRequest(["IP EO1 EO6 EO2 { EO3 / EO4 } EO5 EO7 NS", "IP EO1 EO2 { EO6 EO3 EO5 / EO6 EO4 EO5 } EO7 NS", "IP EO1 EO2 { EO3 EO5 / EO4 EO5 } EO6 EO7 NS"], [0.666, 0.5, 0.327])
 #mapping.ssamOptimalRequest(["IP EO2 EO1 < DOM3 > { EO3 NS1 / EO4 NS2 }","IP EO1 < DOM3 > { EO2 EO3 NS1 / EO2 EO4 NS2 }"], [0.5, 0.8])

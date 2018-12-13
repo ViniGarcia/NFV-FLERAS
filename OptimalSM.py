@@ -34,6 +34,7 @@ class OptimalSM:
 	__domMatrix = None
 
 	__currentTopology = None
+	__currentOutNodes = None
 	__currentInteractions = None
 	__currentIndexes = None
 
@@ -97,12 +98,12 @@ class OptimalSM:
 					domLast = [domIndex]
 					domIndex += 1
 					continue
-				if self.__currentTopology[index+1] == '}' or (len(self.__currentTopology) >= index+3 and self.__currentTopology[index+2] == '}'):
+				if self.__currentTopology[index+1] == '}' or (len(self.__currentTopology) >= index+3 and self.__currentTopology[index+1] in self.__currentOutNodes and self.__currentTopology[index+2] == '}'):
 					domSaves.pop(-1)
 					domLast = lastSaves.pop(-1)
 					domIndex += 1
 					continue
-				if self.__currentTopology[index+1] == '/' or (len(self.__currentTopology) > index+3 and self.__currentTopology[index+2] == '/'):
+				if self.__currentTopology[index+1] == '/' or (len(self.__currentTopology) > index+3 and self.__currentTopology[index+1] in self.__currentOutNodes and self.__currentTopology[index+2] == '/'):
 					lastSaves[-1].append(domIndex)
 					domLast = [domSaves[-1]]
 					domIndex += 1
@@ -237,12 +238,12 @@ class OptimalSM:
 					domLast = [domIndex]
 					domIndex += 1
 					continue
-				if self.__currentTopology[index+1] == '}' or (len(self.__currentTopology) >= index+3 and self.__currentTopology[index+2] == '}'):
+				if self.__currentTopology[index+1] == '}' or (len(self.__currentTopology) >= index+3 and self.__currentTopology[index+1] in self.__currentOutNodes and self.__currentTopology[index+2] == '}'):
 					domSaves.pop(-1)
 					domLast = lastSaves.pop(-1)
 					domIndex += 1
 					continue
-				if self.__currentTopology[index+1] == '/' or (len(self.__currentTopology) > index+3 and self.__currentTopology[index+2] == '/'):
+				if self.__currentTopology[index+1] == '/' or (len(self.__currentTopology) > index+3 and self.__currentTopology[index+1] in self.__currentOutNodes and self.__currentTopology[index+2] == '/'):
 					lastSaves[-1].append(domIndex)
 					domLast = [domSaves[-1]]
 					domIndex += 1
@@ -275,9 +276,10 @@ class OptimalSM:
 		self.__domMatrix = domMatrix
 		self.__status = 1
 
-	def osmProcess(self, elements, topology, dependencies):
+	def osmProcess(self, elements, outNodes, topology, dependencies):
 
 		self.__currentTopology = topology
+		self.__currentOutNodes = outNodes
 		self.__osmInteractions(elements, dependencies, list(self.__domMatrix.keys()))
 		self.__distEvaluations = self.__osmCombinePolicies(self.__osmCombineResources(self.__osmCombineDomains()))
 		self.__status = 2

@@ -57,15 +57,15 @@ POLICIES:
       WEIGHT: !!float 0.5
     - ID: !!str COST
       MIN: !!int 0
-      MAX: !!int 1000
+      MAX: !!int 5
       TYPE: !!str DOMAIN
       GOAL: !!str MIN
       WEIGHT: !!float 0.3
   AGGREGATE:
-    - ID: !!str RTT
+    - ID: !!str COST
       MIN: !!int 0
-      MAX: !!int 100
-      TYPE: !!str TRANSITION
+      MAX: !!int 30
+      TYPE: !!str DOMAIN
       GOAL: !!str MIN
       WEIGHT: !!float 0.2
 DEPLOYMENT:

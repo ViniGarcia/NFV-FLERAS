@@ -1,0 +1,43 @@
+DOMAINS:
+  - !!str &domain1 FendeSM
+  - !!str &domain2 FendePOA
+  - !!str &domain3 FendeCTBA
+RESOURCES:
+  *domain1:
+    MEMORY: !!int 7168
+    NET_IFACES: !!int 10
+    CPUS: !!int 7
+  *domain2:
+    MEMORY: !!int 7168
+    NET_IFACES: !!int 10
+    CPUS: !!int 7
+  *domain3:
+    MEMORY: !!int 7168
+    NET_IFACES: !!int 8
+    CPUS: !!int 3
+LOCAL: 
+  - ID: !!str COST
+    *domain1: !!float 2
+    *domain2: !!float 5
+    *domain3: !!float 3.5
+TRANSITION:
+  - ID: !!str RTT
+    *domain1:
+      *domain2: !!float 7.811
+      *domain3: !!float 21.721
+    *domain2:
+      *domain1: !!float 4.826
+      *domain3: !!float 26.002
+    *domain3:
+      *domain1: !!float 29.332
+      *domain2: !!float 26.187
+  - ID: !!str HOPS
+    *domain1:
+      *domain2: !!int 11
+      *domain3: !!int 13
+    *domain2:
+      *domain1: !!int 11
+      *domain3: !!int 16
+    *domain3:
+      *domain1: !!int 14
+      *domain2: !!int 15
