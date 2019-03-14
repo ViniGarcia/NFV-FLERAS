@@ -1,6 +1,6 @@
 ######## USER CLASS DESCRIPTION ########
 
-#PROJECT: NFV FLERAS (FLExible Resource Allocation Service) 
+#PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
 #CONTACT: vfulber@inf.ufsm.br
 
@@ -13,12 +13,12 @@
 from os.path import isfile
 from cmd import Cmd
 
-from DomainsData import DomainsData
-from SFCRequest import SFCRequest
-from SFCTopology import SFCTopology
-from SFCExpansion import SFCExpansion
-from GoalFunction import GoalFunction
-from SFCComposition import SFCComposition
+from YAMLR.DomainsData import DomainsData
+from YAMLR.SFCRequest import SFCRequest
+from STOG.SFCTopology import SFCTopology
+from CUSCO.SFCExpansion import SFCExpansion
+from CUSCO.GoalFunction import GoalFunction
+from CUSCO.SFCComposition import SFCComposition
 
 class FLERASCLI(Cmd):
 
@@ -29,7 +29,7 @@ class FLERASCLI(Cmd):
 	composition = None
 
 	def do_help(self, args):
-		
+
 		print("\n############### HELP #################")
 		print("help -> show this message")
 		print("exit -> ends the execution")
@@ -79,7 +79,7 @@ class FLERASCLI(Cmd):
 			print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.srStatus()))
 			self.request = None
 			return
-		
+
 		self.topology = SFCTopology(self.request.srServiceON(), self.request.srServiceOE(), self.domains.ddDomains())
 		self.topology.stValidate(self.request.srServiceTopology())
 		if self.topology.stStatus() != 1:
@@ -91,7 +91,7 @@ class FLERASCLI(Cmd):
 		print("SUCCESS!!")
 
 	def do_compose(self, args):
-		
+
 		if len(args) != 0:
 			return
 
@@ -106,7 +106,7 @@ class FLERASCLI(Cmd):
 		print("SUCCESS!!")
 
 	def do_topologies(self, args):
-		
+
 		if len(args) != 0:
 			return
 
@@ -122,7 +122,7 @@ class FLERASCLI(Cmd):
 		print("###########################################")
 
 	def do_advice(self, args):
-		
+
 		if len(args) != 0:
 			return
 

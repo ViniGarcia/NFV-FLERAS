@@ -5,14 +5,16 @@ NFV FLERAS: NFV FLExible Resource Allocation System
 
 ### What is FLERAS?
 
-FLERAS is a system to execute NFV Resource Allocation (NFV RA) [1] processes. To do that, 
-FLERAS uses an innovative SFC Request model (structure using YAML) to flexibilize the 
-definition of goal functions and policies to be applied during the NFV RA processing. 
-In addition to the new SFC Request, FLERAS provides a formal and simple SFC topology 
-specification method based on a context-free grammar. FLERAS is especially indicating 
-to evaluate different goal functions under a generic SFC Composition and SFC Split and 
+FLERAS is a system to execute NFV Resource Allocation (NFV RA) [1] processes. To do that,
+FLERAS uses an innovative SFC Request model (structure using YAML) to flexibilize the
+definition of goal functions and policies to be applied during the NFV RA processing.
+In addition to the new SFC Request, FLERAS provides a formal and simple SFC topology
+specification method based on a context-free grammar. FLERAS is especially indicating
+to evaluate different goal functions under a generic SFC Composition and SFC Split and
 Mapping solution.<br/>
 <br/>
+
+<!---
 The FLERAS' request model is structure by a YAML notation and presents three main blocks:<br/>
 1. METADATA BLOCK<br/>
 1.1. ID (Request unique identifier)<br/>
@@ -28,7 +30,7 @@ The FLERAS' request model is structure by a YAML notation and presents three mai
 3.1.3. WEIGHT (Value for weighted evaluation)<br/>
 3.1.4. INPUT (Initial metric value)<br/>
 3.1.5. EVALUATION (Metric evaluation operation ("MULT", "DIV", "SUM", "SUB"))<br/>
-3.1.6. UPDATE (Metric ID that the evaluation operation will update this metric)<br/> 
+3.1.6. UPDATE (Metric ID that the evaluation operation will update this metric)<br/>
 3.2. BRANCHINGS (List of evaluation data division between segments of ramifications for every metric)<br/>
 3.2.1. METRIC (Some metric ID)<br/>
 3.2.1.1. UPDATE (Metric evaluatin data division operation ("MULT", "DIV", "SUM", "SUB"))<br/>
@@ -76,6 +78,7 @@ The FLERAS SFC specification follows the context-free grammar production rules:<
 16. DOMAIN -> DOMID1, DOMID2, ..., DOMIn*<br/>
 
 *Retrieved from the FLERAS request.
+-->
 
 ### How was it developed?
 
