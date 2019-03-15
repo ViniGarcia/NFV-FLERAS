@@ -397,7 +397,7 @@ class Branch:
 
 ######## SFC EXPANSION CLASS BEGIN ########
 
-from STOG.SFCTopology import SFCTopology, PartialOrder
+from SCAG.SFCTopology import SFCTopology, PartialOrder
 from YAMLR.SFCRequest import SFCRequest
 import itertools
 

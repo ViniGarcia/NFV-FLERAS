@@ -22,7 +22,7 @@
 import copy
 
 from YAMLR.SFCRequest import SFCRequest
-from STOG.SFCTopology import SFCTopology
+from SCAG.SFCTopology import SFCTopology
 from CUSCO.SFCExpansion import SFCExpansion
 from CUSCO.GoalFunction import GoalFunction
 

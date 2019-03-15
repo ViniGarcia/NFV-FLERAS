@@ -15,7 +15,7 @@ from cmd import Cmd
 
 from YAMLR.DomainsData import DomainsData
 from YAMLR.SFCRequest import SFCRequest
-from STOG.SFCTopology import SFCTopology
+from SCAG.SFCTopology import SFCTopology
 from CUSCO.SFCExpansion import SFCExpansion
 from CUSCO.GoalFunction import GoalFunction
 from CUSCO.SFCComposition import SFCComposition
