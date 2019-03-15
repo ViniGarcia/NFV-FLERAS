@@ -104,8 +104,9 @@ Contact us towards git issues requests or by the e-mail vfulber@inf.ufsm.br.
 
 ### FLERAS Research Group
 
-Vinícius Fülber Garcia (Federal University of Santa Maria - Brazil)<br/>
-Carlos Raniery Paula dos Santos (Federal University of Santa Maria - Brazil)
+Vinícius Fülber Garcia (Federal University of Paraná - Brazil)<br/>
+Elias Procópio Duarte Júnior (Federal University of Paraná - Brazil)<br/>
+Carlos Raniery Paula dos Santos (Federal University of Santa Maria - Brazil)<br/>
 
 ### References
 
