@@ -37,6 +37,7 @@ class PartialOrder:
 	__elements = None
 	__oDependencies = None
 	__cDependencies = None
+	__dDependencies = None
 	__iDependencies = None
 
 	__combinations = None
@@ -53,8 +54,12 @@ class PartialOrder:
 
 		while '<' in self.__elements:
 			index = self.__elements.index('<')
-			self.__iDependencies.append((self.__elements[index-1], self.__elements[index+1]))
-			self.__elements = self.__elements[0:index] + self.__elements[index+3:len(self.__elements)]
+			if self.__elements[index+2] == '>':
+				self.__dDependencies.append((self.__elements[index-1], self.__elements[index+1]))
+				self.__elements = self.__elements[0:index] + self.__elements[index+3:len(self.__elements)]
+			else:
+				self.__iDependencies.append((self.__elements[index-1], self.__elements[index+1], self.__elements[index+3]))
+				self.__elements = self.__elements[0:index] + self.__elements[index+5:len(self.__elements)]
 
 	def __poDependenciesElementsValidate(self):
 
@@ -169,6 +174,7 @@ class PartialOrder:
 		self.__elements = porderPEs
 		self.__oDependencies = porderODs
 		self.__cDependencies = porderCDs
+		self.__dDependencies = []
 		self.__iDependencies = []
 
 		self.__poInfraDependenciesRemove()
@@ -184,10 +190,15 @@ class PartialOrder:
 		if self.__status != 1:
 			return None
 
-		for dependency in self.__iDependencies:
+		for dependency in self.__dDependencies:
 			for combination in combinations:
 				index = combination.index(dependency[0])
 				combination.insert(index + 1, '< ' + dependency[1] + ' >')
+
+		for dependency in self.__iDependencies:
+			for combination in combinations:
+				 index = combination.index(dependency[0])
+				 combination.insert(index + 1, '< ' + dependency[1] + ' | ' + dependency[2] + ' >')
 
 		self.__combinations = combinations
 
@@ -202,34 +213,40 @@ class PartialOrder:
 
 		return self.__status
 
-	def poOPEs(self):
+	def poElements(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__elements
 
-	def poOD(self):
+	def poODependencies(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__oDependencies
 
-	def poCD(self):
+	def poCDependencies(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__cDependencies
 
-	def poID(self):
+	def poDDependencies(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__dDependencies
+
+	def poIDependencies(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__iDependencies
-
 
 	def poCombinations(self):
 
@@ -277,7 +294,7 @@ class PartialOrder:
 
 import nltk
 
-class SFCTopology:
+class cuSTOM:
 	__status = None
 
 	__topologyEPs = None
@@ -291,10 +308,10 @@ class SFCTopology:
 
 	######## CONSTRUCTOR ########
 
-	def __init__(self, topologyVNFs, topologyPNFs, topologyDomains, topologyMachines, topologyEPs):
+	def __init__(self, topologyVNFs, topologyPNFs, topologyDomains, topologyMachines, topologyENs):
 
 		kernelGrammar = """
-			TART -> "IN" MAIN
+			START -> "IN" MAIN
 
 			MAIN -> TBRANCHING | NTBRANCHING | OPERATIONAL MAIN | OPERATIONAL EN
 			NTBMAIN -> INTBRANCHING | OPERATIONAL NTBMAIN | OPERATIONAL
@@ -341,7 +358,7 @@ class SFCTopology:
 			grammarADomain = grammarADomain[:len(grammarADomain)-1] + '\n'
 
 		grammarPMachine = 'PHYMACHINE ->'
-		if len(topologyDomains) != 0 and if len(topologyMachines) != 0:
+		if len(topologyDomains) != 0 and len(topologyMachines) != 0:
 			for machine in topologyMachines:
 				grammarPMachine += ' "' + machine + '" |'
 			grammarPMachine = grammarPMachine[:len(grammarPMachine)-1] + '\n'
@@ -350,95 +367,134 @@ class SFCTopology:
 				self.__status = -1
 				return
 
-		grammarEP = 'EP ->'
-		for EP in topologyEPs:
-			grammarEP += ' "' + EP + '" |'
-		grammarEP = grammarEP[:len(grammarEP)-1]
+		grammarEN = 'EN ->'
+		for EN in topologyENs:
+			grammarEN += ' "' + EN + '" |'
+		grammarEN = grammarEN[:len(grammarEN)-1]
 
 		self.__topologyVNFs = topologyVNFs
 		self.__topologyPNFs = topologyPNFs
 		self.__topologyDomains = topologyDomains
 		self.__topologyMachines = topologyMachines
-		self.__topologyEPs = topologyEPs
+		self.__topologyENs = topologyENs
 
-		self.__mainParser = nltk.ChartParser(nltk.CFG.fromstring(kernelGrammar + grammarPELEM + grammarEP + grammarDomain))
+		self.__mainParser = nltk.ChartParser(nltk.CFG.fromstring(kernelGrammar + grammarVNF + grammarPNF + grammarADomain + grammarPMachine + grammarEN))
 		self.__status = 0
 
-	# ######## PRIVATE METHODS ########
-	#
-	# def __stPorders(self):
-	#
-	# 	self.__servicePorders = []
-	# 	splittedSFC = self.__serviceTopology.split()
-	#
-	# 	for index in range(0, len(splittedSFC)):
-	#
-	# 		if splittedSFC[index] == '[':
-	# 			porderPEs = []
-	# 			porderODs = []
-	# 			porderCDs = []
-	#
-	# 			index += 1
-	# 			while splittedSFC[index] != ']':
-	# 				porderPEs.append(splittedSFC[index])
-	# 				index += 1
-	#
-	# 			index += 1
-	# 			while splittedSFC[index] == '(':
-	# 				if splittedSFC[index+3] != '*':
-	# 					porderODs.append([splittedSFC[index+1], splittedSFC[index+2]])
-	# 					index += 4
-	# 				else:
-	# 					porderCDs.append([splittedSFC[index+1], splittedSFC[index+2]])
-	# 					index += 5
-	#
-	# 			self.__servicePorders.append(PartialOrder(porderPEs, porderODs, porderCDs))
-	#
-	# ######## PUBLIC METHODS ########
-	#
-	# def stValidate(self, sfcTopology):
-	#
-	# 	self.__serviceTopology = None
-	# 	self.__servicePorders = None
-	#
-	# 	if next(self.__mainParser.parse(sfcTopology.split()), None) == None:
-	# 		self.__status = -1
-	# 		return False
-	#
-	# 	self.__serviceTopology = sfcTopology
-	# 	self.__stPorders()
-	#
-	# 	for porder in self.__servicePorders:
-	# 		if not porder.poValid():
-	# 			self.__status = -2 + porder.poStatus()
-	# 			return False
-	#
-	# 	self.__status = 1
-	# 	return True
-	#
-	# def stStatus(self):
-	#
-	# 	return self.__status
-	#
-	# def stTopology(self):
-	#
-	# 	if self.__status != 1:
-	# 		return None
-	#
-	# 	return self.__serviceTopology
-	#
-	# def stBoundaryEPs(self):
-	#
-	# 	if self.__status != 1:
-	# 		return None
-	#
-	# 	return self.__boundaryEPs
-	#
-	# def stPOrder(self):
-	#
-	# 	if self.__status != 1:
-	# 		return None
-	#
-	# 	return self.__servicePorders
+	######## PRIVATE METHODS ########
+
+	def __stPorders(self):
+
+		self.__servicePorders = []
+		splittedSFC = self.__serviceTopology.split()
+
+		for index in range(0, len(splittedSFC)):
+
+			if splittedSFC[index] == '[':
+				porderPEs = []
+				porderODs = []
+				porderCDs = []
+
+				index += 1
+				while splittedSFC[index] != ']':
+					porderPEs.append(splittedSFC[index])
+					index += 1
+
+				index += 1
+				while splittedSFC[index] == '(':
+					if splittedSFC[index+3] != '*':
+						porderODs.append([splittedSFC[index+1], splittedSFC[index+2]])
+						index += 4
+					else:
+						porderCDs.append([splittedSFC[index+1], splittedSFC[index+2]])
+						index += 5
+
+				self.__servicePorders.append(PartialOrder(porderPEs, porderODs, porderCDs))
+
+	######## PUBLIC METHODS ########
+
+	def stValidate(self, serviceTopology):
+
+		self.__serviceTopology = None
+		self.__servicePorders = None
+
+		if next(self.__mainParser.parse(serviceTopology.split()), None) == None:
+			self.__status = -1
+			return False
+
+		self.__serviceTopology = serviceTopology
+		self.__stPorders()
+
+		for porder in self.__servicePorders:
+			if not porder.poValid():
+				self.__status = -2 + porder.poStatus()
+				return False
+
+		self.__status = 1
+		return True
+
+	def stStatus(self):
+
+		return self.__status
+
+	def stTopology(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__serviceTopology
+
+	def stVNFs(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__topologyVNFs
+
+	def stPNFs(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__topologyPNFs
+
+	def stDomains(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__topologyDomains
+
+	def stMachines(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__topologyMachines
+
+	def stEPs(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__topologyEPs
+
+	def stPOrder(self):
+
+		if self.__status != 1:
+			return None
+
+		return self.__servicePorders
 
 ############### cuSTOM CLASS END ################
+
+################## TEST AREA ####################
+
+grammar = cuSTOM(["VNF1", "VNF2", "VNF3", "VNF4", "VNF5", "VNF6", "VNF7"], ["PNF1", "PNF2"], ["DOM1", "DOM2"], ["PHY1", "PHY2"], ["EN1", "EN2"])
+#print(grammar.stValidate("IN VNF1 EN1"))
+#print(grammar.stValidate("IN VNF1 VNF2 EN1"))
+#print(grammar.stValidate("IN VNF1 < DOM1 > VNF2 EN1"))
+print(grammar.stValidate("IN [ VNF1 < PHY1 | DOM1 > VNF2 < DOM2 > ] EN1"))
+#print(grammar.stValidate("IN [ VNF1 < PHY1 | DOM1 > VNF2 ] { VNF3 < DOM1 > VNF2 EN1 / VNF3 < DOM1 > VNF4 { VNF5 / VNF6 } VNF7 EN2 }"))
+
+#################################################
