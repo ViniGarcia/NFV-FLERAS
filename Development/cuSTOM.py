@@ -341,33 +341,33 @@ class cuSTOM:
 			SHARABLEPNF -> "!" PNF | PNF
 		"""
 
-		grammarVNF = 'VNF ->'
+		grammarVNF = 'VNF -> '
 		for VNF in topologyVNFs:
 			grammarVNF += ' "' + VNF + '" |'
 		grammarVNF = grammarVNF[:len(grammarVNF)-1] + '\n'
 
-		grammarPNF = 'PNF ->'
+		grammarPNF = 'PNF -> '
 		for PNF in topologyPNFs:
 			grammarPNF += ' "' + PNF + '" |'
 		grammarPNF = grammarPNF[:len(grammarPNF)-1] + '\n'
 
-		grammarADomain = 'ADMDOMAIN ->'
+		grammarADomain = 'ADMDOMAIN -> '
 		if len(topologyDomains) != 0:
 			for domain in topologyDomains:
 				grammarADomain += ' "' + domain + '" |'
-			grammarADomain = grammarADomain[:len(grammarADomain)-1] + '\n'
+		grammarADomain = grammarADomain[:len(grammarADomain)-1] + '\n'
 
-		grammarPMachine = 'PHYMACHINE ->'
+		grammarPMachine = 'PHYMACHINE -> '
 		if len(topologyDomains) != 0 and len(topologyMachines) != 0:
 			for machine in topologyMachines:
 				grammarPMachine += ' "' + machine + '" |'
-			grammarPMachine = grammarPMachine[:len(grammarPMachine)-1] + '\n'
 		else:
 			if len(topologyMachines) != 0:
 				self.__status = -1
 				return
+		grammarPMachine = grammarPMachine[:len(grammarPMachine)-1] + '\n'
 
-		grammarEN = 'EN ->'
+		grammarEN = 'EN -> '
 		for EN in topologyENs:
 			grammarEN += ' "' + EN + '" |'
 		grammarEN = grammarEN[:len(grammarEN)-1]
@@ -490,11 +490,100 @@ class cuSTOM:
 
 ################## TEST AREA ####################
 
-grammar = cuSTOM(["VNF1", "VNF2", "VNF3", "VNF4", "VNF5", "VNF6", "VNF7"], ["PNF1", "PNF2"], ["DOM1", "DOM2"], ["PHY1", "PHY2"], ["EN1", "EN2"])
+grammar = cuSTOM(["PE1", "PE2", "PE3", "PE4", "PE5", "PE6", "PE7", "PE8", "PE9", "PE10", "PE11"], [], [], [], ["EP1", "EP2", "EP3", "EP4"], )
+sfcDefinition1 = "IN PE1 PE2 PE3 PE4 EP1"
+sfcDefinition2 = "IN [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE2 PE3 ) PE4 EP1"
+sfcDefinition3 = "IN [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE2 PE3 ) PE4 [ PE5 PE6 ] EP1"
+sfcDefinition4 = "IN [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 ) ( PE3 PE7 ) PE4 [ PE5 PE6 ] EP1"
+sfcDefinition5 = "IN [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 * ) ( PE3 PE7 ) PE4 [ PE5 PE6 ] EP1"
+sfcDefinition6 = "IN [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 * ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
+sfcDefinition7 = "IN [ PE1 PE2 PE3 PE4 ] ( PE1 PE2 * ) ( PE2 PE3 * ) ( PE3 PE4 ) PE5 [ PE6 PE7 ] EP1"
+sfcDefinition8 = "IN [ PE1 PE2 PE3 PE4 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE3 PE4 ) PE5 [ PE6 PE7 ] EP1"
+sfcDefinition9 = "IN [ PE1 PE2 PE3 PE4 ] ( PE1 PE2 * ) ( PE3 PE4 * ) ( PE2 PE3 * ) PE5 [ PE6 PE7 ] EP1"
+sfcDefinition10 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE5 PE2 ) EP1"
+sfcDefinition11 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE4 * ) EP1"
+sfcDefinition12 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE5 PE2 ) EP1"
+sfcDefinition13 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE7 PE2 ) ( PE5 PE7 ) EP1"
+sfcDefinition14 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { PE4 / PE5 } PE6 EP1"
+sfcDefinition15 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 / PE8 } PE9 EP1"
+sfcDefinition16 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 / PE8 } PE9 / PE10 } PE11 EP1"
+sfcDefinition17 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 ) { [ PE4 PE5 ] EP1 / PE6 { PE7 / PE8 } PE9 EP2 / PE10 EP3 }"
+sfcDefinition18 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE5 ) EP1"
+sfcDefinition19 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE1 PE3 ) EP1"
+sfcError1 = "IN PE1 PE2 PE3 EP1 PE4 EP1"
+sfcError2 = "IN [ PE1 PE2 PE3 EP2 ] ( PE2 PE1 ) ( PE2 PE3 ) PE4 EP1"
+sfcError3 = "IN [ PE1 PE2 PE3 ] ( PE2 PE1 ) PE4 ( PE2 PE3 ) EP1"
+sfcError4 = "IN [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE2 EP1 ) PE4 EP1"
+sfcError5 = "IN [ PE1 PE2 PE3 ] ( PE2 PE1 ) ( PE1 PE2 ) PE4 [ PE5 PE6 ] EP1"
+sfcError6 = "IN [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE7 PE1 ) ( PE2 PE7 ) PE4 [ PE5 PE6 ] EP1"
+sfcError7 = "IN [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE2 PE7 ) ( PE7 PE1 ) PE4 [ PE5 PE6 ] EP1"
+sfcError8 = "IN [ PE1 PE2 PE3 PE7 ] ( PE1 PE2 ) ( PE3 PE2 * ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
+sfcError9 = "IN [ PE1 PE2 PE3 PE7 ] ( PE1 PE3 ) ( PE7 PE1 ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
+sfcError10 = "IN [ PE1 PE2 PE3 PE7 ] ( PE3 PE1 ) ( PE1 PE7 ) ( PE3 PE7 * ) PE4 [ PE5 PE6 ] EP1"
+sfcError11 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE5 PE2 ) ( PE1 PE4 ) EP1"
+sfcError12 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE5 * ) EP1"
+sfcError13 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE7 PE1 ) ( PE2 PE7 ) EP1"
+sfcError14 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { PE4 / PE5 EP2 } PE6 EP1"
+sfcError15 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] } PE9 EP1"
+sfcError16 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 / PE8 EP2 } PE9 / PE10 } PE11 EP1"
+sfcError17 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 / PE8 EP2 } EP2 / PE10 } PE11 EP1"
+sfcError18 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 * ) { [ PE4 PE5 ] / PE6 { PE7 EP2 / PE8 EP3 } / PE10 } PE11 EP1"
+sfcError19 = "IN [ PE1 PE2 PE3 ] ( PE2 PE3 ) { [ PE4 PE5 ] EP1 / PE6 { PE7 / PE8 } EP2 / PE10 EP3 }"
+sfcError20 = "IN [ PE1 PE2 PE3 PE4 PE5 PE6 PE7 ] ( PE2 PE3 * ) ( PE1 PE2 * ) ( PE4 PE5 * ) ( PE5 PE6 * ) ( PE3 PE2 ) EP1"
+sfcBranch1 = "IN [ PE1 PE2 ] ( PE2 PE1 ) PE3 { PE4 EP1 / PE4 EP2 }"
+sfcBranch2 = "IN [ PE1 PE2 ] ( PE2 PE1 ) PE3 { [ PE4 PE5 ] EP1 / PE4 EP2 }"
+sfcBranch3 = "IN [ PE1 PE2 ] ( PE2 PE1 ) PE3 { [ PE4 PE5 ] EP1 / PE4 PE5 EP2 }"
+
+print ("T1:" + str(grammar.stValidate(sfcDefinition1)))
+print ("T2:" + str(grammar.stValidate(sfcDefinition2)))
+print ("T3:" + str(grammar.stValidate(sfcDefinition3)))
+print ("T4:" + str(grammar.stValidate(sfcDefinition4)))
+print ("T5:" + str(grammar.stValidate(sfcDefinition5)))
+print ("T6:" + str(grammar.stValidate(sfcDefinition6)))
+print ("T7:" + str(grammar.stValidate(sfcDefinition7)))
+print ("T8:" + str(grammar.stValidate(sfcDefinition8)))
+print ("T9:" + str(grammar.stValidate(sfcDefinition9)))
+print ("T10:" + str(grammar.stValidate(sfcDefinition10)))
+print ("T11:" + str(grammar.stValidate(sfcDefinition11)))
+print ("T12:" + str(grammar.stValidate(sfcDefinition12)))
+print ("T13:" + str(grammar.stValidate(sfcDefinition13)))
+print ("T14:" + str(grammar.stValidate(sfcDefinition14)))
+print ("T15:" + str(grammar.stValidate(sfcDefinition15)))
+print ("T16:" + str(grammar.stValidate(sfcDefinition16)))
+print ("T17:" + str(grammar.stValidate(sfcDefinition17)))
+print ("T18:" + str(grammar.stValidate(sfcDefinition18)))
+print ("T19:" + str(grammar.stValidate(sfcDefinition19)))
+print (" ")
+print ("E1:" + str(grammar.stValidate(sfcError1)))
+print ("E2:" + str(grammar.stValidate(sfcError2)))
+print ("E3:" + str(grammar.stValidate(sfcError3)))
+print ("E4:" + str(grammar.stValidate(sfcError4)))
+print ("E5:" + str(grammar.stValidate(sfcError5)))
+print ("E6:" + str(grammar.stValidate(sfcError6)))
+print ("E7:" + str(grammar.stValidate(sfcError7)))
+print ("E8:" + str(grammar.stValidate(sfcError8)))
+print ("E9:" + str(grammar.stValidate(sfcError9)))
+print ("E10:" + str(grammar.stValidate(sfcError10)))
+print ("E11:" + str(grammar.stValidate(sfcError11)))
+print ("E12:" + str(grammar.stValidate(sfcError12)))
+print ("E13:" + str(grammar.stValidate(sfcError13)))
+print ("E14:" + str(grammar.stValidate(sfcError14)))
+print ("E15:" + str(grammar.stValidate(sfcError15)))
+print ("E16:" + str(grammar.stValidate(sfcError16)))
+print ("E17:" + str(grammar.stValidate(sfcError17)))
+print ("E18:" + str(grammar.stValidate(sfcError18)))
+print ("E19:" + str(grammar.stValidate(sfcError19)))
+print ("E20:" + str(grammar.stValidate(sfcError20)))
+print (" ")
+print ("B1:" + str(grammar.stValidate(sfcBranch1)))
+print ("B2:" + str(grammar.stValidate(sfcBranch2)))
+print ("B3:" + str(grammar.stValidate(sfcBranch3)))
+
+#grammar = cuSTOM(["VNF1", "VNF2", "VNF3", "VNF4", "VNF5", "VNF6", "VNF7"], ["PNF1", "PNF2"], ["DOM1", "DOM2"], ["PHY1", "PHY2"], ["EN1", "EN2"])
 #print(grammar.stValidate("IN VNF1 EN1"))
 #print(grammar.stValidate("IN VNF1 VNF2 EN1"))
 #print(grammar.stValidate("IN VNF1 < DOM1 > VNF2 EN1"))
-print(grammar.stValidate("IN [ VNF1 < PHY1 | DOM1 > VNF2 < DOM2 > ] EN1"))
+#print(grammar.stValidate("IN [ VNF1 < PHY1 | DOM1 > VNF2 < DOM2 > ] EN1"))
 #print(grammar.stValidate("IN [ VNF1 < PHY1 | DOM1 > VNF2 ] { VNF3 < DOM1 > VNF2 EN1 / VNF3 < DOM1 > VNF4 { VNF5 / VNF6 } VNF7 EN2 }"))
 
 #################################################
