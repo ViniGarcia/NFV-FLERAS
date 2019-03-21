@@ -263,7 +263,7 @@ class PartialOrder:
 
 #--------------------------------------------------
 
-########### cuSTOM CLASS DESCRIPTION ############
+########### CUSTOM CLASS DESCRIPTION ############
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -291,11 +291,11 @@ class PartialOrder:
 
 #################################################
 
-############## cuSTOM CLASS BEGIN ###############
+############## CUSTOM CLASS BEGIN ###############
 
 import nltk
 
-class cuSTOM:
+class CUSTOM:
 	__status = None
 
 	__topologyEPs = None
@@ -487,6 +487,6 @@ class cuSTOM:
 
 		return self.__servicePorders
 
-############### cuSTOM CLASS END ################
+############### CUSTOM CLASS END ################
 
 #################################################
