@@ -5,7 +5,7 @@ NFV FLERAS: NFV FLExible Resource Allocation System
 
 ### What is FLERAS?
 
-<p align="justify">FLERAS is a system to execute NFV Resource Allocation (NFV-RA) [1] processes. To do that, FLERAS uses a novel NFV service request model (structured in YAML) that relaxes the definition of goal functions and policies used for the NFV-RA execution. Furthermore, FLERAS provides a formal and robust NFV service topology specification model based on a context-free grammar (SCAG -- simplified version --- or CUSTOM -- complete version). Finally, a new generic evaluation method (i.e., can be employed in any deployment stage) based on indexing is also presented to jointly evaluate many metrics with different granularity and objectives that forms objective functions. This methodology reduces every evaluation problem into an index maximization problem, providing an unified result (Suitability Index) for each deployment candidate. FLERAS is a work in progress, new tools and models will be updated in this GitHub.</p>
+<p align="justify">FLERAS is a system to execute NFV Resource Allocation (NFV-RA) [1] processes. To do that, FLERAS uses a novel NFV service request model (structured in YAML) that relaxes the definition of goal functions and policies used for the NFV-RA execution. Furthermore, FLERAS provides a formal and robust NFV service topology specification model based on a context-free grammar (SCAG -- simplified version --- or CUSTOM -- complete version). Finally, a new generic evaluation method (i.e., can be employed in any deployment stage) based on indexing is also presented to jointly evaluate many metrics with different granularity and objectives that forms objective functions. This methodology reduces every multiple evaluation problems into a unique index maximization problem, thus providing a unified result (Suitability Index) for each deployment candidate. FLERAS is a work in progress, new tools and models, as well as papers and presentation, will be updated in this GitHub.</p>
 
 ### How was it developed?
 
@@ -34,6 +34,7 @@ Contact us towards git issues requests or by the e-mail vfulber@inf.ufsm.br.
 ### FLERAS Research Group
 
 Vinícius Fülber Garcia (Federal University of Paraná - Brazil)<br/>
+Alexandre Huff (Federal Technological University of Paraná - Brazil)<br/>
 Elias Procópio Duarte Júnior (Federal University of Paraná - Brazil)<br/>
 Carlos Raniery Paula dos Santos (Federal University of Santa Maria - Brazil)<br/>
 Marcelo Caggiani Luizelli (Federal University of Pampa - Brazil)<br/>
