@@ -40,10 +40,10 @@ Marcelo Caggiani Luizelli (Federal University of Pampa - Brazil)<br/>
 
 ### Publications
 
-<p style='text-align: justify;'>**-> Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço <-**<br/>
+<p align="justify">-> Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço <-<br/>
 V. F. Garcia and M. C. Luizelli and E. P. Duarte Junior and C. R. P. dos Santos, "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço," in XXIV Workshop de Gerência e Operações de Redes e Serviços (XXXVII Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May. 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf</p>
 
 ### References
 
-<p style='text-align: justify;'>**-> NFV Resource Allocation <-**<br/>
+<p align="justify">-> NFV Resource Allocation <-<br/>
 [1] J. Gil Herrera and J. F. Botero, "Resource Allocation in NFV: A Comprehensive Survey," in IEEE Transactions on Network and Service Management, vol. 13, no. 3, pp. 518-532, Sept. 2016. doi: 10.1109/TNSM.2016.2598420</p>
