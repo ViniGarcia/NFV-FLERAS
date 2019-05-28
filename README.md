@@ -5,80 +5,8 @@ NFV FLERAS: NFV FLExible Resource Allocation System
 
 ### What is FLERAS?
 
-FLERAS is a system to execute NFV Resource Allocation (NFV RA) [1] processes. To do that,
-FLERAS uses an innovative SFC Request model (structure using YAML) to flexibilize the
-definition of goal functions and policies to be applied during the NFV RA processing.
-In addition to the new SFC Request, FLERAS provides a formal and simple SFC topology
-specification method based on a context-free grammar. FLERAS is especially indicating
-to evaluate different goal functions under a generic SFC Composition and SFC Split and
-Mapping solution.<br/>
+FLERAS is a system to execute NFV Resource Allocation (NFV-RA) [1] processes. To do that, FLERAS uses a novel NFV service request model (structured in YAML) that relaxes the definition of goal functions and policies used for the NFV-RA execution. Furthermore, FLERAS provides a formal and robust NFV service topology specification model based on a context-free grammar (SCAG -- simplified version --- or CUSTOM -- complete version). Finally, a new generic evaluation method (i.e., can be employed in any deployment stage) based on indexing is also presented to jointly evaluate many metrics with different granularity and objectives that forms objective functions. This methodology reduces every evaluation problem into an index maximization problem, providing an unified result (Suitability Index) for each deployment candidate. FLERAS is a work in progress, new tools and models will be updated in this GitHub.<br/>
 <br/>
-
-<!---
-The FLERAS' request model is structure by a YAML notation and presents three main blocks:<br/>
-1. METADATA BLOCK<br/>
-1.1. ID (Request unique identifier)<br/>
-1.2. DESCRIPTION (Multi line request description)<br/>
-2. SERVICE BLOCK<br/>
-2.1. TOPOLOGY (Topology defined with the context-free grammar described below)<br/>
-2.2. OELEMENTS (List of operacional elements IDs)<br/>
-2.3. OUTNODES (List of output nodes IDs)<br/>
-3. GOAL FUNCTION BLOCK<br/>
-3.1. METRICS (List of metric objects that composes the goal function)<br/>
-3.1.1. ID (Metric unique identifier)<br/>
-3.1.2. GOAL (Minimize ("MIN") or maximize ("MAX") metric)<br/>
-3.1.3. WEIGHT (Value for weighted evaluation)<br/>
-3.1.4. INPUT (Initial metric value)<br/>
-3.1.5. EVALUATION (Metric evaluation operation ("MULT", "DIV", "SUM", "SUB"))<br/>
-3.1.6. UPDATE (Metric ID that the evaluation operation will update this metric)<br/>
-3.2. BRANCHINGS (List of evaluation data division between segments of ramifications for every metric)<br/>
-3.2.1. METRIC (Some metric ID)<br/>
-3.2.1.1. UPDATE (Metric evaluatin data division operation ("MULT", "DIV", "SUM", "SUB"))<br/>
-3.2.1.2. FACTORS (Metric evaluation data division factors, a list with one factor for each segment in the branchings and one list per branching)<br/>
-4. POLICIES ()<br/>
-4.1. IMMEDIATE ()<br/>
-4.1.1. ID ()<br/>
-4.1.2. MIN ()<br/>
-4.1.3. MAX ()<br/>
-4.1.4. TYPE ()<br/>
-4.1.5. GOAL ()<br/>
-4.1.6. WEIGHT ()<br/>
-4.2. AGGREGATE ()<br/>
-4.2.1. ID ()<br/>
-4.2.2. MIN ()<br/>
-4.2.3. MAX ()<br/>
-4.2.4. TYPE ()<br/>
-4.2.5. GOAL ()<br/>
-4.2.6. WEIGHT ()<br/>
-5. DEPLOYMENT ()<br/>
-5.1. OELEMENT ()<br/>
-5.1.1. FLAVOUR ()<br/>
-5.1.1.1. MEMORY ()<br/>
-5.1.1.2. NET_IFACES ()<br/>
-5.1.1.3. CPUS ()<br/>
-5.1.2. BENCHMARK ()<br/>
-5.1.2.1. METRIC () <br/>
-
-The FLERAS SFC specification follows the context-free grammar production rules:<br/>
-1. S -> "IP" OPBLOCK<br/>
-2. OPBLOCK -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EP<br/>
-3. ROPBLOCK -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK<br/>
-4. TPBLOCK -> PORDER | MASKPELEM<br/>
-5. PORDER -> "[" MASKPELEM NPELEM "]" POEXCEPTION | "[" MASKPELEM NPELEM "]"<br/>
-6. POEXCEPTION -> "(" PELEM PELEM ")" POEXCEPTION | "(" PELEM PELEM ")" | "(" PELEM PELEM "*" ")" POEXCEPTION | "(" PELEM PELEM "*" ")"<br/>
-7. TBRANCH -> TPBLOCK "{" OPBLOCK NEXTTBRANCH "}" <br/>
-8. NEXTTBRANCH -> "/" OPBLOCK NEXTTBRANCH | "/" OPBLOCK<br/>
-9. NTBRANCH -> TPBLOCK "{" ROPBLOCK NEXTNTBRANCH "}" OPBLOCK<br/>
-10. INTBRANCH -> TPBLOCK "{" ROPBLOCK NEXTNTBRANCH "}" ROPBLOCK<br/>
-11. NEXTNTBRANCH -> "/" ROPBLOCK NEXTNTBRANCH | "/" ROPBLOCK<br/>
-12. NPELEM -> MASKPELEM NPELEM | MASKPELEM<br/>
-13. MASKPELEM -> PELEM | PELEM "<" DOMAIN ">"<br/>
-14. OPELEM -> OPEID1, OPEID2, ..., OPEIDn*<br/>
-15. EP -> EPID1, EPID2, ..., EPIDn*<br/>
-16. DOMAIN -> DOMID1, DOMID2, ..., DOMIn*<br/>
-
-*Retrieved from the FLERAS request.
--->
 
 ### How was it developed?
 
@@ -88,15 +16,17 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 
 ### Project steps
 
-1. SFC topology validator (OK!!)<br/>
-2. SFC request validator (OK!!)<br/>
-3. SFC expansion tool (OK!!)<br/>
-4. SFC goal function creator (OK!!)<br/>
-5. SFC generic composition method (OK!!)<br/>
-6. SFC generic split and mapping method (IN DEVELOPMENT!!)<br/>
-7. SFC generic selection method (WAITING)<br/>
-8. SFC registry architecture (WAITING)<br/>
-9. Graphical interface (WAITING)
+1. NFV service topology validator [OK!!]<br/>
+2. NFV service request validator [OK!!]<br/>
+3. NFV service topology expansion tool (deployment composing stage) [OK!!]<br/>
+4. NFV composing goal function creator (deployment composing stage) [OK!!]<br/>
+5. NFV service generic composition tool (deployment composing stage) [OK!!]<br/>
+6. NFV service generic split and mapping tool (deployment embedding stage) [IN DEVELOPMENT!!]<br/>
+7. NFV service generic selection tool (deployment embedding stage) [WAITING]<br/>
+8. NFV service generic placement tool (deployment embedding stage) [WAITING]<br/>
+8. NFV service generic scheduling tool (deployment scheduling stage) [WAITING]<br/>
+8. Deployment-as-a-Service architecture (NFV market integration) [WAITING]<br/>
+9. Graphical interface [WAITING]
 
 ### Support
 
@@ -107,6 +37,12 @@ Contact us towards git issues requests or by the e-mail vfulber@inf.ufsm.br.
 Vinícius Fülber Garcia (Federal University of Paraná - Brazil)<br/>
 Elias Procópio Duarte Júnior (Federal University of Paraná - Brazil)<br/>
 Carlos Raniery Paula dos Santos (Federal University of Santa Maria - Brazil)<br/>
+Marcelo Caggiani Luizelli (Federal University of Pampa - Brazil)<br/>
+
+### Publications
+
+-> Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço <-<br/>
+V. F. Garcia and M. C. Luizelli and E. P. Duarte Junior and C. R. P. dos Santos, "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço," in XXIV Workshop de Gerência e Operações de Redes e Serviços (XXXVII Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May. 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf  
 
 ### References
 
