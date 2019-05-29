@@ -265,6 +265,3 @@ class HELM:
 
     def getEvalMetrics(self):
         return self.__evalMetrics
-
-teste = HELM({"A":("max", 1), "B":("min", 1)})
-print(teste.hJointEvaluate({"C1":{"A":10, "B":1}, "C2":{"A":1, "B":10}, "C3":{"A":5, "B":5}, "C4":{"A":2.5, "B":5}}))

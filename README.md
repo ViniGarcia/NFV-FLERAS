@@ -27,6 +27,14 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 8. Deployment-as-a-Service architecture (NFV market integration) [WAITING]<br/>
 9. Graphical interface [WAITING]
 
+### Project details
+
+1. YAMLR (YAML Request): NFV service request model
+2. SCAG (Service ChAin Grammar): simple NFV service topology specification model
+3. CUSTOM (CUtomazable Service Topology Model): complete NFV service topology specification model
+4. HELM (Holistic EvaLuation Methodology): multi-criteria and holistic deployment evaluation library
+5. CUSCO (CUstomazable Service COmposing): generic and flexible composition tool
+
 ### Support
 
 Contact us towards git issues requests or by the e-mail vfulber@inf.ufsm.br.
