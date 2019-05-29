@@ -117,6 +117,58 @@ class HELM:
 
         return SI
 
+    def __hSI(self):
+
+        #Metrics processing
+        weightSum = 0.0
+        normalizedWeight = 0.0
+
+        #Results processing
+        metricResults = {}
+
+        for metric in self.__evalMetrics:
+            weightSum += self.__evalMetrics[metric][1]
+
+        for metric in self.__evalMetrics:
+            results = []
+
+            normalizedWeight = self.__evalMetrics[metric][1] / weightSum
+
+            for candidate in self.__partialResults:
+                results.append(float(self.__partialResults[candidate][metric]))
+
+            maximum = results[0]
+            minimum = results[0]
+            for index in range(1, len(results)):
+                if maximum < results[index]:
+                    maximum = results[index]
+                if minimum > results[index]:
+                    minimum = results[index]
+            normFactor = maximum - minimum
+            for index in range(0, len(results)):
+                if self.__evalMetrics[metric][0] == "min":
+                    if normFactor != 0:
+                        results[index] = (1 - ((results[index] - minimum) / normFactor)) * normalizedWeight
+                    else:
+                        results[index] = 0
+                else:
+                    if normFactor != 0:
+                        results[index] = ((results[index] - minimum) / normFactor) * normalizedWeight
+                    else:
+                        results[index] = normalizedWeight
+
+            metricResults[metric] = results
+
+        self.__lastIndexing = {}
+        index = 0;
+        for candidate in self.__partialResults:
+            self.__lastIndexing[candidate] = 0
+            for metric in self.__evalMetrics:
+                self.__lastIndexing[candidate] += metricResults[metric][index]
+            index += 1
+
+        return self.__lastIndexing
+
     ######## PUBLIC METHODS ########
 
     def hConfigure(self, evalMetrics):
@@ -178,6 +230,30 @@ class HELM:
 
         return self.__lastIndexing
 
+    def hJointEvaluate(self, partialResults):
+
+        if not self.__status == 1:
+            return -7
+
+        if not isinstance(partialResults, dict):
+            return -8
+
+        metricKeys = list(self.__evalMetrics.keys())
+        for rKey in partialResults:
+            if not isinstance(partialResults[rKey], dict):
+                return -9
+            if list(partialResults[rKey]) != metricKeys:
+                return -10
+
+            for mKey in partialResults[rKey]:
+                if not isinstance(partialResults[rKey][mKey], float) and not isinstance(partialResults[rKey][mKey], int):
+                    return -11
+
+        self.__partialResults = partialResults
+        self.__lastIndexing = None
+
+        return self.__hSI()
+
     def getStatus(self):
         return self.__status
 
@@ -190,5 +266,5 @@ class HELM:
     def getEvalMetrics(self):
         return self.__evalMetrics
 
-#teste = HELM({"A":("max", 1), "B":("min", 1)})
-#print(teste.hStepEvaluate({"C1":{"A":10, "B":1}, "C2":{"A":10, "B":10}}))
+teste = HELM({"A":("max", 1), "B":("min", 1)})
+print(teste.hJointEvaluate({"C1":{"A":10, "B":1}, "C2":{"A":1, "B":10}, "C3":{"A":5, "B":5}, "C4":{"A":2.5, "B":5}}))
