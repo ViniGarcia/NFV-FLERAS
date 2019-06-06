@@ -12,6 +12,7 @@ NFV FLERAS: NFV FLExible Resource Allocation System
 FLERAS is being developed using standard Python 3 language and other libraries such as:<br/>
 1. Natural Languege Tool Kit (pip3 install nltk)<br/>
 2. Python YAML (pip3 install pyyaml)
+3. NumPy (pip3 install numpy)
 
 ### Project steps
 

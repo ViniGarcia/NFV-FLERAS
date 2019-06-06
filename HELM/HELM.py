@@ -36,6 +36,8 @@
 
 #################################################
 
+from numpy import array
+
 ############### HELM CLASS BEGIN ################
 
 class HELM:
@@ -56,116 +58,25 @@ class HELM:
 
     ######## PRIVATE METHODS ########
 
-    def __hMap(self):
-
-        mappedResults = {}
-        for metric in self.__evalMetrics:
-            results = []
-            for candidate in self.__partialResults:
-                results.append(float(self.__partialResults[candidate][metric]))
-
-            maximum = max(results)
-            minimum = min(results)
-            for index in range(0, len(results)):
-                results[index] -= minimum;
-            mappedResults[metric] = results
-
-        return mappedResults
-
-    def __hNormalize(self, mappedResults):
-
-        for metric in self.__evalMetrics:
-            normFactor = max(mappedResults[metric])
-
-            if normFactor > 0:
-                for index in range(0, len(mappedResults[metric])):
-                    mappedResults[metric][index] /= normFactor
-            else:
-                for index in range(0, len(mappedResults[metric])):
-                    mappedResults[metric][index] = 1
-
-
-    def __hComplement(self, normalizedResults):
-
-        for metric in self.__evalMetrics:
-            if self.__evalMetrics[metric][0] == "max":
-                continue
-
-            for index in range(0, len(normalizedResults[metric])):
-                normalizedResults[metric][index] = 1 - normalizedResults[metric][index]
-
-    def __hWeight(self, complementedResults):
-
-        weightSum = 0.0
-        for metric in self.__evalMetrics:
-            weightSum += self.__evalMetrics[metric][1]
-        for metric in self.__evalMetrics:
-            normalizedWeight = self.__evalMetrics[metric][1] / weightSum
-
-            for index in range(0, len(complementedResults[metric])):
-                complementedResults[metric][index] *= normalizedWeight
-
-    def __hIndexing(self, weightedResults):
-
-        SI = {}
-        candidatesKeys = list(self.__partialResults.keys())
-
-        for index in range(0, len(candidatesKeys)):
-            SI[candidatesKeys[index]] = 0.0
-            for metric in self.__evalMetrics:
-                SI[candidatesKeys[index]] += weightedResults[metric][index]
-
-        return SI
-
     def __hSI(self):
 
-        #Metrics processing
-        weightSum = 0.0
-        normalizedWeight = 0.0
-
-        #Results processing
-        metricResults = {}
-
+        partialResults = {}
+        weightSum = 0
         for metric in self.__evalMetrics:
+            partialResults[metric] = [candidate[metric] for candidate in self.__partialResults.values()]
             weightSum += self.__evalMetrics[metric][1]
 
-        for metric in self.__evalMetrics:
-            results = []
-
-            normalizedWeight = self.__evalMetrics[metric][1] / weightSum
-
-            for candidate in self.__partialResults:
-                results.append(float(self.__partialResults[candidate][metric]))
-
-            maximum = results[0]
-            minimum = results[0]
-            for index in range(1, len(results)):
-                if maximum < results[index]:
-                    maximum = results[index]
-                if minimum > results[index]:
-                    minimum = results[index]
-            normFactor = maximum - minimum
-            for index in range(0, len(results)):
-                if self.__evalMetrics[metric][0] == "min":
-                    if normFactor != 0:
-                        results[index] = (1 - ((results[index] - minimum) / normFactor)) * normalizedWeight
-                    else:
-                        results[index] = 0
-                else:
-                    if normFactor != 0:
-                        results[index] = ((results[index] - minimum) / normFactor) * normalizedWeight
-                    else:
-                        results[index] = normalizedWeight
-
-            metricResults[metric] = results
+        for metric in partialResults:
+            partialResults[metric] = array(partialResults[metric])
+            if self.__evalMetrics[metric][0] == "max":
+                partialResults[metric] = ((partialResults[metric] - partialResults[metric].min(axis=0)) / (partialResults[metric].max(axis=0) - partialResults[metric].min(axis=0))) * self.__evalMetrics[metric][1] / weightSum
+            else:
+                partialResults[metric] = (partialResults[metric].max(axis=0) - partialResults[metric]) / (partialResults[metric].max(axis=0) - partialResults[metric].min(axis=0)) * self.__evalMetrics[metric][1] / weightSum
 
         self.__lastIndexing = {}
-        index = 0;
-        for candidate in self.__partialResults:
-            self.__lastIndexing[candidate] = 0
-            for metric in self.__evalMetrics:
-                self.__lastIndexing[candidate] += metricResults[metric][index]
-            index += 1
+        keys = list(self.__partialResults.keys())
+        for index in range(len(self.__partialResults)):
+            self.__lastIndexing[keys[index]] = sum([candidate[index] for candidate in partialResults.values()])
 
         return self.__lastIndexing
 
@@ -200,37 +111,7 @@ class HELM:
             self.__status = 1
             return 1
 
-    def hStepEvaluate(self, partialResults):
-
-        if not self.__status == 1:
-            return -7
-
-        if not isinstance(partialResults, dict):
-            return -8
-
-        metricKeys = list(self.__evalMetrics.keys())
-        for rKey in partialResults:
-            if not isinstance(partialResults[rKey], dict):
-                return -9
-            if list(partialResults[rKey]) != metricKeys:
-                return -10
-
-            for mKey in partialResults[rKey]:
-                if not isinstance(partialResults[rKey][mKey], float) and not isinstance(partialResults[rKey][mKey], int):
-                    return -11
-
-        self.__partialResults = partialResults
-        self.__lastIndexing = None
-
-        processedResults = self.__hMap()
-        self.__hNormalize(processedResults)
-        self.__hComplement(processedResults)
-        self.__hWeight(processedResults)
-        self.__lastIndexing = self.__hIndexing(processedResults)
-
-        return self.__lastIndexing
-
-    def hJointEvaluate(self, partialResults):
+    def hEvaluate(self, partialResults):
 
         if not self.__status == 1:
             return -7
@@ -265,3 +146,6 @@ class HELM:
 
     def getEvalMetrics(self):
         return self.__evalMetrics
+
+#test = HELM({"A":("min", 0.5), "B":("max", 0.5)})
+#print(test.hEvaluate({"C1":{"A":5, "B":10}, "C2":{"A":10, "B":5}}))
