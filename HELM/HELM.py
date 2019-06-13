@@ -69,9 +69,15 @@ class HELM:
         for metric in partialResults:
             partialResults[metric] = array(partialResults[metric])
             if self.__evalMetrics[metric][0] == "max":
-                partialResults[metric] = ((partialResults[metric] - partialResults[metric].min(axis=0)) / (partialResults[metric].max(axis=0) - partialResults[metric].min(axis=0))) * self.__evalMetrics[metric][1] / weightSum
+                if partialResults[metric].max(axis=0) != partialResults[metric].min(axis=0):
+                    partialResults[metric] = ((partialResults[metric] - partialResults[metric].min(axis=0)) / (partialResults[metric].max(axis=0) - partialResults[metric].min(axis=0))) * self.__evalMetrics[metric][1] / weightSum
+                else:
+                    partialResults[metric] = [self.__evalMetrics[metric][1] / weightSum for candidate in self.__partialResults]
             else:
-                partialResults[metric] = (partialResults[metric].max(axis=0) - partialResults[metric]) / (partialResults[metric].max(axis=0) - partialResults[metric].min(axis=0)) * self.__evalMetrics[metric][1] / weightSum
+                if partialResults[metric].max(axis=0) != partialResults[metric].min(axis=0):
+                    partialResults[metric] = (partialResults[metric].max(axis=0) - partialResults[metric]) / (partialResults[metric].max(axis=0) - partialResults[metric].min(axis=0)) * self.__evalMetrics[metric][1] / weightSum
+                else:
+                    partialResults[metric] = [self.__evalMetrics[metric][1] / weightSum for candidate in self.__partialResults]
 
         self.__lastIndexing = {}
         keys = list(self.__partialResults.keys())
@@ -123,7 +129,7 @@ class HELM:
         for rKey in partialResults:
             if not isinstance(partialResults[rKey], dict):
                 return -9
-            if list(partialResults[rKey]) != metricKeys:
+            if partialResults[rKey].keys() != set(metricKeys):
                 return -10
 
             for mKey in partialResults[rKey]:
@@ -147,5 +153,33 @@ class HELM:
     def getEvalMetrics(self):
         return self.__evalMetrics
 
-#test = HELM({"A":("min", 0.5), "B":("max", 0.5)})
-#print(test.hEvaluate({"C1":{"A":5, "B":10}, "C2":{"A":10, "B":5}}))
+################ HELM CLASS END #################
+
+#################################################
+#TEST SET
+# import random
+#
+# Nmin = 2
+# Nmax = 2
+# M = 2
+# PR = (0, 2)
+#
+# A = {}
+# for i in range(Nmin):
+#     A["M" + str(i)] = ("min", 1)
+# for i in range(Nmin, Nmin+Nmax):
+#     A["M" + str(i)] = ("max", 1)
+#
+# B = {}
+# for i in range(M):
+#     B["C" + str(i)] = {}
+#     for j in list(A.keys()):
+#         B["C" + str(i)][j] = random.randint(PR[0], PR[1])
+#
+# print(A)
+# print("\n")
+# print(B)
+#
+# test = HELM(A)
+# print("\n")
+# print(test.hEvaluate(B))
