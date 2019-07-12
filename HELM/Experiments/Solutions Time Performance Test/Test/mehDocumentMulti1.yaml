@@ -1,0 +1,8 @@
+ELEMENTS:
+  NF0:
+    TR: 0.9161296536422439
+METRICS:
+  TR: !!python/tuple
+  - min
+  - 1.0
+TOPOLOGY: NF0

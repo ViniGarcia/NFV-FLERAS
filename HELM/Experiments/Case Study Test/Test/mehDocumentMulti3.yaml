@@ -1,0 +1,24 @@
+ELEMENTS:
+  FW:
+    TR: 0.75
+    PD: 0.2
+  IPS:
+    TR: 0.9
+    PD: 0.8
+  DPI:
+    TR: 0.85
+    PD: 0.8
+  TS:
+    TR: 0.95
+    PD: 0.2
+  ADC:
+    TR: 1.0
+    PD: 0.05
+METRICS:
+  TR: !!python/tuple
+  - min
+  - 1.0
+  PD: !!python/tuple
+  - min
+  - 1.0
+TOPOLOGY: FW - ( IPS DPI TS ) - ADC
