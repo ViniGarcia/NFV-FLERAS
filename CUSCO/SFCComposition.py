@@ -62,7 +62,7 @@ class SFCComposition:
 
 	def __scBranchesPrepare(self):
 
-		sfcBranches = self.__sfcRequest.grFunctionBranches()
+		sfcBranches = self.__sfcRequest.crFunctionBranches()
 		branchUpdate = {}
 		branchFactors = []
 
@@ -85,7 +85,7 @@ class SFCComposition:
 
 	def __scOElementsPrepare(self):
 
-		sfcOElements = self.__sfcRequest.grServiceBechmark()
+		sfcOElements = self.__sfcRequest.crServiceBechmark()
 		self.__oElementsData = {}
 
 		for OE in sfcOElements:
@@ -101,7 +101,7 @@ class SFCComposition:
 		nextBranch = 1
 
 		sfcElements = self.__sfcDictionary[index].split()
-		boundaryEPs = self.__sfcRequest.grServiceON()
+		boundaryEPs = self.__sfcRequest.crServiceON()
 
 		for eIndex in range(1, len(sfcElements)):
 
@@ -178,8 +178,8 @@ class SFCComposition:
 
 	def __scWeightNormalizations(self):
 
-		weights = self.__sfcRequest.grFunctionWeights()
-		goals = self.__sfcRequest.grFunctionGoals()
+		weights = self.__sfcRequest.crFunctionWeights()
+		goals = self.__sfcRequest.crFunctionGoals()
 
 		for index in self.__normalizedDicitionary:
 			sfcIndex = 0

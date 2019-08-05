@@ -14,7 +14,8 @@ from os.path import isfile
 from cmd import Cmd
 
 from YAMLR.DomainsData import DomainsData
-from YAMLR.GeneralRequest import GeneralRequest
+from YAMLR.ComposingRequest import ComposingRequest
+from YAMLR.EmbeddingRequest import EmbeddingRequest
 from SCAG.SFCTopology import SFCTopology
 from CUSCO.SFCExpansion import SFCExpansion
 from CUSCO.GoalFunction import GoalFunction
@@ -27,6 +28,7 @@ class FLERASCLI(Cmd):
 	request = None
 	topology = None
 	composition = None
+	type = None
 
 	def do_help(self, args):
 
@@ -34,7 +36,7 @@ class FLERASCLI(Cmd):
 		print("help -> show this message")
 		print("exit -> ends the execution")
 		print("domains path -> receives a domain data description path, validate and enable its informations for setup")
-		print("setup path -> receives a sfc request path, validate and enable the commands below")
+		print("setup type path -> receives a request type (1 for compose and 2 for split and mapping) and a sfc request path, validate and enable the commands below according to setup type")
 		print("compose -> executes the generic composition method in already informed sfc request, it enables the topologies and advice commands")
 		print("topologies -> show all composed topologies in addition to their goal functions indexes")
 		print("advice -> inidicates the best composed topology considering the goal function")
@@ -63,36 +65,54 @@ class FLERASCLI(Cmd):
 
 	def do_setup(self, args):
 
-		if len(args) == 0:
+		args = args.split()
+		if len(args) < 2:
+			return
+
+		if args[0] not in ["C", "SM"]:
+			print("TYPE IS NEED AS FIRST ARGUMENT (C FOR COMPOSING OR SM FOR SPLIT/MAP)")
 			return
 
 		if self.domains == None:
 			print("DOMAINS SETUP IS NEEDED")
 			return
 
-		if not isfile(args):
+		if not isfile(args[1]):
 			print("INVALID FILE")
 			return
 
-		self.request = GeneralRequest(args, self.domains.ddDomains())
-		if self.request.grStatus() != 1:
-			print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.grStatus()))
-			self.request = None
-			return
+		if args[0] == "C":
+			self.request = ComposingRequest(args[1], self.domains.ddDomains())
+			if self.request.crStatus() != 1:
+				print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.crStatus()))
+				self.request = None
+				return
+			self.topology = SFCTopology(self.request.crServiceON(), self.request.crServiceOE(), self.domains.ddDomains())
+			self.topology.stValidate(self.request.crServiceTopology())
+			if self.topology.stStatus() != 1:
+				print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.crStatus()))
+				self.request = None
+		else:
+			if args[0] == "SM":
+				self.request = EmbeddingRequest(args[1], self.domains.ddDomains())
+				if self.request.erStatus() != 1:
+					print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.crStatus()))
+					self.request = None
+					return
+				self.topology = SFCTopology(self.request.erServiceON(), self.request.erServiceOE(), self.domains.ddDomains())
+				self.topology.stValidate(self.request.erServiceTopology())
+				if self.topology.stStatus() != 1:
+					print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.erStatus()))
+					self.request = None
 
-		self.topology = SFCTopology(self.request.grServiceON(), self.request.grServiceOE(), self.domains.ddDomains())
-		self.topology.stValidate(self.request.grServiceTopology())
-		if self.topology.stStatus() != 1:
-			print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.grStatus()))
-			self.request = None
-
+		self.type = args[0]
 		self.composition = None
 
 		print("SUCCESS!!")
 
 	def do_compose(self, args):
 
-		if len(args) != 0:
+		if len(args) != 0 or self.type != "C":
 			return
 
 		if self.request == None:
