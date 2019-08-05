@@ -21,7 +21,7 @@
 
 import copy
 
-from YAMLR.SFCRequest import SFCRequest
+from YAMLR.GeneralRequest import GeneralRequest
 from SCAG.SFCTopology import SFCTopology
 from CUSCO.SFCExpansion import SFCExpansion
 from CUSCO.GoalFunction import GoalFunction
@@ -62,7 +62,7 @@ class SFCComposition:
 
 	def __scBranchesPrepare(self):
 
-		sfcBranches = self.__sfcRequest.srFunctionBranches()
+		sfcBranches = self.__sfcRequest.grFunctionBranches()
 		branchUpdate = {}
 		branchFactors = []
 
@@ -85,7 +85,7 @@ class SFCComposition:
 
 	def __scOElementsPrepare(self):
 
-		sfcOElements = self.__sfcRequest.srServiceBechmark()
+		sfcOElements = self.__sfcRequest.grServiceBechmark()
 		self.__oElementsData = {}
 
 		for OE in sfcOElements:
@@ -101,7 +101,7 @@ class SFCComposition:
 		nextBranch = 1
 
 		sfcElements = self.__sfcDictionary[index].split()
-		boundaryEPs = self.__sfcRequest.srServiceON()
+		boundaryEPs = self.__sfcRequest.grServiceON()
 
 		for eIndex in range(1, len(sfcElements)):
 
@@ -178,8 +178,8 @@ class SFCComposition:
 
 	def __scWeightNormalizations(self):
 
-		weights = self.__sfcRequest.srFunctionWeights()
-		goals = self.__sfcRequest.srFunctionGoals()
+		weights = self.__sfcRequest.grFunctionWeights()
+		goals = self.__sfcRequest.grFunctionGoals()
 
 		for index in self.__normalizedDicitionary:
 			sfcIndex = 0

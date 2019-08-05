@@ -20,7 +20,7 @@
 
 import copy
 
-from YAMLR.SFCRequest import SFCRequest
+from YAMLR.GeneralRequest import GeneralRequest
 
 class GoalFunction:
 	__status = None
@@ -68,7 +68,7 @@ class GoalFunction:
 		self.__sfcFunction = {}
 		self.__evaluationAggregate = {}
 
-		for metric in sfcRequest.srFunction()["METRICS"]:
+		for metric in sfcRequest.grFunction()["METRICS"]:
 			self.__sfcFunction[metric["ID"]] = metric.copy()
 			self.__evaluationAggregate[metric["ID"]] = 0
 

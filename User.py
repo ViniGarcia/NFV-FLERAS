@@ -14,7 +14,7 @@ from os.path import isfile
 from cmd import Cmd
 
 from YAMLR.DomainsData import DomainsData
-from YAMLR.SFCRequest import SFCRequest
+from YAMLR.GeneralRequest import GeneralRequest
 from SCAG.SFCTopology import SFCTopology
 from CUSCO.SFCExpansion import SFCExpansion
 from CUSCO.GoalFunction import GoalFunction
@@ -74,16 +74,16 @@ class FLERASCLI(Cmd):
 			print("INVALID FILE")
 			return
 
-		self.request = SFCRequest(args, self.domains.ddDomains())
-		if self.request.srStatus() != 1:
-			print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.srStatus()))
+		self.request = GeneralRequest(args, self.domains.ddDomains())
+		if self.request.grStatus() != 1:
+			print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.grStatus()))
 			self.request = None
 			return
 
-		self.topology = SFCTopology(self.request.srServiceON(), self.request.srServiceOE(), self.domains.ddDomains())
-		self.topology.stValidate(self.request.srServiceTopology())
+		self.topology = SFCTopology(self.request.grServiceON(), self.request.grServiceOE(), self.domains.ddDomains())
+		self.topology.stValidate(self.request.grServiceTopology())
 		if self.topology.stStatus() != 1:
-			print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.srStatus()))
+			print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.grStatus()))
 			self.request = None
 
 		self.composition = None
