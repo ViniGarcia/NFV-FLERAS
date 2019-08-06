@@ -263,7 +263,7 @@ class ComposingRequest:
 		openedFile.close()
 
 		try:
-			yamlParsed = yaml.load(fileData)
+			yamlParsed = yaml.safe_load(fileData)
 		except:
 			return
 

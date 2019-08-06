@@ -1,14 +1,14 @@
 ######## DOMAINS DATA CLASS DESCRIPTION ########
 
-#PROJECT: NFV FLERAS (FLExible Resource Allocation Service) 
+#PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
 #CONTACT: vfulber@inf.ufsm.br
 
-#RECEIVES A YAML FILE WITH THE DOMAINS DATA 
+#RECEIVES A YAML FILE WITH THE DOMAINS DATA
 #AND AVAILABLE METRICS TO BE EVALUATED DURING
 #SPLIT AND MAPPING PROCESSES.
 
-#THE STATUS CLASS ATTRIBUTE INDICATE ITS 
+#THE STATUS CLASS ATTRIBUTE INDICATE ITS
 #OPERATIONS RESULTS CODES:
 
 #NORMAL CODES ->
@@ -53,7 +53,7 @@ class DomainsData:
 	######## PRIVATE METHODS ########
 
 	def __ddValidate(self, domainYaml):
-		
+
 		if not "DOMAINS" in domainYaml or not "RESOURCES" in domainYaml or not "LOCAL" in domainYaml or not "TRANSITION" in domainYaml:
 			self.__status = -3
 			return False
@@ -95,14 +95,14 @@ class DomainsData:
 
 			if domainYaml["RESOURCES"][domain]["CPUS"] < 0 or domainYaml["RESOURCES"][domain]["NET_IFACES"] < 0 or domainYaml["RESOURCES"][domain]["MEMORY"] < 0:
 				self.__status = -9
-				return False				
+				return False
 
 		return True
 
 	######## PUBLIC METHODS ########
 
 	def ddProcess(self, domainFile):
-		
+
 		if not os.path.isfile(domainFile):
 			self.__status = -1
 			return
@@ -111,7 +111,7 @@ class DomainsData:
 		openedFile.close()
 
 		try:
-			domainYaml = yaml.load(fileData)
+			domainYaml = yaml.safe_load(fileData)
 		except:
 			self.__status = -2
 			return
@@ -143,8 +143,8 @@ class DomainsData:
 
 		return self.__domainsResources
 
-	def  ddLocalMetrics(self):	
-		
+	def  ddLocalMetrics(self):
+
 		if self.__status != 1:
 			return
 
@@ -186,5 +186,5 @@ class DomainsData:
 			transitionMetrics[metric["ID"]] = metric
 
 		return transitionMetrics
-		
+
 ######## DOMAINS DATA CLASS END ########

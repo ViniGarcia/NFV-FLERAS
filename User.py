@@ -20,6 +20,7 @@ from SCAG.SFCTopology import SFCTopology
 from CUSCO.SFCExpansion import SFCExpansion
 from CUSCO.GoalFunction import GoalFunction
 from CUSCO.SFCComposition import SFCComposition
+from CUSMAP.SFCSplitMap import SFCSplitAndMap
 
 class FLERASCLI(Cmd):
 
@@ -28,6 +29,7 @@ class FLERASCLI(Cmd):
 	request = None
 	topology = None
 	composition = None
+	mapping = None
 	type = None
 
 	def do_help(self, args):
@@ -74,7 +76,7 @@ class FLERASCLI(Cmd):
 			return
 
 		if self.domains == None:
-			print("DOMAINS SETUP IS NEEDED")
+			print("DOMAINS SETUP IS REQUIRED")
 			return
 
 		if not isfile(args[1]):
@@ -116,7 +118,7 @@ class FLERASCLI(Cmd):
 			return
 
 		if self.request == None:
-			print("REQUEST SETUP IS NEEDED")
+			print("REQUEST SETUP IS REQUIRED")
 			return
 
 		expand = SFCExpansion(self.topology)
@@ -125,13 +127,25 @@ class FLERASCLI(Cmd):
 
 		print("SUCCESS!!")
 
+	def do_map(self, args):
+
+		if len(args) != 0 or self.type != "SM":
+			return
+
+		if self.request == None:
+			print("REQUEST SETUP IS REQUIRED")
+			return
+
+		self.mapping = SFCSplitAndMap(self.request, self.domains)
+		self.mapping.ssamNaturalRequest()
+
 	def do_topologies(self, args):
 
 		if len(args) != 0:
 			return
 
 		if self.composition == None:
-			print("COMPOSE PROCESS IS NEEDED")
+			print("COMPOSE TASK IS REQUIRED")
 			return
 
 		topologies = self.composition.scSFCIndexes()
@@ -141,17 +155,37 @@ class FLERASCLI(Cmd):
 			print("TOPOLOGY: " + topo[0] + "  " + "INDEX: " + str(topo[1]))
 		print("###########################################")
 
+	def do_mappings(self, args):
+
+		if len(args) != 0:
+			return
+
+		if self.mapping == None:
+			print("MAPPING TASK IS REQUIRED")
+			return
+
+		maps = self.mapping.ssamKeys()
+		sis = self.mapping.ssamIndexes()
+
+		print("################ MAPPINGS ##################")
+		for index in range(len(maps)):
+			print("MAPPING: " + str(maps[index]) + "  " + "INDEX: " + str(sis[index]))
+		print("###########################################")
+
 	def do_advice(self, args):
 
 		if len(args) != 0:
 			return
 
-		if self.composition == None:
-			print("COMPOSE PROCESS IS NEEDED")
+		if self.composition == None and self.mapping == None:
+			print("DEPLOYMENT PROCESS IS REQUIRED")
 			return
 
 		print("############### ADVICE #################")
-		print("COMPOSITION: " + self.composition.scBestTopology())
+		if self.composition != None:
+			print("COMPOSITION: " + self.composition.scBestTopology())
+		if self.mapping != None:
+			print("MAPPING: " + self.mapping.ssamAdvice())
 		print("###########################################")
 
 	def do_exit(self, args):

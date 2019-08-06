@@ -25,14 +25,11 @@
 #-4: INVALID SYMBOL IN A PROVIDED TOPOLOGY
 
 #################################################
-import sys
-sys.path.insert(0, '../')
-
 from itertools import islice
 
 from YAMLR.EmbeddingRequest import EmbeddingRequest
 from YAMLR.DomainsData import DomainsData
-from OptimalSM import OptimalSM
+from CUSMAP.OptimalSM import OptimalSM
 
 class SFCSplitAndMap:
 	__status = None
@@ -431,8 +428,8 @@ class SFCSplitAndMap:
 ######## SFC SPLIT MAP CLASS END ########
 
 #TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
-domains = DomainsData("../Example/DomExample04.yaml")
-request = EmbeddingRequest('../Example/EmbReqExample01.yaml', domains.ddDomains().copy())
-mapping = SFCSplitAndMap(request, domains)
-mapping.ssamNaturalRequest()
+#domains = DomainsData("../Example/DomExample04.yaml")
+#request = EmbeddingRequest('../Example/EmbReqExample01.yaml', domains.ddDomains().copy())
+#mapping = SFCSplitAndMap(request, domains)
+#mapping.ssamNaturalRequest()
 #mapping.ssamOptimalRequest(["IP EO2 EO1 < DOM3 > { EO3 NS1 / EO4 NS2 }","IP EO1 < DOM3 > { EO2 EO3 NS1 / EO2 EO4 NS2 }"], [0.5, 0.8])
