@@ -21,7 +21,7 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 3. NFV service topology expansion tool (deployment composing stage) [OK!!]<br/>
 4. NFV composing goal function creator (deployment composing stage) [OK!!]<br/>
 5. NFV service generic composition tool (deployment composing stage) [OK!!]<br/>
-6. NFV service generic split and mapping tool (deployment embedding stage) [IN DEVELOPMENT!!]<br/>
+6. NFV service generic split and mapping tool (deployment embedding stage) [OK!!]<br/>
 7. NFV service generic selection tool (deployment embedding stage) [WAITING]<br/>
 8. NFV service generic placement tool (deployment embedding stage) [WAITING]<br/>
 8. NFV service generic scheduling tool (deployment scheduling stage) [WAITING]<br/>
@@ -35,6 +35,7 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 3. CUSTOM (CUtomazable Service Topology Model): complete NFV service topology specification model
 4. HELM (Holistic EvaLuation Methodology): multi-criteria and holistic deployment evaluation library
 5. CUSCO (CUstomazable Service COmposing): generic and flexible composition tool
+6. CUSMAP (CUstomazable Service MAPping): generic and flexible split and mapping tool
 
 ### Support
 
