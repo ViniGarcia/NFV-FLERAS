@@ -3,7 +3,7 @@ METADATA:
   DESCRIPTION: >
     Test service especification.
 SERVICE:
-  TOPOLOGY: !!str IP EO1 < DOM1 > EO2 { EO3 < DOM2 > EO5 EO6 / EO4 EO5 EO6 } EO7 NS
+  TOPOLOGY: !!str IP EO1 < FendePOA > EO2 { EO3 < FendeSM > EO5 EO6 / EO4 EO5 EO6 } EO7 NS
   OELEMENTS:
     - !!str &OE1 EO1
     - !!str &OE2 EO2

@@ -21,12 +21,12 @@
 #################################################
 
 import sys
-sys.path.insert(0, 'YAMLR/')
+sys.path.insert(0, '../')
 
 import copy
 from itertools import product
 
-from SFCRequest import SFCRequest
+from YAMLR.EmbeddingRequest import EmbeddingRequest
 
 class OptimalSM:
 	__status = None
@@ -71,7 +71,7 @@ class OptimalSM:
 		for index in self.__currentIndexes:
 			ordered.append(self.__currentInteractions[index])
 		fullCombinations = list(product(*ordered))
-		print("PRODUTO INICIAL: ", len(fullCombinations))
+		#print("PRODUTO INICIAL: ", len(fullCombinations))
 
 		acceptedCombinations = []
 		transitionPolicies = list(set(list(self.__sfcImmPolicies["TRANSITION"].keys()) + list(self.__sfcAggPolicies["TRANSITION"].keys())))
@@ -118,7 +118,7 @@ class OptimalSM:
 			if accept:
 				acceptedCombinations.append(distribution)
 
-		print("TRANSIÇÕES POSSIVEIS: ", len(acceptedCombinations))
+		#print("TRANSIÇÕES POSSIVEIS: ", len(acceptedCombinations))
 		return acceptedCombinations
 
 	def __osmCombineResources(self, domCombinations):
@@ -148,8 +148,8 @@ class OptimalSM:
 			if accept:
 				acceptedCombinations.append(distribution)
 
-		print("RECURSOS: ", len(acceptedCombinations))
-		print("DROPS RECURSOS: ", printTest)
+		#print("RECURSOS: ", len(acceptedCombinations))
+		#print("DROPS RECURSOS: ", printTest)
 		return acceptedCombinations
 
 	def __osmCombinePolicies(self, resCombinations):
@@ -264,8 +264,8 @@ class OptimalSM:
 				acceptedCombinations["DIST"].append(distribution)
 				acceptedCombinations["AGG"].append(aggregationsAnalysis)
 
-		print('POLITICAS: ', len(acceptedCombinations["DIST"]))
-		print('DROPS POLITICAS: ', printDrops)
+		#print('POLITICAS: ', len(acceptedCombinations["DIST"]))
+		#print('DROPS POLITICAS: ', printDrops)
 
 		return acceptedCombinations
 
@@ -286,7 +286,7 @@ class OptimalSM:
 		self.__osmInteractions(elements, dependencies, list(self.__domMatrix.keys()))
 		self.__distEvaluations = self.__osmCombinePolicies(self.__osmCombineResources(self.__osmCombineDomains()))
 		self.__status = 2
-		print("")
+		#print("")
 
 	def osmStatus(self):
 

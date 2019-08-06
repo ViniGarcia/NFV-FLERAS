@@ -26,16 +26,17 @@
 
 #################################################
 import sys
-sys.path.insert(0, 'YAMLR/')
+sys.path.insert(0, '../')
 
 from itertools import islice
 
-from SFCRequest import SFCRequest
-from DomainsData import DomainsData
+from YAMLR.EmbeddingRequest import EmbeddingRequest
+from YAMLR.DomainsData import DomainsData
 from OptimalSM import OptimalSM
 
 class SFCSplitAndMap:
 	__status = None
+	__summary = None
 
 	__sfcRequest = None
 	__domData = None
@@ -58,37 +59,35 @@ class SFCSplitAndMap:
 
 	######## PRIVATE DEBBUGING METHODS ########
 
-	def __ssamGenerateReport(self, evaluations, normalizations, DAI, UI):
+	def __ssamGenerateReport(self, evaluations, normalizations, DAI):
 
 		bestIndexes = []
 		idNr = 0
+		self.__summary = ""
 
-		if evaluations != None and normalizations != None and DAI != None and UI != None:
+		if evaluations != None and normalizations != None and DAI != None:
 			for key in evaluations:
 				if key == "DAI":
 					continue
 
 				DAIbestIndex = 0
 				DAIbestIDs = []
-				UIbestIndex = 0
-				UIbestIDs = []
 
 				for dIndex in range(len(evaluations[key]["DIST"])):
-					print(idNr, "-", key, "/", evaluations[key]["DIST"][dIndex], ":")
-					print("  AGGREGATE(ABS) ->")
+					self.__summary += str(idNr) + "-" + key + "/" + str(evaluations[key]["DIST"][dIndex]) + ":\n"
+					self.__summary += "  AGGREGATE(ABS) ->\n"
 					for metric in evaluations[key]["AGG"][dIndex]["AGGREGATE"]:
-						print("    ", metric, ":", evaluations[key]["AGG"][dIndex]["AGGREGATE"][metric])
-					print("  IMMEDIATE(ABS) ->")
+						self.__summary += "    " + metric + ":" + str(evaluations[key]["AGG"][dIndex]["AGGREGATE"][metric]) + "\n"
+					self.__summary += "  IMMEDIATE(ABS) ->\n"
 					for metric in evaluations[key]["AGG"][dIndex]["IMMEDIATE"]:
-						print("    ", metric, ":", evaluations[key]["AGG"][dIndex]["IMMEDIATE"][metric])
-					print("  AGGREGATE(NOR) ->")
+						self.__summary += "    " + metric + ":" + str(evaluations[key]["AGG"][dIndex]["IMMEDIATE"][metric]) + "\n"
+					self.__summary += "  AGGREGATE(NOR) ->\n"
 					for metric in normalizations[key]["AGGREGATE"]:
-						print("    ", metric, ":", normalizations[key]["AGGREGATE"][metric][dIndex])
-					print("  IMMEDIATE(NOR) ->")
+						self.__summary += "    " + metric + ":" + str(normalizations[key]["AGGREGATE"][metric][dIndex]) + "\n"
+					self.__summary += "  IMMEDIATE(NOR) ->\n"
 					for metric in normalizations[key]["IMMEDIATE"]:
-						print("    ", metric, ":", normalizations[key]["IMMEDIATE"][metric][dIndex])
-					print("  DAI -> ", DAI[key][dIndex])
-					print("  UI -> ", UI[key][dIndex])
+						self.__summary += "    " + metric + ":" + str(normalizations[key]["IMMEDIATE"][metric][dIndex]) + "\n"
+					self.__summary += "  DAI -> " + str(DAI[key][dIndex]) + "\n"
 
 					if DAIbestIndex == DAI[key][dIndex]:
 						DAIbestIDs.append(idNr)
@@ -96,20 +95,14 @@ class SFCSplitAndMap:
 						if DAIbestIndex < DAI[key][dIndex]:
 							DAIbestIndex = DAI[key][dIndex]
 							DAIbestIDs = [idNr]
-					if UIbestIndex == UI[key][dIndex]:
-						UIbestIDs.append(idNr)
-					else:
-						if UIbestIndex < UI[key][dIndex]:
-							UIbestIndex = UI[key][dIndex]
-							UIbestIDs = [idNr]
 					idNr += 1
 
-				bestIndexes.append({"TOPOLOGY":key, "DAI":DAIbestIndex, "DAIDIST":DAIbestIDs, "UI":UIbestIndex, "UIDIST":UIbestIDs})
+				bestIndexes.append({"TOPOLOGY":key, "DAI":DAIbestIndex, "DAIDIST":DAIbestIDs})
 
-			print("\n------ BEST INDEXES SUMMARY ------\n")
+			self.__summary += "\n------ BEST INDEXES SUMMARY ------\n"
 			for summary in bestIndexes:
-				print(summary,"\n")
-			print("-----------------------------------")
+				self.__summary += str(summary) + "\n"
+			self.__summary += "-----------------------------------"
 
 	######## PRIVATE VALIDATION METHODS ########
 
@@ -146,7 +139,7 @@ class SFCSplitAndMap:
 
 	def __ssamCheckDomains(self):
 
-		if set(self.__sfcRequest.srDomains()) <= set(self.__domData.ddDomains()):
+		if set(self.__sfcRequest.erDomains()) <= set(self.__domData.ddDomains()):
 			return True
 		else:
 			self.__status = -1
@@ -154,7 +147,7 @@ class SFCSplitAndMap:
 
 	def __ssamCheckPolicies(self):
 
-		requestPolicies = self.__sfcRequest.srPoliciesMetrics()
+		requestPolicies = self.__sfcRequest.erPoliciesMetrics()
 		domainsLMetrics = self.__domData.ddLocalMetrics()
 		domainsTMetrics = self.__domData.ddTransitionMetrics()
 
@@ -170,7 +163,7 @@ class SFCSplitAndMap:
 
 	def __ssamCheckTopology(self, topology):
 
-		validSymbols = self.__sfcRequest.srServiceOE() + self.__sfcRequest.srServiceON() + self.__sfcRequest.srDomains() + ['<', '>', '{', '}', '/', 'IP']
+		validSymbols = self.__sfcRequest.erServiceOE() + self.__sfcRequest.erServiceON() + self.__sfcRequest.erDomains() + ['<', '>', '{', '}', '/', 'IP']
 		splittedTopo = topology.split()
 
 		for symbol in splittedTopo:
@@ -183,7 +176,7 @@ class SFCSplitAndMap:
 
 		immPolicies = {"LOCAL": {}, "TRANSITION":{}}
 		aggPolicies = {"LOCAL": {}, "TRANSITION":{}}
-		rawPolicies = self.__sfcRequest.srPolicies()
+		rawPolicies = self.__sfcRequest.erPolicies()
 
 		for policy in rawPolicies["IMMEDIATE"]:
 			if policy["TYPE"] == "DOMAIN":
@@ -199,7 +192,7 @@ class SFCSplitAndMap:
 
 		self.__immediateDictionary = immPolicies
 		self.__aggregateDictionary = aggPolicies
-		self.__flavoursDictionary = self.__sfcRequest.srServiceFlavours()
+		self.__flavoursDictionary = self.__sfcRequest.erServiceFlavours()
 
 	def __ssamPreprocessTopology(self, topology):
 
@@ -336,7 +329,7 @@ class SFCSplitAndMap:
 		for topology in topologiesList:
 			if self.__ssamCheckTopology(topology):
 				arguments = self.__ssamPreprocessTopology(topology)
-				processor.osmProcess(self.__sfcRequest.srServiceOE(), self.__sfcRequest.srServiceON(), arguments[0], arguments[1])
+				processor.osmProcess(self.__sfcRequest.erServiceOE(), self.__sfcRequest.erServiceON(), arguments[0], arguments[1])
 				evaluations[topology] = processor.osmEvaluation()
 			else:
 				self.__status = -4
@@ -355,6 +348,27 @@ class SFCSplitAndMap:
 		self.__ssamGenerateReport(evaluations, normalizations, DAI, UI)
 		self.__status = 2
 
+	def ssamNaturalRequest(self):
+
+		if self.__status < 1:
+			return
+
+		evaluations = {}
+		processor = OptimalSM(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
+		if self.__ssamCheckTopology(self.__sfcRequest.erServiceTopology()):
+			arguments = self.__ssamPreprocessTopology(self.__sfcRequest.erServiceTopology())
+			processor.osmProcess(self.__sfcRequest.erServiceOE(), self.__sfcRequest.erServiceON(), arguments[0], arguments[1])
+			evaluations[self.__sfcRequest.erServiceTopology()] = processor.osmEvaluation()
+		else:
+			self.__status = -4
+			return
+
+		normalizations = self.__ssamNormalizeEvaluations(evaluations)
+		DAI = self.__ssamGenerateIndex(evaluations, normalizations)
+
+		self.__ssamGenerateReport(evaluations, normalizations, DAI)
+		self.__status = 2
+
 	def ssamStatus(self):
 
 		return self.__status
@@ -362,8 +376,8 @@ class SFCSplitAndMap:
 ######## SFC SPLIT MAP CLASS END ########
 
 #TESTS -> PARTIALLY IMPLEMENTED (ON DEVELOPMENT)
-domains = DomainsData("Example/DomExample04.yaml")
-request = SFCRequest('Example/ReqExample14.yaml', domains.ddDomains().copy())
+domains = DomainsData("../Example/DomExample04.yaml")
+request = EmbeddingRequest('../Example/EmbReqExample01.yaml', domains.ddDomains().copy())
 mapping = SFCSplitAndMap(request, domains)
-mapping.ssamOptimalRequest(["IP EO1 EO6 EO2 { EO3 / EO4 } EO5 EO7 NS", "IP EO1 EO2 { EO6 EO3 EO5 / EO6 EO4 EO5 } EO7 NS", "IP EO1 EO2 { EO3 EO5 / EO4 EO5 } EO6 EO7 NS"], [0.666, 0.5, 0.327])
+mapping.ssamNaturalRequest()
 #mapping.ssamOptimalRequest(["IP EO2 EO1 < DOM3 > { EO3 NS1 / EO4 NS2 }","IP EO1 < DOM3 > { EO2 EO3 NS1 / EO2 EO4 NS2 }"], [0.5, 0.8])
