@@ -37,6 +37,7 @@ from OptimalSM import OptimalSM
 class SFCSplitAndMap:
 	__status = None
 	__summary = None
+	__evaluations = None
 
 	__sfcRequest = None
 	__domData = None
@@ -59,15 +60,15 @@ class SFCSplitAndMap:
 
 	######## PRIVATE DEBBUGING METHODS ########
 
-	def __ssamGenerateReport(self, evaluations, normalizations, DAI):
+	def __ssamGenerateReport(self, evaluations, normalizations, DSI):
 
 		bestIndexes = []
 		idNr = 0
 		self.__summary = ""
 
-		if evaluations != None and normalizations != None and DAI != None:
+		if evaluations != None and normalizations != None and DSI != None:
 			for key in evaluations:
-				if key == "DAI":
+				if key == "DSI":
 					continue
 
 				DAIbestIndex = 0
@@ -87,17 +88,17 @@ class SFCSplitAndMap:
 					self.__summary += "  IMMEDIATE(NOR) ->\n"
 					for metric in normalizations[key]["IMMEDIATE"]:
 						self.__summary += "    " + metric + ":" + str(normalizations[key]["IMMEDIATE"][metric][dIndex]) + "\n"
-					self.__summary += "  DAI -> " + str(DAI[key][dIndex]) + "\n"
+					self.__summary += "  DSI -> " + str(DSI[key][dIndex]) + "\n"
 
-					if DAIbestIndex == DAI[key][dIndex]:
+					if DAIbestIndex == DSI[key][dIndex]:
 						DAIbestIDs.append(idNr)
 					else:
-						if DAIbestIndex < DAI[key][dIndex]:
-							DAIbestIndex = DAI[key][dIndex]
+						if DAIbestIndex < DSI[key][dIndex]:
+							DAIbestIndex = DSI[key][dIndex]
 							DAIbestIDs = [idNr]
 					idNr += 1
 
-				bestIndexes.append({"TOPOLOGY":key, "DAI":DAIbestIndex, "DAIDIST":DAIbestIDs})
+				bestIndexes.append({"TOPOLOGY":key, "DSI":DAIbestIndex, "DSIDIST":DAIbestIDs})
 
 			self.__summary += "\n------ BEST INDEXES SUMMARY ------\n"
 			for summary in bestIndexes:
@@ -291,16 +292,16 @@ class SFCSplitAndMap:
 							normalizations[topology]["AGGREGATE"][policy][index] = normalizations[topology]["AGGREGATE"][policy][index] * self.__aggregateDictionary[category][policy]['WEIGHT']
 						indexes[topology][index] += normalizations[topology]["AGGREGATE"][policy][index]
 
-		evaluations['DAI'] = indexes
+		evaluations['DSI'] = indexes
 		return indexes
 
-	def __ssamHarmonizeIndexes(self, topologiesList, TAI, DAI):
+	def __ssamHarmonizeIndexes(self, topologiesList, TAI, DSI):
 
 		UI = {}
 		for topology in topologiesList:
 			UI[topology] = []
 
-			for evaluation in DAI[topology]:
+			for evaluation in DSI[topology]:
 				UI[topology].append((evaluation + TAI[topology])/2)
 
 		return UI
@@ -336,17 +337,18 @@ class SFCSplitAndMap:
 				return
 
 		normalizations = self.__ssamNormalizeEvaluations(evaluations)
-		DAI = self.__ssamGenerateIndex(evaluations, normalizations)
+		DSI = self.__ssamGenerateIndex(evaluations, normalizations)
 
 		if topoligiesTAI != None:
 
 			TAI = {}
 			for index in range(len(topologiesList)):
 				TAI[topologiesList[index]] = topoligiesTAI[index]
-			UI = self.__ssamHarmonizeIndexes(topologiesList, TAI, DAI)
+			UI = self.__ssamHarmonizeIndexes(topologiesList, TAI, DSI)
 
-		self.__ssamGenerateReport(evaluations, normalizations, DAI, UI)
-		self.__status = 2
+		self.__ssamGenerateReport(evaluations, normalizations, DSI, UI)
+		self.__status = 3
+		self.__evaluations = evaluations
 
 	def ssamNaturalRequest(self):
 
@@ -363,15 +365,68 @@ class SFCSplitAndMap:
 			self.__status = -4
 			return
 
-		normalizations = self.__ssamNormalizeEvaluations(evaluations)
-		DAI = self.__ssamGenerateIndex(evaluations, normalizations)
+		if len(evaluations[self.__sfcRequest.erServiceTopology()]["DIST"]) == 0:
+			return
 
-		self.__ssamGenerateReport(evaluations, normalizations, DAI)
+		normalizations = self.__ssamNormalizeEvaluations(evaluations)
+		DSI = self.__ssamGenerateIndex(evaluations, normalizations)
+
+		self.__ssamGenerateReport(evaluations, normalizations, DSI)
 		self.__status = 2
+		self.__evaluations = evaluations
 
 	def ssamStatus(self):
 
 		return self.__status
+
+	def ssamKeys(self):
+
+		if self.__status != 2:
+			return None
+
+		return self.__evaluations[self.__sfcRequest.erServiceTopology()]["DIST"]
+
+	def ssamAggregations(self):
+
+		if self.__status != 2:
+			return None
+
+		return self.__evaluations[self.__sfcRequest.erServiceTopology()]["AGG"]
+
+	def ssamIndexes(self):
+
+		if self.__status != 2:
+			return None
+
+		return self.__evaluations["DSI"][self.__sfcRequest.erServiceTopology()]
+
+	def ssamAdvice(self):
+
+		if self.__status != 2:
+			return None
+
+		key = self.__evaluations["DSI"][self.__sfcRequest.erServiceTopology()].index(max(self.__evaluations["DSI"][self.__sfcRequest.erServiceTopology()]))
+		base = self.__sfcRequest.erServiceTopology().split()
+		result = base.copy()
+		offload = 0
+
+		for index in range(len(base)):
+			if base[index] in self.__sfcRequest.erServiceOE():
+				if base[index + 1] != "<":
+					result.insert(index + offload + 1, "<")
+					result.insert(index + offload + 2, self.__evaluations[self.__sfcRequest.erServiceTopology()]["DIST"][key][int(offload/3)])
+					result.insert(index + offload + 3, ">")
+					offload += 3
+
+		return " ".join(result)
+
+	def ssamSummary(self):
+
+		if self.__status != 2:
+			return None
+
+		return self.__summary
+
 
 ######## SFC SPLIT MAP CLASS END ########
 
