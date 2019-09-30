@@ -20,3 +20,23 @@ SCAG was developed using standard Python 3 language and other libraries such as:
 <p align="center">
   <img src="http://www.inf.ufpr.br/vfgarcia/hosting/SCAG.png">
 </p>
+
+### Do you have some examples?
+
+Yes, for sure. First, let us specify the media cache service presented in [1]. This service is a simple linear topology with three network functions: Cache (C), Firewall (FW), and Network Address Translator (NAT). This service is depicted in the figure below [A]. The SCAG specification is shown in the same figure in [B]. Note that the symbol "EN1" defines an egress node.
+
+<p align="center">
+  <img src="http://www.inf.ufpr.br/vfgarcia/hosting/MS.png">
+</p>
+
+However, sometimes, branching segments are needed. An example where branching is requested is the security service presented in [2]. This security topology is composed of multiple branches that process suspicious traffic according to the type and the network layer of threat. We depict the described service topology in the figure below in [A] with four network functions: Screener (S), Network Security (NS -- for layer 3 threats), Application Security (AS - for layer 7 threats), and Network Adress Translator (NAT). In figure [B], we show the SCAG specification with three egress nodes (EN1, EN2, and EN3).
+
+<p align="center">
+  <img src="http://www.inf.ufpr.br/vfgarcia/hosting/SS.png">
+</p>
+
+Finally, when a service topology is submitted to a composing solution, the network operator should be able to previous declare partially ordered segments of network functions. Thus, these segments become the optimization target of composing solutions. For example, consider an HTTP security service with five network functions as depicted in figure below [A]: Firewall (FW), Deep Packet Inspector (DPI), Markup Filter (MF), Intrusion Prevent System (IPS), and Load Balancer (LB). The first four functions (FW, DPI, MF, and IPS) can be repositioned (with some constraints, discussed later) and still provide the same service functionalities. Note that there are some constraints to be observed, for example, the MF is coupled to the DPI once the DPI mark invalid requests and the MF drops them. Also, the FW has an ordering dependency with the DPI once only HTTP packets are allowed by the firewall, and the DPI is designed to analyze only this protocol. In figure [B], the SCAG specification with the described partially ordering segments and dependencies is presented.
+
+<p align="center">
+  <img src="http://www.inf.ufpr.br/vfgarcia/hosting/HSS.png">
+</p>
