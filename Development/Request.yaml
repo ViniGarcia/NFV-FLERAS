@@ -1,0 +1,60 @@
+METRICS:
+  LOCAL:
+    PRICE: "MINIMIZATION" 
+  TRANSITION:
+    RTT: "MINIMIZATION"
+    HOPS: "MINIMIZATION"
+SERVICE:
+  TOPOLOGY: ["IN", "F1", "F2", "EN"]
+  FUNCTION: 
+    F1: 
+      MEMORY: 1024
+      VCPU: 2
+      IFACES: 2
+    F2:
+      MEMORY: 512
+      VCPU: 1
+      IFACES: 2
+DOMAINS:
+  D1: 
+    RESOURCE:
+      MEMORY: 1024
+      VCPU: 2
+      IFACES: 4
+    LOCAL:
+      PRICE: 50
+    TRANSITION:
+      D2: 
+        RTT: 5
+        HOPS: 4
+      D3:
+        RTT: 10
+        HOPS: 4
+  D2: 
+    RESOURCE:
+      MEMORY: 1024
+      VCPU: 2
+      IFACES: 4
+    LOCAL:
+      PRICE: 100
+    TRANSITION:
+      D1: 
+        RTT: 15
+        HOPS: 4
+      D3:
+        RTT: 20
+        HOPS: 2
+  D3:
+    RESOURCE:
+      MEMORY: 512
+      VCPU: 2
+      IFACES: 4
+    LOCAL:
+      PRICE: 75
+    TRANSITION:
+      D1: 
+        RTT: 20
+        HOPS: 4
+      D2:
+        RTT: 10
+        HOPS: 2
