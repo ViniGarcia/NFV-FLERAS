@@ -43,74 +43,110 @@ class RequestProcessor:
 			return -8
 
 		for metric in requestYAML["METRICS"]["LOCAL"]:
-			if not requestYAML["METRICS"]["LOCAL"][metric] in ["MAXIMIZATION", "MINIMIZATION"]:
+			if not "OBJECTIVE" in requestYAML["METRICS"]["LOCAL"][metric] or not "POLICIES" in requestYAML["METRICS"]["LOCAL"][metric]:
 				return -9
 
-		for metric in requestYAML["METRICS"]["TRANSITION"]:
-			if not requestYAML["METRICS"]["TRANSITION"][metric] in ["MAXIMIZATION", "MINIMIZATION"]:
+			if not requestYAML["METRICS"]["LOCAL"][metric]["OBJECTIVE"] in ["MAXIMIZATION", "MINIMIZATION"]:
 				return -10
 
+			if not isinstance(requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"], list):
+				return -11
+
+			validPolicies = []
+			for policy in requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"]:
+				policy = policy.split(" ")
+				if not policy[0] in ["=", ">", "<", ">=", "<="]:
+					return -12
+				try: 
+					float(policy[1])
+				except:
+					return -13
+				validPolicies.append(policy[0] + policy[1])
+			requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"] = validPolicies
+
+		for metric in requestYAML["METRICS"]["TRANSITION"]:
+			if not "OBJECTIVE" in requestYAML["METRICS"]["TRANSITION"][metric] or not "POLICIES" in requestYAML["METRICS"]["TRANSITION"][metric]:
+				return -14
+
+			if not requestYAML["METRICS"]["TRANSITION"][metric]["OBJECTIVE"] in ["MAXIMIZATION", "MINIMIZATION"]:
+				return -15
+
+			if not isinstance(requestYAML["METRICS"]["TRANSITION"][metric]["POLICIES"], list):
+				return -16
+
+			validPolicies = []
+			for policy in requestYAML["METRICS"]["TRANSITION"][metric]["POLICIES"]:
+				policy = policy.split(" ")
+				if not policy[0] in ["=", ">", "<", ">=", "<="]:
+					return -17
+				try: 
+					float(policy[1])
+				except:
+					return -18
+				validPolicies.append(policy[0] + policy[1])
+			requestYAML["METRICS"]["TRANSITION"][metric]["POLICIES"] = validPolicies
+
 		if not isinstance(requestYAML["SERVICE"]["TOPOLOGY"], list) or not isinstance(requestYAML["SERVICE"]["FUNCTION"], dict):
-			return -11
+			return -19
 
 		for member in requestYAML["SERVICE"]["TOPOLOGY"]:
 			if member == "IN" or str.startswith(member, "EN"):
 				continue
 			if not member in requestYAML["SERVICE"]["FUNCTION"]:
-				return -12
+				return -20
 
 		for member in requestYAML["SERVICE"]["FUNCTION"]:
 			if not member in requestYAML["SERVICE"]["TOPOLOGY"]:
-				return -13
+				return -21
 
 		if not isinstance(requestYAML["DOMAINS"], dict):
-			return -14
+			return -22
 
 		for member in requestYAML["SERVICE"]["FUNCTION"]:
 			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member], dict):
-				return -15
+				return -23
 			if not "MEMORY" in requestYAML["SERVICE"]["FUNCTION"][member] or not "VCPU" in requestYAML["SERVICE"]["FUNCTION"][member] or not "IFACES" in requestYAML["SERVICE"]["FUNCTION"][member]:
-				return -16
+				return -24
 			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"], int):
-				return -17
+				return -25
 			if requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"] < 0:
-				return -18
+				return -26
 
 		for member in requestYAML["DOMAINS"]:
 			if not isinstance(requestYAML["DOMAINS"][member], dict):
-				return -19
+				return -27
 			if not "RESOURCE" in requestYAML["DOMAINS"][member] or not "LOCAL" in requestYAML["DOMAINS"][member] or not "TRANSITION" in requestYAML["DOMAINS"][member]:
-				return -20
+				return -28
 			if not "MEMORY" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "VCPU" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "IFACES" in requestYAML["DOMAINS"][member]["RESOURCE"]:
-				return -21
+				return -29
 			if not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"], int):
-				return -22
+				return -30
 			if requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"] < 0:
-				return -23
+				return -31
 
 			for metric in requestYAML["DOMAINS"][member]["LOCAL"]:
 				if not metric in requestYAML["METRICS"]["LOCAL"]:
-					return -24
+					return -32
 				if not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], float):
-					return -25
+					return -33
 
 			for metric in requestYAML["METRICS"]["LOCAL"]:
 				if not metric in requestYAML["DOMAINS"][member]["LOCAL"]:
-					return -26
+					return -34
 
 			for domain in requestYAML["DOMAINS"][member]["TRANSITION"]:
 				if not domain in requestYAML["DOMAINS"]:
-					return -27
+					return -35
 
 				for metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
 					if not metric in requestYAML["METRICS"]["TRANSITION"]:
-						return -28
+						return -36
 					if not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], float):
-						return -29
+						return -37
 
 				for metric in requestYAML["METRICS"]["TRANSITION"]:
 					if not metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
-						return -30
+						return -38
 
 		return 1
 
@@ -225,14 +261,14 @@ class ServiceMapping(platypus.Problem):
 		for metric in range(0, len(self.__metrics["LOCAL"])):
 			parameter = self.__domains[0]["LOCAL"][metric]
 			for domain in range(1, len(self.__domains)):
-				if self.__metrics["LOCAL"][metric] == "MINIMIZATION":
+				if self.__metrics["LOCAL"][metric]["OBJECTIVE"] == "MINIMIZATION":
 					if self.__domains[domain]["LOCAL"][metric] > parameter:
 						parameter = self.__domains[domain]["LOCAL"][metric]
 				else:
 					if self.__domains[domain]["LOCAL"][metric] < parameter:
 						parameter = self.__domains[domain]["LOCAL"][metric]
 
-			if self.__metrics["LOCAL"][metric] == "MINIMIZATION":
+			if self.__metrics["LOCAL"][metric]["OBJECTIVE"] == "MINIMIZATION":
 				if parameter < 0:
 					self.__penalize.append(1)
 				else:
@@ -252,14 +288,14 @@ class ServiceMapping(platypus.Problem):
 						parameter = self.__domains[domain]["TRANSITION"][connection][metric]
 						continue
 
-					if self.__metrics["TRANSITION"][metric] == "MINIMIZATION":
+					if self.__metrics["TRANSITION"][metric]["OBJECTIVE"] == "MINIMIZATION":
 						if self.__domains[domain]["TRANSITION"][connection][metric] > parameter:
 							parameter = self.__domains[domain]["TRANSITION"][connection][metric]
 					else:
 						if self.__domains[domain]["TRANSITION"][connection][metric] < parameter:
 							parameter = self.__domains[domain]["TRANSITION"][connection][metric]
 
-			if self.__metrics["TRANSITION"][metric] == "MINIMIZATION":
+			if self.__metrics["TRANSITION"][metric]["OBJECTIVE"] == "MINIMIZATION":
 				if parameter < 0:
 					self.__penalize.append(1)
 				else:
@@ -358,16 +394,16 @@ class Mapping:
 			return
 
 		if population < 1:
-			self.__status = -31
+			self.__status = -39
 			return
 		if tournament < 2 or tournament > population:
-			self.__status = -32
+			self.__status = -40
 			return
 		if not crossover in ["SBX", "HUX", "PMX", "SSX"]:
-			self.__status = -33
+			self.__status = -41
 			return
 		if crossoverProbability <= 0 or crossoverProbability > 1:
-			self.__status = -34
+			self.__status = -42
 			return
 
 		if crossover == "SBX":
@@ -389,7 +425,7 @@ class Mapping:
 		elif algorithm == "SPEA2":
 			self.__algorithm = platypus.SPEA2(self.__problem, population_size = population, selector = platypus.operators.TournamentSelector(tournament, dominance=platypus.core.AttributeDominance(platypus.core.fitness_key)), variator = crossover)
 		else:
-			self.__status = -35
+			self.__status = -43
 
 	def execute(self, iterations):
 
@@ -397,12 +433,12 @@ class Mapping:
 			return self.__status
 
 		if not isinstance(iterations, int):
-			self.__status = -36
-			return -36
+			self.__status = -44
+			return -44
 
 		if iterations < 1:
-			self.__status = -37
-			return -37
+			self.__status = -45
+			return -45
 
 		self.__algorithm.run(iterations)
 
@@ -426,8 +462,6 @@ for index in range(len(result[0])):
 	print(result[0][index])
 	print(result[1][index])
 	print("----")
-
-
 
 #Improvement -> enable the specification of generic topologies
 #Improvement -> enable the specification of domain dependencies
