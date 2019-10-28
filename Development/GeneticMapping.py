@@ -328,21 +328,28 @@ class ServiceMapping(platypus.Problem):
 			for policy in metrics["TRANSITION"][index]["POLICIES"]:
 				self.__policies["EQUATION"].append(policy)
 				self.__policies["INDEX"].append(index)
-		
+		self.__policies["EQUATION"].append("==0")
+
 		#Initializing problem [(dimensions, objectives)])
 		super(ServiceMapping, self).__init__(len(service["STRUCTURE"]), len(metrics["LOCAL"]) + len(metrics["TRANSITION"]), len(self.__policies["EQUATION"]))
+
 		#Initializing candidate domains [from 0 to domain n-1 -- for all dimension] 
 		self.types[:] = [platypus.Integer(0, len(domains)-1)] * len(service["STRUCTURE"])
+
 		#Initializing directions
 		self.directions[:] = directions
+
 		#Initializing constraints
 		self.constraints[:] = self.__policies["EQUATION"]
+
 		#Initializing processing data
 		self.__metrics = metrics
 		self.__service = service
 		self.__domains = domains
+
 		#Create the penalty vector
 		self.__penalty()
+
 		#Status updated to "ready to process"
 		self.__status = 1
     
@@ -360,9 +367,7 @@ class ServiceMapping(platypus.Problem):
 				computation[candidate[index]][resource] += self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
 				if computation[candidate[index]][resource] > self.__domains[candidate[index]]["RESOURCE"][resource]:
 					solution.objectives[:] = self.__penalize
-					for policy in self.__policies["INDEX"]:
-						constraints.append(self.__penalize[policy])
-					solution.constraints[:] = constraints
+					solution.constraints[:] = self.__policies["INDEX"] + [1]
 					return
 
 			for metric in self.__metrics["LOCAL"]:
@@ -373,9 +378,7 @@ class ServiceMapping(platypus.Problem):
 
 			if not candidate[index] in self.__domains[candidate[index-1]]["TRANSITION"]:
 				solution.objectives[:] = self.__penalize
-				for policy in self.__policies["INDEX"]:
-					constraints.append(self.__penalize[policy])
-				solution.constraints[:] = constraints
+				solution.constraints[:] = self.__policies["INDEX"] + [1]
 				return
 
 			for metric in self.__metrics["TRANSITION"]:
@@ -383,8 +386,8 @@ class ServiceMapping(platypus.Problem):
 
 		solution.objectives[:] = evaluation
 		for policy in self.__policies["INDEX"]:
-					constraints.append(evaluation[policy])
-		solution.constraints[:] = constraints
+			constraints.append(evaluation[policy])
+		solution.constraints[:] = constraints + [0]
 
 
 	def getStatus(self):
