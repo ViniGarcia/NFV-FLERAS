@@ -11,7 +11,7 @@ METRICS:
       OBJECTIVE: "MINIMIZATION"
       POLICIES: []
 SERVICE:
-  TOPOLOGY: ["IN", "F1", "F2", "EN"]
+  TOPOLOGY: ["IN", "F1", "F2", "< D2 >", "EN"]
   FUNCTION: 
     F1: 
       MEMORY: 1024

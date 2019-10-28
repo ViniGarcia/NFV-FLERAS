@@ -9,7 +9,7 @@ import local_platypus
 #STATUS CODES: 
 #		0 -> Not evaluated yet
 #		1 -> Succesfully evaluated
-#		-1 to -38 -> Error
+#		-1 to -40 -> Error
 
 class RequestProcessor:
 
@@ -92,61 +92,68 @@ class RequestProcessor:
 		for member in requestYAML["SERVICE"]["TOPOLOGY"]:
 			if member == "IN" or str.startswith(member, "EN"):
 				continue
+			if str.startswith(member, "< ") and str.endswith(member, " >"):
+				dependency = member.split(" ")
+				if len(dependency) != 3:								#Ajustar retornos daqui
+					return -20
+				if not dependency[1] in requestYAML["DOMAINS"]:
+					return -21
+				continue 
 			if not member in requestYAML["SERVICE"]["FUNCTION"]:
-				return -20
+				return -22
 
 		for member in requestYAML["SERVICE"]["FUNCTION"]:
 			if not member in requestYAML["SERVICE"]["TOPOLOGY"]:
-				return -21
+				return -23
 
 		if not isinstance(requestYAML["DOMAINS"], dict):
-			return -22
+			return -24
 
 		for member in requestYAML["SERVICE"]["FUNCTION"]:
 			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member], dict):
-				return -23
-			if not "MEMORY" in requestYAML["SERVICE"]["FUNCTION"][member] or not "VCPU" in requestYAML["SERVICE"]["FUNCTION"][member] or not "IFACES" in requestYAML["SERVICE"]["FUNCTION"][member]:
-				return -24
-			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"], int):
 				return -25
-			if requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"] < 0:
+			if not "MEMORY" in requestYAML["SERVICE"]["FUNCTION"][member] or not "VCPU" in requestYAML["SERVICE"]["FUNCTION"][member] or not "IFACES" in requestYAML["SERVICE"]["FUNCTION"][member]:
 				return -26
+			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"], int):
+				return -27
+			if requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"] < 0:
+				return -28
 
 		for member in requestYAML["DOMAINS"]:
 			if not isinstance(requestYAML["DOMAINS"][member], dict):
-				return -27
-			if not "RESOURCE" in requestYAML["DOMAINS"][member] or not "LOCAL" in requestYAML["DOMAINS"][member] or not "TRANSITION" in requestYAML["DOMAINS"][member]:
-				return -28
-			if not "MEMORY" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "VCPU" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "IFACES" in requestYAML["DOMAINS"][member]["RESOURCE"]:
 				return -29
-			if not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"], int):
+			if not "RESOURCE" in requestYAML["DOMAINS"][member] or not "LOCAL" in requestYAML["DOMAINS"][member] or not "TRANSITION" in requestYAML["DOMAINS"][member]:
 				return -30
-			if requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"] < 0:
+			if not "MEMORY" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "VCPU" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "IFACES" in requestYAML["DOMAINS"][member]["RESOURCE"]:
 				return -31
+			if not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"], int):
+				return -32
+			if requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"] < 0:
+				return -33
 
 			for metric in requestYAML["DOMAINS"][member]["LOCAL"]:
 				if not metric in requestYAML["METRICS"]["LOCAL"]:
-					return -32
+					return -34
 				if not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], float):
-					return -33
+					return -35
 
 			for metric in requestYAML["METRICS"]["LOCAL"]:
 				if not metric in requestYAML["DOMAINS"][member]["LOCAL"]:
-					return -34
+					return -36
 
 			for domain in requestYAML["DOMAINS"][member]["TRANSITION"]:
 				if not domain in requestYAML["DOMAINS"]:
-					return -35
+					return -37
 
 				for metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
 					if not metric in requestYAML["METRICS"]["TRANSITION"]:
-						return -36
+						return -38
 					if not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], float):
-						return -37
+						return -39
 
 				for metric in requestYAML["METRICS"]["TRANSITION"]:
 					if not metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
-						return -38
+						return -40
 
 		return 1
 
@@ -178,14 +185,22 @@ class RequestProcessor:
 			for domain in list(self.__domains[index]["TRANSITION"].keys()):
 				self.__domains[index]["TRANSITION"][keylist.index(domain)] = self.__domains[index]["TRANSITION"].pop(domain)
 
+
 	def __update(self):
 
-		functions = []
+		self.__service["STRUCTURE"] = []
+		self.__service["DEPENDENCY"] = []
+
+		domainKeys = list(self.__domainDictionary.keys())
+		domainNames = list(self.__domainDictionary.values())
+
 		for index in range(len(self.__service["TOPOLOGY"])):
 			if self.__service["TOPOLOGY"][index] in self.__service["FUNCTION"]:
-				functions.append((self.__service["TOPOLOGY"][index], index))
+				self.__service["STRUCTURE"].append((self.__service["TOPOLOGY"][index], index))
+				continue
+			if str.startswith(self.__service["TOPOLOGY"][index], "<"):
+				self.__service["DEPENDENCY"].append((len(self.__service["STRUCTURE"])-1, domainKeys[domainNames.index(self.__service["TOPOLOGY"][index].split(" ")[1])]))
 
-		self.__service["STRUCTURE"] = functions
 
 	def __init__(self, requestFile):
 
@@ -419,16 +434,16 @@ class Mapping:
 			return
 
 		if population < 1:
-			self.__status = -39
-			return
-		if tournament < 2 or tournament > population:
-			self.__status = -40
-			return
-		if not crossover in ["SBX", "HUX", "PMX", "SSX"]:
 			self.__status = -41
 			return
-		if crossoverProbability <= 0 or crossoverProbability > 1:
+		if tournament < 2 or tournament > population:
 			self.__status = -42
+			return
+		if not crossover in ["SBX", "HUX", "PMX", "SSX"]:
+			self.__status = -43
+			return
+		if crossoverProbability <= 0 or crossoverProbability > 1:
+			self.__status = -44
 			return
 
 		if crossover == "SBX":
@@ -446,11 +461,11 @@ class Mapping:
 			algorithm = "SPEA2"
 
 		if algorithm == "NSGA2":
-			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator([]), selector = local_platypus.operators.TournamentSelector(tournament), variator = crossover)
+			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = crossover)
 		elif algorithm == "SPEA2":
-			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator([]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = crossover)
+			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = crossover)
 		else:
-			self.__status = -43
+			self.__status = -45
 
 	def execute(self, iterations):
 
@@ -458,12 +473,12 @@ class Mapping:
 			return self.__status
 
 		if not isinstance(iterations, int):
-			self.__status = -44
-			return -44
+			self.__status = -46
+			return -46
 
 		if iterations < 1:
-			self.__status = -45
-			return -45
+			self.__status = -47
+			return -47
 
 		self.__algorithm.run(iterations)
 
@@ -487,4 +502,3 @@ for index in range(len(result[0])):
 	print("----")
 
 #Improvement -> enable the specification of generic topologies
-#Improvement -> enable the specification of domain dependencies
