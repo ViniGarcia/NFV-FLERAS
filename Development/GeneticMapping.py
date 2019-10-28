@@ -9,7 +9,7 @@ import platypus
 #STATUS CODES: 
 #		0 -> Not evaluated yet
 #		1 -> Succesfully evaluated
-#		-1 to -30 -> Error
+#		-1 to -38 -> Error
 
 class RequestProcessor:
 
@@ -55,7 +55,7 @@ class RequestProcessor:
 			validPolicies = []
 			for policy in requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"]:
 				policy = policy.split(" ")
-				if not policy[0] in ["=", ">", "<", ">=", "<="]:
+				if not policy[0] in ["!=", "==", ">", "<", ">=", "<="]:
 					return -12
 				try: 
 					float(policy[1])
@@ -251,6 +251,7 @@ class ServiceMapping(platypus.Problem):
 	__metrics = None
 	__service = None
 	__domains = None
+	__policies = None
 	
 	__penalize = None
 
@@ -308,23 +309,34 @@ class ServiceMapping(platypus.Problem):
 
 
 	def __init__(self, metrics, service, domains):
-		#Initializing problem [(dimensions, objectives)])
-		super(ServiceMapping, self).__init__(len(service["STRUCTURE"]), len(metrics["LOCAL"]) + len(metrics["TRANSITION"]))
-		#Initializing candidate domains [from 0 to domain n-1 -- for all dimension] 
-		self.types[:] = [platypus.Integer(0, len(domains)-1)] * len(service["STRUCTURE"])
-		#Initializing problem directions
+		#Preparing problem directions and constraints
+		self.__policies = {"EQUATION":[], "INDEX":[]}
 		directions = []
 		for index in range(len(metrics["LOCAL"])):
-			if metrics["LOCAL"][index] == "MAXIMIZATION":
+			if metrics["LOCAL"][index]["OBJECTIVE"] == "MAXIMIZATION":
 				directions.append(platypus.Problem.MAXIMIZE)
 			else:
 				directions.append(platypus.Problem.MINIMIZE)
+			for policy in metrics["LOCAL"][index]["POLICIES"]:
+				self.__policies["EQUATION"].append(policy)
+				self.__policies["INDEX"].append(index)
 		for index in range(len(metrics["LOCAL"]), len(metrics["LOCAL"]) + len(metrics["TRANSITION"])):
-			if metrics["TRANSITION"][index] == "MAXIMIZATION":
+			if metrics["TRANSITION"][index]["OBJECTIVE"] == "MAXIMIZATION":
 				directions.append(platypus.Problem.MAXIMIZE)
 			else:
 				directions.append(platypus.Problem.MINIMIZE)
+			for policy in metrics["TRANSITION"][index]["POLICIES"]:
+				self.__policies["EQUATION"].append(policy)
+				self.__policies["INDEX"].append(index)
+		
+		#Initializing problem [(dimensions, objectives)])
+		super(ServiceMapping, self).__init__(len(service["STRUCTURE"]), len(metrics["LOCAL"]) + len(metrics["TRANSITION"]), len(self.__policies["EQUATION"]))
+		#Initializing candidate domains [from 0 to domain n-1 -- for all dimension] 
+		self.types[:] = [platypus.Integer(0, len(domains)-1)] * len(service["STRUCTURE"])
+		#Initializing directions
 		self.directions[:] = directions
+		#Initializing constraints
+		self.constraints[:] = self.__policies["EQUATION"]
 		#Initializing processing data
 		self.__metrics = metrics
 		self.__service = service
@@ -339,6 +351,7 @@ class ServiceMapping(platypus.Problem):
 		candidate = solution.variables[:]
 
 		evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
+		constraints = []
 		computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]
 
 		for index in range(len(candidate)):
@@ -347,6 +360,9 @@ class ServiceMapping(platypus.Problem):
 				computation[candidate[index]][resource] += self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
 				if computation[candidate[index]][resource] > self.__domains[candidate[index]]["RESOURCE"][resource]:
 					solution.objectives[:] = self.__penalize
+					for policy in self.__policies["INDEX"]:
+						constraints.append(self.__penalize[policy])
+					solution.constraints[:] = constraints
 					return
 
 			for metric in self.__metrics["LOCAL"]:
@@ -357,12 +373,18 @@ class ServiceMapping(platypus.Problem):
 
 			if not candidate[index] in self.__domains[candidate[index-1]]["TRANSITION"]:
 				solution.objectives[:] = self.__penalize
+				for policy in self.__policies["INDEX"]:
+					constraints.append(self.__penalize[policy])
+				solution.constraints[:] = constraints
 				return
 
 			for metric in self.__metrics["TRANSITION"]:
 				evaluation[metric] += self.__domains[candidate[index-1]]["TRANSITION"][candidate[index]][metric]
 
 		solution.objectives[:] = evaluation
+		for policy in self.__policies["INDEX"]:
+					constraints.append(evaluation[policy])
+		solution.constraints[:] = constraints
 
 
 	def getStatus(self):
@@ -448,7 +470,7 @@ class Mapping:
 			return final
 
 		for solution in nondominated:
-			if not solution.variables in final[0]:
+			if not solution.variables in final[0] and solution.feasible:
 				final[0].append(solution.variables)
 				final[1].append(solution.objectives)
 		return final
@@ -465,4 +487,3 @@ for index in range(len(result[0])):
 
 #Improvement -> enable the specification of generic topologies
 #Improvement -> enable the specification of domain dependencies
-#Improvement -> enbale the spefication of constraints
