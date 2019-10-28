@@ -90,7 +90,7 @@ class RequestProcessor:
 			return -19
 
 		for member in requestYAML["SERVICE"]["TOPOLOGY"]:
-			if member == "IN" or str.startswith(member, "EN"):
+			if member in ["IN", "{", "}", "/"] or str.startswith(member, "EN"):
 				continue
 			if str.startswith(member, "< ") and str.endswith(member, " >"):
 				dependency = member.split(" ")
@@ -98,7 +98,7 @@ class RequestProcessor:
 					return -20
 				if not dependency[1] in requestYAML["DOMAINS"]:
 					return -21
-				continue 
+				continue
 			if not member in requestYAML["SERVICE"]["FUNCTION"]:
 				return -22
 
@@ -393,7 +393,7 @@ class ServiceMapping(local_platypus.Problem):
 
 			if not candidate[index] in self.__domains[candidate[index-1]]["TRANSITION"]:
 				solution.objectives[:] = self.__penalize
-				solution.constraints[:] = self.__policies["INDEX"] + [1]
+				solution.constraints[:] = self.__policies["INDEX"] + [2]
 				return
 
 			for metric in self.__metrics["TRANSITION"]:
@@ -481,7 +481,6 @@ class Mapping:
 			return -47
 
 		self.__algorithm.run(iterations)
-
 		final = [[], []]
 		nondominated = local_platypus.nondominated(self.__algorithm.result)
 
@@ -501,4 +500,12 @@ for index in range(len(result[0])):
 	print(result[1][index])
 	print("----")
 
+#Platy.pus BUG: a bug occur when the number of iterations is greater than the population (check: there is an adjust of the population size in the original code)
+
+#Executing:
 #Improvement -> enable the specification of generic topologies
+#	Validator update [OK]
+#	Execution flow update [In progress]
+#		Detect initial points of branchings
+#		Detect final points of branchings
+#		Detect branch change

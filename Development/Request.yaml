@@ -2,7 +2,7 @@ METRICS:
   LOCAL:
     PRICE: 
       OBJECTIVE: "MINIMIZATION"
-      POLICIES: ["<= 150"]
+      POLICIES: ["<= 300"]
   TRANSITION:
     RTT: 
       OBJECTIVE: "MINIMIZATION"
@@ -11,7 +11,7 @@ METRICS:
       OBJECTIVE: "MINIMIZATION"
       POLICIES: []
 SERVICE:
-  TOPOLOGY: ["IN", "F1", "F2", "< D2 >", "EN"]
+  TOPOLOGY: ["IN", "F1", "{", "F2", "/", "F3", "}", "F4", "EN"]
   FUNCTION: 
     F1: 
       MEMORY: 1024
@@ -21,12 +21,20 @@ SERVICE:
       MEMORY: 512
       VCPU: 1
       IFACES: 2
+    F3:
+      MEMORY: 256
+      VCPU: 1
+      IFACES: 2
+    F4:
+      MEMORY: 256
+      VCPU: 1
+      IFACES: 2
 DOMAINS:
   D1: 
     RESOURCE:
       MEMORY: 1024
-      VCPU: 2
-      IFACES: 4
+      VCPU: 4
+      IFACES: 8
     LOCAL:
       PRICE: 50
     TRANSITION:
@@ -38,9 +46,9 @@ DOMAINS:
         HOPS: 4
   D2: 
     RESOURCE:
-      MEMORY: 1024
-      VCPU: 2
-      IFACES: 4
+      MEMORY: 1280
+      VCPU: 4
+      IFACES: 8
     LOCAL:
       PRICE: 100
     TRANSITION:
@@ -52,9 +60,9 @@ DOMAINS:
         HOPS: 2
   D3:
     RESOURCE:
-      MEMORY: 512
-      VCPU: 2
-      IFACES: 4
+      MEMORY: 768
+      VCPU: 4
+      IFACES: 8
     LOCAL:
       PRICE: 75
     TRANSITION:
