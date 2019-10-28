@@ -1,6 +1,6 @@
 import os
 import yaml
-import platypus
+import local_platypus
 
 ##------##------##------##------ REQUEST PARSER CLASS ------##------##------##------##
 #NAME: RequestProcessor
@@ -245,7 +245,7 @@ class RequestProcessor:
 #		0 -> Iddle state
 #		1 -> Ready to process
 
-class ServiceMapping(platypus.Problem):
+class ServiceMapping(local_platypus.Problem):
 
 	__status = 0
 	__metrics = None
@@ -314,17 +314,17 @@ class ServiceMapping(platypus.Problem):
 		directions = []
 		for index in range(len(metrics["LOCAL"])):
 			if metrics["LOCAL"][index]["OBJECTIVE"] == "MAXIMIZATION":
-				directions.append(platypus.Problem.MAXIMIZE)
+				directions.append(local_platypus.Problem.MAXIMIZE)
 			else:
-				directions.append(platypus.Problem.MINIMIZE)
+				directions.append(local_platypus.Problem.MINIMIZE)
 			for policy in metrics["LOCAL"][index]["POLICIES"]:
 				self.__policies["EQUATION"].append(policy)
 				self.__policies["INDEX"].append(index)
 		for index in range(len(metrics["LOCAL"]), len(metrics["LOCAL"]) + len(metrics["TRANSITION"])):
 			if metrics["TRANSITION"][index]["OBJECTIVE"] == "MAXIMIZATION":
-				directions.append(platypus.Problem.MAXIMIZE)
+				directions.append(local_platypus.Problem.MAXIMIZE)
 			else:
-				directions.append(platypus.Problem.MINIMIZE)
+				directions.append(local_platypus.Problem.MINIMIZE)
 			for policy in metrics["TRANSITION"][index]["POLICIES"]:
 				self.__policies["EQUATION"].append(policy)
 				self.__policies["INDEX"].append(index)
@@ -334,7 +334,7 @@ class ServiceMapping(platypus.Problem):
 		super(ServiceMapping, self).__init__(len(service["STRUCTURE"]), len(metrics["LOCAL"]) + len(metrics["TRANSITION"]), len(self.__policies["EQUATION"]))
 
 		#Initializing candidate domains [from 0 to domain n-1 -- for all dimension] 
-		self.types[:] = [platypus.Integer(0, len(domains)-1)] * len(service["STRUCTURE"])
+		self.types[:] = [local_platypus.Integer(0, len(domains)-1)] * len(service["STRUCTURE"])
 
 		#Initializing directions
 		self.directions[:] = directions
@@ -432,23 +432,23 @@ class Mapping:
 			return
 
 		if crossover == "SBX":
-			crossover = platypus.operators.SBX(probability = float(crossoverProbability))
+			crossover = local_platypus.operators.SBX(probability = float(crossoverProbability))
 		elif crossover == "HUX":
-			crossover = platypus.operators.HUX(probability = float(crossoverProbability))
+			crossover = local_platypus.operators.HUX(probability = float(crossoverProbability))
 		elif crossover == "PMX":
-			crossover = platypus.operators.PMX(probability = float(crossoverProbability))
+			crossover = local_platypus.operators.PMX(probability = float(crossoverProbability))
 		elif crossover == "SSX":
-			crossover = platypus.operators.SSX(probability = float(crossoverProbability))
+			crossover = local_platypus.operators.SSX(probability = float(crossoverProbability))
 
 		self.__problem = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
-		if platypus.Problem.MAXIMIZE in self.__problem.directions and algorithm == "NSGA2":
+		if local_platypus.Problem.MAXIMIZE in self.__problem.directions and algorithm == "NSGA2":
 			print("\nPlaty.pus library does not support maximization problems with NSGAII - Algorithm changed to SPEA2!!\n")
 			algorithm = "SPEA2"
 
 		if algorithm == "NSGA2":
-			self.__algorithm = platypus.NSGAII(self.__problem, population_size = population, selector = platypus.operators.TournamentSelector(tournament), variator = crossover)
+			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator([]), selector = local_platypus.operators.TournamentSelector(tournament), variator = crossover)
 		elif algorithm == "SPEA2":
-			self.__algorithm = platypus.SPEA2(self.__problem, population_size = population, selector = platypus.operators.TournamentSelector(tournament, dominance=platypus.core.AttributeDominance(platypus.core.fitness_key)), variator = crossover)
+			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator([]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = crossover)
 		else:
 			self.__status = -43
 
@@ -468,9 +468,7 @@ class Mapping:
 		self.__algorithm.run(iterations)
 
 		final = [[], []]
-		nondominated = platypus.nondominated(self.__algorithm.result)
-		if str(nondominated[0].objectives) == str(self.__problem.getPenalize()):
-			return final
+		nondominated = local_platypus.nondominated(self.__algorithm.result)
 
 		for solution in nondominated:
 			if not solution.variables in final[0] and solution.feasible:
