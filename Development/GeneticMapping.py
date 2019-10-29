@@ -1,5 +1,6 @@
 import os
 import yaml
+import copy
 import local_platypus
 
 ##------##------##------##------ REQUEST PARSER CLASS ------##------##------##------##
@@ -195,7 +196,8 @@ class RequestProcessor:
 		domainNames = list(self.__domainDictionary.values())
 		branchList = []
 
-		for index in range(len(self.__service["TOPOLOGY"])):
+		self.__service["STRUCTURE"].append((self.__service["TOPOLOGY"][1], 1, [0]))
+		for index in range(2, len(self.__service["TOPOLOGY"])):
 			if self.__service["TOPOLOGY"][index] in self.__service["FUNCTION"]:
 				if self.__service["TOPOLOGY"][index-1] != "/":
 					if self.__service["TOPOLOGY"][index-1] != "}":
@@ -284,7 +286,6 @@ class ServiceMapping(local_platypus.Problem):
 	__policies = None
 	
 	__penalize = None
-
 
 	def __penalty(self):
 		self.__penalize = []
@@ -403,16 +404,35 @@ class ServiceMapping(local_platypus.Problem):
 			for metric in self.__metrics["LOCAL"]:
 				evaluation[metric] += self.__domains[candidate[index]]["LOCAL"][metric]
 
-			if index == 0 or candidate[index] == candidate[index-1]:
+			flag = True
+			for connection in self.__service["STRUCTURE"][index][2]:
+				if candidate[index] != candidate[connection]:
+					flag = False
+					break
+			if flag:
 				continue
 
-			if not candidate[index] in self.__domains[candidate[index-1]]["TRANSITION"]:
-				solution.objectives[:] = self.__penalize
-				solution.constraints[:] = self.__policies["INDEX"] + [2]
-				return
+			meanDictionary = None
+			meanFactor = 0
+			for connection in self.__service["STRUCTURE"][index][2]:
+				meanFactor += 1
+
+				if candidate[index] == candidate[connection]:
+					continue
+
+				if not candidate[index] in self.__domains[candidate[connection]]["TRANSITION"]:
+					solution.objectives[:] = self.__penalize
+					solution.constraints[:] = self.__policies["INDEX"] + [2]
+					return
+
+				if meanDictionary == None:
+					meanDictionary = copy.copy(self.__domains[candidate[connection]]["TRANSITION"][candidate[index]])
+				else:
+					for metric in self.__metrics["TRANSITION"]:
+						meanDictionary[metric] += self.__domains[candidate[connection]]["TRANSITION"][candidate[index]][metric]
 
 			for metric in self.__metrics["TRANSITION"]:
-				evaluation[metric] += self.__domains[candidate[index-1]]["TRANSITION"][candidate[index]][metric]
+				evaluation[metric] += meanDictionary[metric] / meanFactor
 
 		solution.objectives[:] = evaluation
 		for policy in self.__policies["INDEX"]:
@@ -514,7 +534,6 @@ class Mapping:
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
 test = Mapping("Request.yaml", "NSGA2", 100, 2, "SBX", 1)
-exit()
 result = test.execute(100)
 
 for index in range(len(result[0])):
@@ -523,12 +542,3 @@ for index in range(len(result[0])):
 	print("----")
 
 #Platy.pus BUG: a bug occur when the number of iterations is greater than the population (check: there is an adjust of the population size in the original code)
-
-#Executing:
-#Improvement -> enable the specification of generic topologies
-#	Validator update [OK]
-#	Execution flow update [In progress]
-#		Detect initial points of branchings [OK]
-#		Detect final points of branchings [OK]
-#		Detect branch change [OK]
-#		Calculate the branchs transitions
