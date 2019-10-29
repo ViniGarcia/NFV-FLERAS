@@ -94,7 +94,7 @@ class RequestProcessor:
 				continue
 			if str.startswith(member, "< ") and str.endswith(member, " >"):
 				dependency = member.split(" ")
-				if len(dependency) != 3:								#Ajustar retornos daqui
+				if len(dependency) != 3:
 					return -20
 				if not dependency[1] in requestYAML["DOMAINS"]:
 					return -21
@@ -193,13 +193,28 @@ class RequestProcessor:
 
 		domainKeys = list(self.__domainDictionary.keys())
 		domainNames = list(self.__domainDictionary.values())
+		branchList = []
 
 		for index in range(len(self.__service["TOPOLOGY"])):
 			if self.__service["TOPOLOGY"][index] in self.__service["FUNCTION"]:
-				self.__service["STRUCTURE"].append((self.__service["TOPOLOGY"][index], index))
+				if self.__service["TOPOLOGY"][index-1] != "/":
+					if self.__service["TOPOLOGY"][index-1] != "}":
+						self.__service["STRUCTURE"].append((self.__service["TOPOLOGY"][index], index, [(len(self.__service["STRUCTURE"]) - 1)]))
+					else:
+						self.__service["STRUCTURE"].append((self.__service["TOPOLOGY"][index], index, branchList[-1][1]))
+						branchList.pop()
+				else:
+					self.__service["STRUCTURE"].append((self.__service["TOPOLOGY"][index], index, [branchList[-1][0]]))
+					branchList[-1][1].append((len(self.__service["STRUCTURE"]) - 2))
 				continue
 			if str.startswith(self.__service["TOPOLOGY"][index], "<"):
 				self.__service["DEPENDENCY"].append((len(self.__service["STRUCTURE"])-1, domainKeys[domainNames.index(self.__service["TOPOLOGY"][index].split(" ")[1])]))
+				continue
+			if self.__service["TOPOLOGY"][index] == "{":
+				branchList.append((len(self.__service["STRUCTURE"]) - 1, []))
+				continue
+			if self.__service["TOPOLOGY"][index] == "}":
+				branchList[-1][1].append(len(self.__service["STRUCTURE"]) - 1)
 
 
 	def __init__(self, requestFile):
@@ -408,6 +423,7 @@ class ServiceMapping(local_platypus.Problem):
 	def getStatus(self):
 		return self.__status
 
+
 	def getPenalize(self):
 		return self.__penalize
 
@@ -467,6 +483,7 @@ class Mapping:
 		else:
 			self.__status = -45
 
+
 	def execute(self, iterations):
 
 		if self.__status != 1 and (self.__status > -30 and self.__status < 0):
@@ -490,9 +507,14 @@ class Mapping:
 				final[1].append(solution.objectives)
 		return final
 
+
+	def getStatus(self):
+		return self.__status
+
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
 test = Mapping("Request.yaml", "NSGA2", 100, 2, "SBX", 1)
+exit()
 result = test.execute(100)
 
 for index in range(len(result[0])):
@@ -506,6 +528,7 @@ for index in range(len(result[0])):
 #Improvement -> enable the specification of generic topologies
 #	Validator update [OK]
 #	Execution flow update [In progress]
-#		Detect initial points of branchings
-#		Detect final points of branchings
-#		Detect branch change
+#		Detect initial points of branchings [OK]
+#		Detect final points of branchings [OK]
+#		Detect branch change [OK]
+#		Calculate the branchs transitions
