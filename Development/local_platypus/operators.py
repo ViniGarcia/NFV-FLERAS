@@ -583,6 +583,44 @@ class BitFlip(Mutation):
 
         return result
 
+class ConstrainedBitFlip(Mutation):
+
+    def __init__(self, probability = 1, constraints = []):
+        """Bit Flip Mutation for Binary Strings in Constrained Candidates.
+
+        Parameters
+        ----------
+        probability : int or float
+            The probability of flipping an individual bit.  If the value is
+            an int, then the probability is divided by the number of bits.
+        constraints: list of indexes ([int, ..., int])
+            Positions of result array that must not be mutated.
+        """
+        super(ConstrainedBitFlip, self).__init__()
+        self.probability = probability
+        self.constraints = constraints
+
+    def mutate(self, parent):
+        result = copy.deepcopy(parent)
+        problem = result.problem
+        probability = self.probability
+
+        if isinstance(probability, int):
+            probability /= sum([t.nbits for t in problem.types if isinstance(t, Binary)])
+
+        for i in range(problem.nvars):
+            type = problem.types[i]
+            if i in self.constraints:
+                continue
+
+            if isinstance(type, Binary):
+                for j in range(type.nbits):
+                    if random.uniform(0.0, 1.0) <= probability:
+                        result.variables[i][j] = not result.variables[i][j]
+                        result.evaluated = False
+
+        return result
+
 class BitSwap(Mutation):
 
     def __init__(self, probability=1):
@@ -607,6 +645,45 @@ class BitSwap(Mutation):
 
         for i in range(problem.nvars):
             type = problem.types[i]
+
+            if isinstance(type, Binary):
+                for j in range(type.nbits):
+                    if random.uniform(0.0, 1.0) <= probability:
+                        k = random.randrange(type.nbits)
+                        result.variables[i][j] = result.variables[i][k]
+                        result.evaluated = False
+
+        return result
+
+class ConstrainedBitSwap(Mutation):
+
+    def __init__(self, probability = 1, constraints = []):
+        """Bit Swap Mutation for Constrained Binary Strings.
+
+        Parameters
+        ----------
+        probability : int or float
+            The probability of flipping an individual bit.  If the value is
+            an int, then the probability is divided by the number of bits.
+        constraints: list of indexes ([int, ..., int])
+            Positions of result array that must not be mutated.
+        """
+        super(BitSwap, self).__init__()
+        self.probability = probability
+        self.constraints = constraints
+
+    def mutate(self, parent):
+        result = copy.deepcopy(parent)
+        problem = result.problem
+        probability = self.probability
+
+        if isinstance(probability, int):
+            probability /= sum([t.nbits for t in problem.types if isinstance(t, Binary)])
+
+        for i in range(problem.nvars):
+            type = problem.types[i]
+            if i in self.constraints:
+                continue
 
             if isinstance(type, Binary):
                 for j in range(type.nbits):

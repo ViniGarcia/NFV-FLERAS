@@ -497,10 +497,11 @@ class Mapping:
 		elif crossover == "SSX":
 			crossover = local_platypus.operators.SSX(probability = float(crossoverProbability))
 
+		mutationConstraints = [constraint[0] for constraint in self.__request.getService()["DEPENDENCY"]]
 		if mutation == "FLIP":
-			mutation = local_platypus.operators.BitFlip(probability = float(mutationProbability))
+			mutation = local_platypus.operators.ConstrainedBitFlip(probability = float(mutationProbability), constraints = mutationConstraints)
 		elif mutation == "SWAP":
-			mutation = local_platypus.operators.BitSwap(probability = float(mutationProbability))
+			mutation = local_platypus.operators.ConstrainedBitSwap(probability = float(mutationProbability), constraints = mutationConstraints)
 
 		self.__problem = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
 		if local_platypus.Problem.MAXIMIZE in self.__problem.directions and algorithm == "NSGA2":
