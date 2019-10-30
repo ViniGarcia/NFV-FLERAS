@@ -7,7 +7,7 @@ import local_platypus
 #NAME: RequestProcessor
 #OBJECTIVE: Validates the YAML request document and organizes it to be processed by the
 #			multu-objective genetic algorithm.
-#STATUS CODES: 
+#STATUS CODES:
 #		0 -> Not evaluated yet
 #		1 -> Succesfully evaluated
 #		-1 to -40 -> Error
@@ -19,15 +19,15 @@ class RequestProcessor:
 	__service = None
 	__domains = None
 
-	__domainDictionary = None	
+	__domainDictionary = None
 	__metricDictionary = None
 
 	def __validate(self, requestYAML):
-		
+
 		if not "METRICS" in requestYAML or not "SERVICE" in requestYAML or not "DOMAINS" in requestYAML:
 			return -3
 
-		
+
 		if not "LOCAL" in requestYAML["METRICS"] or not "TRANSITION" in requestYAML["METRICS"]:
 			return -4
 
@@ -58,7 +58,7 @@ class RequestProcessor:
 				policy = policy.split(" ")
 				if not policy[0] in ["!=", "==", ">", "<", ">=", "<="]:
 					return -12
-				try: 
+				try:
 					float(policy[1])
 				except:
 					return -13
@@ -80,7 +80,7 @@ class RequestProcessor:
 				policy = policy.split(" ")
 				if not policy[0] in ["=", ">", "<", ">=", "<="]:
 					return -17
-				try: 
+				try:
 					float(policy[1])
 				except:
 					return -18
@@ -273,7 +273,7 @@ class RequestProcessor:
 #NAME: ServiceMapping
 #OBJECTIVE: Evaluates mappings create by the platypus genetic algorithms, this class is designed
 #			to be directly used in platypus.
-#STATUS CODES: 
+#STATUS CODES:
 #		0 -> Iddle state
 #		1 -> Ready to process
 
@@ -284,7 +284,7 @@ class ServiceMapping(local_platypus.Problem):
 	__service = None
 	__domains = None
 	__policies = None
-	
+
 	__penalize = None
 
 	def __penalty(self):
@@ -315,7 +315,7 @@ class ServiceMapping(local_platypus.Problem):
 			parameter = None
 			for domain in range(0, len(self.__domains)):
 				for connection in self.__domains[domain]["TRANSITION"]:
-					
+
 					if parameter == None:
 						parameter = self.__domains[domain]["TRANSITION"][connection][metric]
 						continue
@@ -364,7 +364,7 @@ class ServiceMapping(local_platypus.Problem):
 		#Initializing problem [(dimensions, objectives)])
 		super(ServiceMapping, self).__init__(len(service["STRUCTURE"]), len(metrics["LOCAL"]) + len(metrics["TRANSITION"]), len(self.__policies["EQUATION"]))
 
-		#Initializing candidate domains [from 0 to domain n-1 -- for all dimension] 
+		#Initializing candidate domains [from 0 to domain n-1 -- for all dimension]
 		self.types[:] = [local_platypus.Integer(0, len(domains)-1)] * len(service["STRUCTURE"])
 
 		#Initializing directions
@@ -383,7 +383,7 @@ class ServiceMapping(local_platypus.Problem):
 
 		#Status updated to "ready to process"
 		self.__status = 1
-    
+
 
 	def evaluate(self, solution):
 		candidate = solution.variables[:]
@@ -452,8 +452,8 @@ class ServiceMapping(local_platypus.Problem):
 
 ##------##------##------##------ MAPPING CLASS ------##------##------##------##
 #NAME: Mapping
-#OBJECTIVE: 
-#STATUS CODES: 
+#OBJECTIVE:
+#STATUS CODES:
 
 class Mapping:
 
@@ -497,9 +497,9 @@ class Mapping:
 			algorithm = "SPEA2"
 
 		if algorithm == "NSGA2":
-			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = crossover)
+			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = local_platypus.operators.GAOperator(crossover, local_platypus.operators.BitFlip()))
 		elif algorithm == "SPEA2":
-			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = crossover)
+			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, local_platypus.operators.BitFlip()))
 		else:
 			self.__status = -45
 
@@ -534,11 +534,9 @@ class Mapping:
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
 test = Mapping("Request.yaml", "NSGA2", 100, 2, "SBX", 1)
-result = test.execute(100)
+result = test.execute(1000)
 
 for index in range(len(result[0])):
 	print(result[0][index])
 	print(result[1][index])
 	print("----")
-
-#Platy.pus BUG: a bug occur when the number of iterations is greater than the population (check: there is an adjust of the population size in the original code)
