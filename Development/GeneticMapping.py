@@ -462,7 +462,7 @@ class Mapping:
 	__algorithm = None
 	__problem = None
 
-	def __init__(self, request, algorithm, population, tournament, crossover, crossoverProbability):
+	def __init__(self, request, algorithm, population, tournament, crossover, crossoverProbability, mutation, mutationProbability):
 
 		self.__request = RequestProcessor(request)
 		self.__status = self.__request.getStatus()
@@ -481,6 +481,12 @@ class Mapping:
 		if crossoverProbability <= 0 or crossoverProbability > 1:
 			self.__status = -44
 			return
+		if not mutation in ["FLIP", "SWAP"]:
+			self.__status = -45
+			return
+		if mutationProbability <= 0 or mutationProbability > 1:
+			self.__status = -46
+			return
 
 		if crossover == "SBX":
 			crossover = local_platypus.operators.SBX(probability = float(crossoverProbability))
@@ -491,17 +497,22 @@ class Mapping:
 		elif crossover == "SSX":
 			crossover = local_platypus.operators.SSX(probability = float(crossoverProbability))
 
+		if mutation == "FLIP":
+			mutation = local_platypus.operators.BitFlip(probability = float(mutationProbability))
+		elif mutation == "SWAP":
+			mutation = local_platypus.operators.BitSwap(probability = float(mutationProbability))
+
 		self.__problem = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
 		if local_platypus.Problem.MAXIMIZE in self.__problem.directions and algorithm == "NSGA2":
 			print("\nPlaty.pus library does not support maximization problems with NSGAII - Algorithm changed to SPEA2!!\n")
 			algorithm = "SPEA2"
 
 		if algorithm == "NSGA2":
-			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = local_platypus.operators.GAOperator(crossover, local_platypus.operators.BitFlip()))
+			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		elif algorithm == "SPEA2":
-			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, local_platypus.operators.BitFlip()))
+			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		else:
-			self.__status = -45
+			self.__status = -47
 
 
 	def execute(self, iterations):
@@ -510,12 +521,12 @@ class Mapping:
 			return self.__status
 
 		if not isinstance(iterations, int):
-			self.__status = -46
-			return -46
+			self.__status = -48
+			return -48
 
 		if iterations < 1:
-			self.__status = -47
-			return -47
+			self.__status = -49
+			return -49
 
 		self.__algorithm.run(iterations)
 		final = [[], []]
@@ -533,7 +544,7 @@ class Mapping:
 
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
-test = Mapping("Request.yaml", "NSGA2", 100, 2, "SBX", 1)
+test = Mapping("Request.yaml", "NSGA2", 50, 2, "SBX", 1, "FLIP", 0.1)
 result = test.execute(1000)
 
 for index in range(len(result[0])):
