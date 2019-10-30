@@ -462,6 +462,21 @@ class Mapping:
 	__algorithm = None
 	__problem = None
 
+	def __translate(self, result):
+		translator = local_platypus.Integer(0, len(self.__request.getDomains())-1)
+		domainDict = self.__request.getDomainDictionary()
+		metricDict = self.__request.getMetricDictionary()
+
+		for index in range(len(result[0])):
+			for domain in range(len(result[0][index])):
+				result[0][index][domain] = domainDict[translator.decode(result[0][index][domain])]
+
+			values = {}
+			for metric in range(len(metricDict)):
+				values[metricDict[metric]] = result[1][index][metric]
+			result[1][index] = values
+
+
 	def __init__(self, request, algorithm, population, tournament, crossover, crossoverProbability, mutation, mutationProbability):
 
 		self.__request = RequestProcessor(request)
@@ -537,6 +552,8 @@ class Mapping:
 			if not solution.variables in final[0] and solution.feasible:
 				final[0].append(solution.variables)
 				final[1].append(solution.objectives)
+		self.__translate(final)
+
 		return final
 
 
