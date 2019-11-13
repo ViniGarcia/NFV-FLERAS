@@ -562,7 +562,7 @@ class Mapping:
 
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
-test = Mapping("Request.yaml", "NSGA2", 50, 2, "SBX", 1, "FLIP", 0.1)
+test = Mapping("test.yaml", "NSGA2", 50, 2, "SBX", 1, "FLIP", 0.1)
 result = test.execute(1000)
 
 for index in range(len(result[0])):

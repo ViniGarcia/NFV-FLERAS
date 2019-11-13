@@ -38,7 +38,7 @@ class FLERASCLI(Cmd):
 		print("help -> show this message")
 		print("exit -> ends the execution")
 		print("domains path -> receives a domain data description path, validate and enable its informations for setup")
-		print("setup type path -> receives a request type (1 for compose and 2 for split and mapping) and a sfc request path, validate and enable the commands below according to setup type")
+		print("setup type path -> receives a request type (C for compose and SM for split and mapping) and a sfc request path, validate and enable the commands below according to setup type")
 		print("compose -> executes the generic composition method in already informed sfc request, it enables the topologies and advice commands")
 		print("topologies -> show all composed topologies in addition to their goal functions indexes")
 		print("advice -> inidicates the best composed topology considering the goal function")
@@ -98,7 +98,7 @@ class FLERASCLI(Cmd):
 			if args[0] == "SM":
 				self.request = EmbeddingRequest(args[1], self.domains.ddDomains())
 				if self.request.erStatus() != 1:
-					print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.crStatus()))
+					print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.erStatus()))
 					self.request = None
 					return
 				self.topology = SFCTopology(self.request.erServiceON(), self.request.erServiceOE(), self.domains.ddDomains())
