@@ -71,7 +71,7 @@ class FLERASCLI(Cmd):
 		if len(args) < 2:
 			return
 
-		if args[0] not in ["C", "SM"]:
+		if not args[0] in ["C", "SM"]:
 			print("TYPE IS NEED AS FIRST ARGUMENT (C FOR COMPOSING OR SM FOR SPLIT/MAP)")
 			return
 

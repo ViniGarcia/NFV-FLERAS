@@ -10,42 +10,42 @@ class RequestTranslate:
 	def __translateDomains(self):
 
 		self.__domainsPart = {"DOMAINS":None, "RESOURCES":None, "LOCAL":None, "TRANSITION":None}
-		self.__domainsPart["DOMAINS"] = list(self.__yamlData["DOMAINS"].keys())
+		self.__domainsPart["DOMAINS"] = list(map(str, self.__yamlData["DOMAINS"].keys()))
 		self.__domainsPart["RESOURCES"] = {}
 		self.__domainsPart["LOCAL"] = []
 		self.__domainsPart["TRANSITION"] = []
 
 		localDict = {}
 		transDict = {}
-		for domain in self.__domainsPart["DOMAINS"]:
-			self.__domainsPart["RESOURCES"][domain] = {"MEMORY":self.__yamlData["DOMAINS"][domain]["RESOURCE"]["MEMORY"], "NET_IFACES":self.__yamlData["DOMAINS"][domain]["RESOURCE"]["IFACES"], "CPUS":self.__yamlData["DOMAINS"][domain]["RESOURCE"]["VCPU"]}
+		for domain in self.__yamlData["DOMAINS"]:
+			self.__domainsPart["RESOURCES"][str(domain)] = {"MEMORY":self.__yamlData["DOMAINS"][domain]["RESOURCE"]["MEMORY"], "NET_IFACES":self.__yamlData["DOMAINS"][domain]["RESOURCE"]["IFACES"], "CPUS":self.__yamlData["DOMAINS"][domain]["RESOURCE"]["VCPU"]}
 
 			for metric in self.__yamlData["DOMAINS"][domain]["LOCAL"]:
 				if not metric in localDict:
 					self.__domainsPart["LOCAL"].append({"ID":metric})
 					localDict[metric] = self.__domainsPart["LOCAL"][-1]
-				localDict[metric][domain] = self.__yamlData["DOMAINS"][domain]["LOCAL"][metric]
+				localDict[metric][str(domain)] = self.__yamlData["DOMAINS"][domain]["LOCAL"][metric]
 
 			for transition in self.__yamlData["DOMAINS"][domain]["TRANSITION"]:
 				for metric in self.__yamlData["DOMAINS"][domain]["TRANSITION"][transition]:
 					if not metric in list(transDict.keys()):
 						self.__domainsPart["TRANSITION"].append({"ID":metric})
 						transDict[metric] = self.__domainsPart["TRANSITION"][-1]
-					if not domain in transDict[metric]:
-						transDict[metric][domain] = {}
+					if not str(domain) in transDict[metric]:
+						transDict[metric][str(domain)] = {}
 
-					transDict[metric][domain][transition] = self.__yamlData["DOMAINS"][domain]["TRANSITION"][transition][metric]
-
+					transDict[metric][str(domain)][str(transition)] = self.__yamlData["DOMAINS"][domain]["TRANSITION"][transition][metric]
 
 	def __translateService(self, identifier):
 
 		self.__servicePart = {"METADATA":{"ID":identifier, "DESCRIPTION": "Just a description..."}, "SERVICE":{}, "POLICIES":{"IMMEDIATE":[], "AGGREGATE":[]}, "DEPLOYMENT":{}}
+		self.__yamlData["SERVICE"]["TOPOLOGY"][0] = "IP"
 		self.__servicePart["SERVICE"]["TOPOLOGY"] = " ".join(self.__yamlData["SERVICE"]["TOPOLOGY"])
 		self.__servicePart["SERVICE"]["OELEMENTS"] = list(self.__yamlData["SERVICE"]["FUNCTION"].keys())
 		self.__servicePart["SERVICE"]["OUTNODES"] = []
 
 		for element in self.__yamlData["SERVICE"]["TOPOLOGY"]:
-			if not element in self.__servicePart["SERVICE"]["OELEMENTS"] + ["IN", "{", "/", "}"]:
+			if not element in self.__servicePart["SERVICE"]["OELEMENTS"] + ["IP", "{", "/", "}"]:
 				if not element.startswith("<"):
 					self.__servicePart["SERVICE"]["OUTNODES"].append(element)
 
