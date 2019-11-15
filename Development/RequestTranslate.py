@@ -52,7 +52,10 @@ class RequestTranslate:
 		weight = 1/(len(self.__yamlData["METRICS"]["LOCAL"].keys()) + len(self.__yamlData["METRICS"]["TRANSITION"].keys()))
 		for ptype in ["LOCAL", "TRANSITION"]:
 			for metric in self.__yamlData["METRICS"][ptype]:
-				self.__servicePart["POLICIES"]["AGGREGATE"].append({"ID":metric, "MIN":0, "MAX":100000000, "TYPE":"DOMAIN", "GOAL":self.__yamlData["METRICS"][ptype][metric]["OBJECTIVE"][:3], "WEIGHT":weight})
+				if ptype == "LOCAL":
+					self.__servicePart["POLICIES"]["AGGREGATE"].append({"ID":metric, "MIN":0, "MAX":100000000, "TYPE":"DOMAIN", "GOAL":self.__yamlData["METRICS"][ptype][metric]["OBJECTIVE"][:3], "WEIGHT":weight})
+				else:
+					self.__servicePart["POLICIES"]["AGGREGATE"].append({"ID":metric, "MIN":0, "MAX":100000000, "TYPE":ptype, "GOAL":self.__yamlData["METRICS"][ptype][metric]["OBJECTIVE"][:3], "WEIGHT":weight})					
 				for policy in self.__yamlData["METRICS"][ptype][metric]["POLICIES"]:
 					if policy.startswith("<="):
 						self.__servicePart["POLICIES"]["AGGREGATE"][-1]["MAX"] = int(policy.split(" ")[-1])
