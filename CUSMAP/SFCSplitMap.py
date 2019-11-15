@@ -25,6 +25,7 @@
 #-4: INVALID SYMBOL IN A PROVIDED TOPOLOGY
 
 #################################################
+import numpy
 from itertools import islice
 
 from YAMLR.EmbeddingRequest import EmbeddingRequest
@@ -209,6 +210,22 @@ class SFCSplitAndMap:
 		return [cleanedTopo, dependencies]
 
 	######## PRIVATE EVALUATION METHODS ########
+
+	def __ssamParetoFront(self, aggregations):
+
+		aggregations = numpy.array(aggregations)
+		i_dominates_j = numpy.all(aggregations[:,None] >= aggregations, axis=-1) & numpy.any(aggregations[:,None] > aggregations, axis=-1)
+		remaining = numpy.arange(len(aggregations))
+		fronts = numpy.empty(len(aggregations), int)
+		frontier_index = 0
+    	
+		while remaining.size > 0:
+			dominated = numpy.any(i_dominates_j[remaining[:,None], remaining], axis=0)
+			fronts[remaining[~dominated]] = frontier_index
+			remaining = remaining[dominated]
+			frontier_index += 1
+
+		return fronts.tolist()
 
 	def __ssamPreprocessEvaluations(self, evaluations):
 
@@ -396,6 +413,25 @@ class SFCSplitAndMap:
 			return None
 
 		return self.__evaluations["DSI"][self.__sfcRequest.erServiceTopology()]
+
+	def ssamFrontiers(self):
+
+		if self.__status != 2:
+			return None
+
+		maps = self.ssamKeys()
+		sis = self.ssamIndexes()
+		agg = self.ssamAggregations()
+
+		paretoList = []
+		for index in range(len(maps)):
+			candidateList = []
+			for ptype in ["AGGREGATE", "IMMEDIATE"]:
+				for metric in agg[index][ptype]:
+					candidateList.append(agg[index][ptype][metric])
+			paretoList.append(candidateList)
+		
+		return self.__ssamParetoFront(paretoList)
 
 	def ssamAdvice(self):
 

@@ -39,9 +39,11 @@ class FLERASCLI(Cmd):
 		print("exit -> ends the execution")
 		print("domains path -> receives a domain data description path, validate and enable its informations for setup")
 		print("setup type path -> receives a request type (C for compose and SM for split and mapping) and a sfc request path, validate and enable the commands below according to setup type")
-		print("compose -> executes the generic composition method in already informed sfc request, it enables the topologies and advice commands")
-		print("topologies -> show all composed topologies in addition to their goal functions indexes")
-		print("advice -> inidicates the best composed topology considering the goal function")
+		print("compose -> executes the generic composition method in an already informed sfc request, it enables the topologies and advice commands")
+		print("map -> executes the generic split and mappings method in an already informed sfc request, it enables the mappings and advice commands")
+		print("topologies -> show all composed topologies in addition to their suitability indexes")
+		print("mappings -> show all mapped topologies in addition to their suitability indexes and pareto front location")
+		print("advice -> inidicates the best composed/mapped topology considering the goal function")
 		print ('######################################\n')
 
 	def do_domains(self, args):
@@ -69,6 +71,7 @@ class FLERASCLI(Cmd):
 
 		args = args.split()
 		if len(args) < 2:
+			print("TOO FEW ARGUMENTS TO SETUP REQUEST")
 			return
 
 		if not args[0] in ["C", "SM"]:
@@ -166,10 +169,11 @@ class FLERASCLI(Cmd):
 
 		maps = self.mapping.ssamKeys()
 		sis = self.mapping.ssamIndexes()
+		front = self.mapping.ssamFrontiers()
 
 		print("################ MAPPINGS ##################")
 		for index in range(len(maps)):
-			print("MAPPING: " + str(maps[index]) + "  " + "INDEX: " + str(sis[index]))
+			print("MAPPING: " + str(maps[index]) + "  INDEX: " + str(sis[index]) + " FRONT: " + str(front[index]))
 		print("###########################################")
 
 	def do_advice(self, args):
@@ -187,6 +191,34 @@ class FLERASCLI(Cmd):
 		if self.mapping != None:
 			print("MAPPING: " + self.mapping.ssamAdvice())
 		print("###########################################")
+
+	#xxx - Deevelopment
+	def do_report(self, args):
+
+		args = args.split()
+		if len(args) < 2:
+			print("TOO FEW ARGUMENTS TO SETUP REQUEST")
+			return
+
+		if not args[0] in ["C", "SM"]:
+			print("TYPE IS NEED AS FIRST ARGUMENT (C FOR COMPOSING OR SM FOR SPLIT/MAP)")
+			return
+
+		if args[0] == "SM":
+			
+			if self.mapping == None:
+				print("MAPPING TASK IS REQUIRED")
+				return
+
+			maps = self.mapping.ssamKeys()
+			sis = self.mapping.ssamIndexes()
+			front = self.mapping.ssamFrontiers()
+
+			file = open(args[1], "w+")
+			file.write("MAPPING;SUITABILITY;FRONTIER\n")
+			for index in range(len(maps)):
+				file.write(str(maps[index]) + ";" + str(sis[index]) + ";" + str(front[index]) + "\n")
+			file.close()
 
 	def do_exit(self, args):
 
