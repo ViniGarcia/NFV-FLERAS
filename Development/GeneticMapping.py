@@ -576,6 +576,7 @@ def usage():
 	print("\t-m mutation_technique: FLIP || SWAP (std: FLIP)")
 	print("\t-mp mutation_probability: 0 <= crossover_probability <= 1 (std: 0.1)")
 	print("\t-g generations: 0 < generations < +n (std:1000)")
+	print("\t-o output: output file name (std: None)")
 	print("======================================================================")
 
 
@@ -587,6 +588,7 @@ cp = 1.0
 m = "FLIP"
 mp = 0.1
 g = 1000
+o = None
 
 if len(sys.argv) < 2 or len(sys.argv)%2 != 0:
 	usage()
@@ -639,13 +641,25 @@ for flag in range(2, len(sys.argv), 2):
 			exit()
 		g = int(sys.argv[flag + 1])
 		continue
+	if sys.argv[flag] == "-o":
+		o = sys.argv[flag + 1]
+		continue
 	print("ERROR: INVALID FLAG "+ sys.argv[flag])
 	exit()
 
 processor = Mapping(sys.argv[1], a, p, t, c, cp, m, mp)
 result = processor.execute(g)
 
-for index in range(len(result[0])):
-	print(result[0][index])
-	print(result[1][index])
-	print("----")
+if o != None:
+	file = open(o, "w+")
+	file.write("MAPPING;")
+	if len(result[0]) > 0:
+		for metric in result[1][0]:
+			file.write(metric + ";")
+	file.write("\n")
+
+	for index in range(len(result[0])):
+		file.write(str(result[0][index]) + ";")
+		for metric in result[1][index]:
+			file.write(str(result[1][index][metric]) + ";")
+		file.write("\n")
