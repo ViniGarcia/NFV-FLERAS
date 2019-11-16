@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 import copy
 import local_platypus
@@ -562,8 +563,87 @@ class Mapping:
 
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
-test = Mapping("test.yaml", "NSGA2", 50, 2, "SBX", 1, "FLIP", 0.1)
-result = test.execute(1000)
+def usage():
+
+	print("================== Genetic Service Mapping (GeSeMa) ==================")
+	print("USAGE: *.py request_file [FLAGS]")
+	print("FLAGS: ")
+	print("\t-a algorithm_name: NSGA2 || SPEA2 (std: NSGA2)")
+	print("\t-p population_size: 0 < population_size < +n (std: 50)")
+	print("\t-t tournament_size: 0 < tournament_size <= population_size (std: 2)")
+	print("\t-c crossover_technique: SBX || HUX || PMX || SSX (std: SBX)")
+	print("\t-cp crossover_probability: 0 <= crossover_probability <= 1 (std: 1)")
+	print("\t-m mutation_technique: FLIP || SWAP (std: FLIP)")
+	print("\t-mp mutation_probability: 0 <= crossover_probability <= 1 (std: 0.1)")
+	print("\t-g generations: 0 < generations < +n (std:1000)")
+	print("======================================================================")
+
+
+a = "NSGA2"
+p = 50
+t = 2
+c = "SBX"
+cp = 1.0
+m = "FLIP"
+mp = 0.1
+g = 1000
+
+if len(sys.argv) < 2 or len(sys.argv)%2 != 0:
+	usage()
+	exit()
+
+if not os.path.isfile(sys.argv[1]):
+	print("ERROR: FILE DOES NOT EXISTS!!\n")
+	exit()
+
+for flag in range(2, len(sys.argv), 2):
+	
+	if sys.argv[flag] == "-a":
+		a = sys.argv[flag + 1]
+		continue
+	if sys.argv[flag] == "-p":
+		if not sys.argv[flag + 1].isdigit() or sys.argv[flag + 1] == "0":
+			print("ERROR: POPULATION SIZE NOT ALLOWED!!\n")
+			exit()
+		p = int(sys.argv[flag + 1])
+		continue
+	if sys.argv[flag] == "-t":
+		if not sys.argv[flag + 1].isdigit() or sys.argv[flag + 1] == "0":
+			print("ERROR: TOURNAMENT SIZE NOT ALLOWED!!\n")
+			exit()
+		t = int(sys.argv[flag + 1])
+		continue
+	if sys.argv[flag] == "-c":
+		c = sys.argv[flag + 1]
+		continue
+	if sys.argv[flag] == "-cp":
+		try:
+			cp = float(sys.argv[flag + 1])
+		except ValueError:
+			print("ERROR: CROSSOVER PROBABILITY NOT ALLOWED!!")
+			exit()
+		continue
+	if sys.argv[flag] == "-m":
+		m = sys.argv[flag + 1]
+		continue
+	if sys.argv[flag] == "-mp":
+		try:
+			mp = float(sys.argv[flag + 1])
+		except ValueError:
+			print("ERROR: MUTATION PROBABILITY NOT ALLOWED!!")
+			exit()
+		continue
+	if sys.argv[flag] == "-g":
+		if not sys.argv[flag + 1].isdigit() or sys.argv[flag + 1] == "0":
+			print("ERROR: NUMBER OF GENERATIONS NOT ALLOWED!!\n")
+			exit()
+		g = int(sys.argv[flag + 1])
+		continue
+	print("ERROR: INVALID FLAG "+ sys.argv[flag])
+	exit()
+
+processor = Mapping(sys.argv[1], a, p, t, c, cp, m, mp)
+result = processor.execute(g)
 
 for index in range(len(result[0])):
 	print(result[0][index])
