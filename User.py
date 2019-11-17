@@ -192,7 +192,7 @@ class FLERASCLI(Cmd):
 			print("MAPPING: " + self.mapping.ssamAdvice())
 		print("###########################################")
 
-	#xxx - Deevelopment
+	#xxx - Development
 	def do_report(self, args):
 
 		args = args.split()

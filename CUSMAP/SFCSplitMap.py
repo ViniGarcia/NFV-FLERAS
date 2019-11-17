@@ -32,6 +32,7 @@ from YAMLR.EmbeddingRequest import EmbeddingRequest
 from YAMLR.DomainsData import DomainsData
 from CUSMAP.OptimalSM import OptimalSM
 
+
 class SFCSplitAndMap:
 	__status = None
 	__summary = None
@@ -469,3 +470,25 @@ class SFCSplitAndMap:
 #mapping = SFCSplitAndMap(request, domains)
 #mapping.ssamNaturalRequest()
 #mapping.ssamOptimalRequest(["IP EO2 EO1 < DOM3 > { EO3 NS1 / EO4 NS2 }","IP EO1 < DOM3 > { EO2 EO3 NS1 / EO2 EO4 NS2 }"], [0.5, 0.8])
+
+#EXECUTION: *.py emb_request ava_domains flag_result
+#import sys
+#sys.path.insert(0,'../YAMLR/')
+#from EmbeddingRequest import EmbeddingRequest
+#from DomainsData import DomainsData
+#from OptimalSM import OptimalSM
+
+#domains = DomainsData(sys.argv[2])
+#request = EmbeddingRequest(sys.argv[1], domains.ddDomains().copy())
+#mapping = SFCSplitAndMap(request, domains)
+#mapping.ssamNaturalRequest()
+#if len(sys.argv) == 4:
+#	maps = mapping.ssamKeys()
+#	sis = mapping.ssamIndexes()
+#	front = mapping.ssamFrontiers()
+#
+#	file = open(sys.argv[1].split(".")[0] + "RESULT.csv", "w+")
+#	file.write("MAPPING;SUITABILITY;FRONTIER\n")
+#	for index in range(len(maps)):
+#		file.write(str(maps[index]) + ";" + str(sis[index]) + ";" + str(front[index]) + "\n")
+#	file.close()
