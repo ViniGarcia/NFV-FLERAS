@@ -1,0 +1,411 @@
+DOMAINS:
+  0:
+    LOCAL:
+      PRICE: 85
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 1027
+      VCPU: 2
+    TRANSITION:
+      1:
+        HOPS: 9
+        RTT: 18
+      2:
+        HOPS: 3
+        RTT: 20
+      3:
+        HOPS: 9
+        RTT: 13
+      4:
+        HOPS: 5
+        RTT: 24
+      5:
+        HOPS: 8
+        RTT: 22
+      6:
+        HOPS: 8
+        RTT: 23
+      7:
+        HOPS: 8
+        RTT: 13
+      8:
+        HOPS: 4
+        RTT: 20
+      9:
+        HOPS: 4
+        RTT: 17
+  1:
+    LOCAL:
+      PRICE: 140
+    RESOURCE:
+      IFACES: 5
+      MEMORY: 735
+      VCPU: 2
+    TRANSITION:
+      0:
+        HOPS: 2
+        RTT: 19
+      2:
+        HOPS: 3
+        RTT: 20
+      3:
+        HOPS: 3
+        RTT: 15
+      4:
+        HOPS: 8
+        RTT: 11
+      5:
+        HOPS: 4
+        RTT: 14
+      6:
+        HOPS: 6
+        RTT: 12
+      7:
+        HOPS: 4
+        RTT: 17
+      8:
+        HOPS: 7
+        RTT: 21
+      9:
+        HOPS: 8
+        RTT: 23
+  2:
+    LOCAL:
+      PRICE: 59
+    RESOURCE:
+      IFACES: 5
+      MEMORY: 1730
+      VCPU: 1
+    TRANSITION:
+      0:
+        HOPS: 8
+        RTT: 15
+      1:
+        HOPS: 4
+        RTT: 12
+      3:
+        HOPS: 9
+        RTT: 11
+      4:
+        HOPS: 6
+        RTT: 13
+      5:
+        HOPS: 2
+        RTT: 21
+      6:
+        HOPS: 7
+        RTT: 11
+      7:
+        HOPS: 7
+        RTT: 22
+      8:
+        HOPS: 4
+        RTT: 13
+      9:
+        HOPS: 7
+        RTT: 21
+  3:
+    LOCAL:
+      PRICE: 123
+    RESOURCE:
+      IFACES: 3
+      MEMORY: 1524
+      VCPU: 1
+    TRANSITION:
+      0:
+        HOPS: 6
+        RTT: 14
+      1:
+        HOPS: 9
+        RTT: 23
+      2:
+        HOPS: 7
+        RTT: 18
+      4:
+        HOPS: 3
+        RTT: 23
+      5:
+        HOPS: 8
+        RTT: 19
+      6:
+        HOPS: 8
+        RTT: 22
+      7:
+        HOPS: 4
+        RTT: 19
+      8:
+        HOPS: 7
+        RTT: 10
+      9:
+        HOPS: 3
+        RTT: 16
+  4:
+    LOCAL:
+      PRICE: 182
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 1710
+      VCPU: 1
+    TRANSITION:
+      0:
+        HOPS: 6
+        RTT: 16
+      1:
+        HOPS: 9
+        RTT: 17
+      2:
+        HOPS: 9
+        RTT: 15
+      3:
+        HOPS: 3
+        RTT: 19
+      5:
+        HOPS: 3
+        RTT: 14
+      6:
+        HOPS: 4
+        RTT: 20
+      7:
+        HOPS: 3
+        RTT: 24
+      8:
+        HOPS: 5
+        RTT: 22
+      9:
+        HOPS: 2
+        RTT: 19
+  5:
+    LOCAL:
+      PRICE: 183
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 845
+      VCPU: 2
+    TRANSITION:
+      0:
+        HOPS: 6
+        RTT: 16
+      1:
+        HOPS: 5
+        RTT: 10
+      2:
+        HOPS: 9
+        RTT: 13
+      3:
+        HOPS: 4
+        RTT: 11
+      4:
+        HOPS: 2
+        RTT: 13
+      6:
+        HOPS: 8
+        RTT: 19
+      7:
+        HOPS: 8
+        RTT: 24
+      8:
+        HOPS: 4
+        RTT: 10
+      9:
+        HOPS: 2
+        RTT: 23
+  6:
+    LOCAL:
+      PRICE: 79
+    RESOURCE:
+      IFACES: 3
+      MEMORY: 1352
+      VCPU: 2
+    TRANSITION:
+      0:
+        HOPS: 6
+        RTT: 22
+      1:
+        HOPS: 7
+        RTT: 13
+      2:
+        HOPS: 9
+        RTT: 23
+      3:
+        HOPS: 2
+        RTT: 16
+      4:
+        HOPS: 7
+        RTT: 15
+      5:
+        HOPS: 2
+        RTT: 21
+      7:
+        HOPS: 7
+        RTT: 22
+      8:
+        HOPS: 9
+        RTT: 24
+      9:
+        HOPS: 4
+        RTT: 22
+  7:
+    LOCAL:
+      PRICE: 177
+    RESOURCE:
+      IFACES: 3
+      MEMORY: 1503
+      VCPU: 3
+    TRANSITION:
+      0:
+        HOPS: 3
+        RTT: 22
+      1:
+        HOPS: 6
+        RTT: 23
+      2:
+        HOPS: 4
+        RTT: 16
+      3:
+        HOPS: 4
+        RTT: 14
+      4:
+        HOPS: 8
+        RTT: 15
+      5:
+        HOPS: 5
+        RTT: 18
+      6:
+        HOPS: 2
+        RTT: 15
+      8:
+        HOPS: 2
+        RTT: 12
+      9:
+        HOPS: 6
+        RTT: 14
+  8:
+    LOCAL:
+      PRICE: 194
+    RESOURCE:
+      IFACES: 3
+      MEMORY: 1074
+      VCPU: 1
+    TRANSITION:
+      0:
+        HOPS: 5
+        RTT: 13
+      1:
+        HOPS: 7
+        RTT: 14
+      2:
+        HOPS: 3
+        RTT: 15
+      3:
+        HOPS: 9
+        RTT: 23
+      4:
+        HOPS: 6
+        RTT: 17
+      5:
+        HOPS: 8
+        RTT: 23
+      6:
+        HOPS: 7
+        RTT: 12
+      7:
+        HOPS: 7
+        RTT: 20
+      9:
+        HOPS: 7
+        RTT: 12
+  9:
+    LOCAL:
+      PRICE: 197
+    RESOURCE:
+      IFACES: 5
+      MEMORY: 1512
+      VCPU: 1
+    TRANSITION:
+      0:
+        HOPS: 4
+        RTT: 10
+      1:
+        HOPS: 2
+        RTT: 23
+      2:
+        HOPS: 2
+        RTT: 19
+      3:
+        HOPS: 5
+        RTT: 12
+      4:
+        HOPS: 5
+        RTT: 21
+      5:
+        HOPS: 5
+        RTT: 23
+      6:
+        HOPS: 7
+        RTT: 17
+      7:
+        HOPS: 2
+        RTT: 12
+      8:
+        HOPS: 5
+        RTT: 14
+METRICS:
+  LOCAL:
+    PRICE:
+      OBJECTIVE: MINIMIZATION
+      POLICIES: []
+  TRANSITION:
+    HOPS:
+      OBJECTIVE: MINIMIZATION
+      POLICIES: []
+    RTT:
+      OBJECTIVE: MINIMIZATION
+      POLICIES: []
+SERVICE:
+  FUNCTION:
+    F1:
+      IFACES: 2
+      MEMORY: 175
+      VCPU: 1
+    F2:
+      IFACES: 3
+      MEMORY: 706
+      VCPU: 1
+    F3:
+      IFACES: 3
+      MEMORY: 240
+      VCPU: 1
+    F4:
+      IFACES: 2
+      MEMORY: 481
+      VCPU: 1
+    F5:
+      IFACES: 2
+      MEMORY: 560
+      VCPU: 1
+    F6:
+      IFACES: 3
+      MEMORY: 915
+      VCPU: 1
+    F7:
+      IFACES: 3
+      MEMORY: 786
+      VCPU: 1
+    F8:
+      IFACES: 2
+      MEMORY: 779
+      VCPU: 1
+  TOPOLOGY:
+  - IN
+  - F1
+  - F2
+  - F3
+  - '{'
+  - F4
+  - /
+  - F5
+  - '}'
+  - F6
+  - F7
+  - F8
+  - EN
