@@ -134,28 +134,24 @@ class RequestProcessor:
 				return -33
 
 			for metric in requestYAML["DOMAINS"][member]["LOCAL"]:
-				if not metric in requestYAML["METRICS"]["LOCAL"]:
-					return -34
 				if not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], float):
-					return -35
+					return -34
 
 			for metric in requestYAML["METRICS"]["LOCAL"]:
 				if not metric in requestYAML["DOMAINS"][member]["LOCAL"]:
-					return -36
+					return -35
 
 			for domain in requestYAML["DOMAINS"][member]["TRANSITION"]:
 				if not domain in requestYAML["DOMAINS"]:
-					return -37
+					return -36
 
 				for metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
-					if not metric in requestYAML["METRICS"]["TRANSITION"]:
-						return -38
 					if not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], float):
-						return -39
+						return -37
 
 				for metric in requestYAML["METRICS"]["TRANSITION"]:
 					if not metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
-						return -40
+						return -38
 
 		return 1
 
@@ -287,6 +283,7 @@ class ServiceMapping(local_platypus.Problem):
 	__policies = None
 
 	__penalize = None
+	__taboo = None
 
 	def __penalty(self):
 		self.__penalize = []
@@ -382,12 +379,20 @@ class ServiceMapping(local_platypus.Problem):
 		#Create the penalty vector
 		self.__penalty()
 
+		#Create the taboo list
+		self.__taboo = []
+
 		#Status updated to "ready to process"
 		self.__status = 1
 
 
 	def evaluate(self, solution):
 		candidate = solution.variables[:]
+		
+		if candidate in self.__taboo:
+			solution.objectives[:] = self.__penalize
+			solution.constraints[:] = self.__policies["INDEX"] + [1]
+			return
 
 		evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
 		constraints = []
@@ -400,6 +405,7 @@ class ServiceMapping(local_platypus.Problem):
 				if computation[candidate[index]][resource] > self.__domains[candidate[index]]["RESOURCE"][resource]:
 					solution.objectives[:] = self.__penalize
 					solution.constraints[:] = self.__policies["INDEX"] + [1]
+					self.__taboo.append(candidate)
 					return
 
 			for metric in self.__metrics["LOCAL"]:
@@ -424,6 +430,7 @@ class ServiceMapping(local_platypus.Problem):
 				if not candidate[index] in self.__domains[candidate[connection]]["TRANSITION"]:
 					solution.objectives[:] = self.__penalize
 					solution.constraints[:] = self.__policies["INDEX"] + [2]
+					self.__taboo.append(candidate)
 					return
 
 				if meanDictionary == None:
@@ -486,22 +493,22 @@ class Mapping:
 			return
 
 		if population < 1:
-			self.__status = -41
+			self.__status = -39
 			return
 		if tournament < 2 or tournament > population:
-			self.__status = -42
+			self.__status = -40
 			return
 		if not crossover in ["SBX", "HUX", "PMX", "SSX"]:
-			self.__status = -43
+			self.__status = -41
 			return
 		if crossoverProbability <= 0 or crossoverProbability > 1:
-			self.__status = -44
+			self.__status = -42
 			return
 		if not mutation in ["FLIP", "SWAP"]:
-			self.__status = -45
+			self.__status = -43
 			return
 		if mutationProbability <= 0 or mutationProbability > 1:
-			self.__status = -46
+			self.__status = -44
 			return
 
 		if crossover == "SBX":
@@ -524,12 +531,15 @@ class Mapping:
 			print("\nPlaty.pus library does not support maximization problems with NSGAII - Algorithm changed to SPEA2!!\n")
 			algorithm = "SPEA2"
 
+		domains = self.__request.getDomains()
+		search = {x:list(domains[x]["TRANSITION"].keys()) for x in list(domains.keys())}
+
 		if algorithm == "NSGA2":
-			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = local_platypus.operators.GAOperator(crossover, mutation))
+			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		elif algorithm == "SPEA2":
-			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, mutation))
+			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		else:
-			self.__status = -47
+			self.__status = -45
 
 
 	def execute(self, iterations):
@@ -538,12 +548,12 @@ class Mapping:
 			return self.__status
 
 		if not isinstance(iterations, int):
-			self.__status = -48
-			return -48
+			self.__status = -46
+			return -46
 
 		if iterations < 1:
-			self.__status = -49
-			return -49
+			self.__status = -47
+			return -47
 
 		self.__algorithm.run(iterations)
 		final = [[], []]

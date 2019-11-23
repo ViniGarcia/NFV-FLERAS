@@ -546,6 +546,10 @@ class Mapping:
 			return -49
 
 		self.__algorithm.run(iterations)
+
+
+	def results(self):
+
 		final = [[], []]
 		nondominated = local_platypus.nondominated(self.__algorithm.result)
 
@@ -599,7 +603,7 @@ if not os.path.isfile(sys.argv[1]):
 	exit()
 
 for flag in range(2, len(sys.argv), 2):
-	
+
 	if sys.argv[flag] == "-a":
 		a = sys.argv[flag + 1]
 		continue
@@ -648,9 +652,10 @@ for flag in range(2, len(sys.argv), 2):
 	exit()
 
 processor = Mapping(sys.argv[1], a, p, t, c, cp, m, mp)
-result = processor.execute(g)
+processor.execute(g)
 
 if o != None:
+	result = processor.results()
 	file = open(o, "w+")
 	file.write("MAPPING;")
 	if len(result[0]) > 0:

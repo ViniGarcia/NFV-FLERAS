@@ -1,0 +1,526 @@
+DOMAINS:
+  POA:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 83
+    TRANSITION:
+      FLN:
+        CAP: 10
+        DIST: 376
+      CWB:
+        CAP: 10
+        DIST: 546
+  FLN:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 119
+    TRANSITION:
+      SAO:
+        CAP: 20
+        DIST: 488
+      POA:
+        CAP: 10
+        DIST: 376
+  CWB:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 105
+    TRANSITION:
+      SAO:
+        CAP: 20
+        DIST: 337
+      CGR:
+        CAP: 10
+        DIST: 779
+      POA:
+        CAP: 10
+        DIST: 546
+  SAO:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 135
+    TRANSITION:
+      BSB:
+        CAP: 10
+        DIST: 876
+      CNF:
+        CAP: 10
+        DIST: 493
+      SDU:
+        CAP: 10
+        DIST: 363
+      FOR:
+        CAP: 40
+        DIST: 2374
+      FLN:
+        CAP: 20
+        DIST: 488
+      CWB:
+        CAP: 20
+        DIST: 337
+  CGR:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 140
+    TRANSITION:
+      CGB:
+        CAP: 10
+        DIST: 563
+      CWB:
+        CAP: 10
+        DIST: 779
+  BSB:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 78
+    TRANSITION:
+      SDU:
+        CAP: 10
+        DIST: 937
+      CNF:
+        CAP: 10
+        DIST: 625
+      FOR:
+        CAP: 10
+        DIST: 1689
+      BEL:
+        CAP: 1
+        DIST: 1594
+      MAO:
+        CAP: 3
+        DIST: 1936
+      GYN:
+        CAP: 20
+        DIST: 174
+      SAO:
+        CAP: 10
+        DIST: 876
+  CNF:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 100
+    TRANSITION:
+      SDU:
+        CAP: 10
+        DIST: 343
+      SSA:
+        CAP: 10
+        DIST: 963
+      FOR:
+        CAP: 10
+        DIST: 1895
+      BSB:
+        CAP: 10
+        DIST: 625
+      SAO:
+        CAP: 10
+        DIST: 493
+  SDU:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 81
+    TRANSITION:
+      VIX:
+        CAP: 10
+        DIST: 412
+      CNF:
+        CAP: 10
+        DIST: 343
+      BSB:
+        CAP: 10
+        DIST: 937
+      SAO:
+        CAP: 10
+        DIST: 363
+  FOR:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 96
+    TRANSITION:
+      NAT:
+        CAP: 100
+        DIST: 436
+      REC:
+        CAP: 10
+        DIST: 631
+      CNF:
+        CAP: 10
+        DIST: 1895
+      BSB:
+        CAP: 10
+        DIST: 1689
+      SLZ:
+        CAP: 10
+        DIST: 647
+      BVB:
+        CAP: 1
+        DIST: 2565
+      SAO:
+        CAP: 40
+        DIST: 2374
+  CGB:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 136
+    TRANSITION:
+      GYN:
+        CAP: 10
+        DIST: 741
+      PVH:
+        CAP: 3
+        DIST: 1139
+      CGR:
+        CAP: 10
+        DIST: 563
+  BEL:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 85
+    TRANSITION:
+      MCP:
+        CAP: 1
+        DIST: 330
+      MAO:
+        CAP: 3
+        DIST: 1297
+      PMW:
+        CAP: 10
+        DIST: 974
+      BSB:
+        CAP: 1
+        DIST: 1594
+      THE:
+        CAP: 3
+        DIST: 750
+      SLZ:
+        CAP: 10
+        DIST: 489
+  MAO:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 166
+    TRANSITION:
+      BVB:
+        CAP: 1
+        DIST: 664
+      BEL:
+        CAP: 3
+        DIST: 1297
+      BSB:
+        CAP: 3
+        DIST: 1936
+  GYN:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 166
+    TRANSITION:
+      CGB:
+        CAP: 10
+        DIST: 741
+      PMW:
+        CAP: 10
+        DIST: 727
+      BSB:
+        CAP: 20
+        DIST: 174
+  SSA:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 152
+    TRANSITION:
+      VIX:
+        CAP: 20
+        DIST: 839
+      CNF:
+        CAP: 10
+        DIST: 963
+      REC:
+        CAP: 100
+        DIST: 679
+      AJU:
+        CAP: 10
+        DIST: 280
+  VIX:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 100
+    TRANSITION:
+      SDU:
+        CAP: 10
+        DIST: 412
+      SSA:
+        CAP: 20
+        DIST: 839
+  NAT:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 96
+    TRANSITION:
+      FOR:
+        CAP: 100
+        DIST: 436
+      CPV:
+        CAP: 100
+        DIST: 176
+      JPA:
+        CAP: 10
+        DIST: 152
+  REC:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 96
+    TRANSITION:
+      FOR:
+        CAP: 10
+        DIST: 631
+      CPV:
+        CAP: 100
+        DIST: 146
+      SSA:
+        CAP: 100
+        DIST: 679
+      MCZ:
+        CAP: 10
+        DIST: 203
+      THE:
+        CAP: 3
+        DIST: 938
+  SLZ:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 69
+    TRANSITION:
+      FOR:
+        CAP: 10
+        DIST: 647
+      BEL:
+        CAP: 10
+        DIST: 1679
+  BVB:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 163
+    TRANSITION:
+      FOR:
+        CAP: 1
+        DIST: 2565
+      MAO:
+        CAP: 1
+        DIST: 664
+  PVH:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 95
+    TRANSITION:
+      CGB:
+        CAP: 3
+        DIST: 1139
+      RBR:
+        CAP: 3
+        DIST: 450
+  MCP:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 85
+    TRANSITION:
+      BEL:
+        CAP: 1
+        DIST: 330
+  PMW:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 120
+    TRANSITION:
+      BEL:
+        CAP: 10
+        DIST: 974
+      GYN:
+        CAP: 10
+        DIST: 727
+  THE:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 107
+    TRANSITION:
+      BEL:
+        CAP: 3
+        DIST: 750
+      REC:
+        CAP: 3
+        DIST: 938
+  AJU:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 65
+    TRANSITION:
+      SSA:
+        CAP: 10
+        DIST: 280
+      MCZ:
+        CAP: 10
+        DIST: 202
+  CPV:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 123
+    TRANSITION:
+      REC:
+        CAP: 100
+        DIST: 146
+      NAT:
+        CAP: 100
+        DIST: 176
+      JPA:
+        CAP: 10
+        DIST: 115
+  JPA:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 89
+    TRANSITION:
+      NAT:
+        CAP: 10
+        DIST: 152
+      CPV:
+        CAP: 10
+        DIST: 115
+  MCZ:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 114
+    TRANSITION:
+      AJU:
+        CAP: 10
+        DIST: 202
+      REC:
+        CAP: 10
+        DIST: 203
+  RBR:
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    LOCAL:
+      PRICE: 95
+    TRANSITION:
+      PVH:
+        CAP: 3
+        DIST: 450
+METRICS:
+  LOCAL:
+    PRICE:
+      OBJECTIVE: MINIMIZATION
+      POLICIES: []
+  TRANSITION:
+    CAP:
+      OBJECTIVE: MAXIMIZATION
+      POLICIES: []
+    DIST:
+      OBJECTIVE: MAXIMIZATION
+      POLICIES: []
+SERVICE:
+  FUNCTION:
+    F1:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    F2:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    F3:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    F4:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+  TOPOLOGY:
+  - IN
+  - F1
+  - F2
+  - F3
+  - F4
+  - EN
