@@ -11,7 +11,7 @@ import local_platypus
 #STATUS CODES:
 #		0 -> Not evaluated yet
 #		1 -> Succesfully evaluated
-#		-1 to -40 -> Error
+#		-1 to -38 -> Error
 
 class RequestProcessor:
 
@@ -284,6 +284,7 @@ class ServiceMapping(local_platypus.Problem):
 
 	__penalize = None
 	__taboo = None
+	__generator = None
 
 	def __penalty(self):
 		self.__penalize = []
@@ -337,7 +338,7 @@ class ServiceMapping(local_platypus.Problem):
 					self.__penalize.append(-1)
 
 
-	def __init__(self, metrics, service, domains):
+	def __init__(self, metrics, service, domains, generator):
 		#Preparing problem directions and constraints
 		self.__policies = {"EQUATION":[], "INDEX":[]}
 		directions = []
@@ -379,8 +380,9 @@ class ServiceMapping(local_platypus.Problem):
 		#Create the penalty vector
 		self.__penalty()
 
-		#Create the taboo list
+		#Create the taboo list and initialize taboo generator
 		self.__taboo = []
+		self.__generator = generator
 
 		#Status updated to "ready to process"
 		self.__status = 1
@@ -390,9 +392,8 @@ class ServiceMapping(local_platypus.Problem):
 		candidate = solution.variables[:]
 		
 		if candidate in self.__taboo:
-			solution.objectives[:] = self.__penalize
-			solution.constraints[:] = self.__policies["INDEX"] + [1]
-			return
+			solution.variables[:] = self.__generator.substitute()
+			candidate = solution.variables[:]
 
 		evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
 		constraints = []
@@ -526,18 +527,19 @@ class Mapping:
 		elif mutation == "SWAP":
 			mutation = local_platypus.operators.ConstrainedBitSwap(probability = float(mutationProbability), constraints = mutationConstraints)
 
-		self.__problem = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
+		domains = self.__request.getDomains()
+		search = {x:list(domains[x]["TRANSITION"].keys()) for x in list(domains.keys())}
+		generation = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"])
+
+		self.__problem = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains(), generation)
 		if local_platypus.Problem.MAXIMIZE in self.__problem.directions and algorithm == "NSGA2":
 			print("\nPlaty.pus library does not support maximization problems with NSGAII - Algorithm changed to SPEA2!!\n")
 			algorithm = "SPEA2"
 
-		domains = self.__request.getDomains()
-		search = {x:list(domains[x]["TRANSITION"].keys()) for x in list(domains.keys())}
-
 		if algorithm == "NSGA2":
-			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament), variator = local_platypus.operators.GAOperator(crossover, mutation))
+			self.__algorithm = local_platypus.NSGAII(self.__problem, population_size = population, generator = generation, selector = local_platypus.operators.TournamentSelector(tournament), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		elif algorithm == "SPEA2":
-			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"]), selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, mutation))
+			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = generation, selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		else:
 			self.__status = -45
 
@@ -578,7 +580,7 @@ def usage():
 	print("================== Genetic Service Mapping (GeSeMa) ==================")
 	print("USAGE: *.py request_file [FLAGS]")
 	print("FLAGS: ")
-	print("\t-a algorithm_name: NSGA2 || SPEA2 (std: NSGA2)")
+	print("\t-a algorithm_name: SPEA2 || NSGA2 (std: SPEA2)")
 	print("\t-p population_size: 0 < population_size < +n (std: 50)")
 	print("\t-t tournament_size: 0 < tournament_size <= population_size (std: 2)")
 	print("\t-c crossover_technique: SBX || HUX || PMX || SSX (std: SBX)")
@@ -590,7 +592,7 @@ def usage():
 	print("======================================================================")
 
 
-a = "NSGA2"
+a = "SPEA2"
 p = 50
 t = 2
 c = "SBX"

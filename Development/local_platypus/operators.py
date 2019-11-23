@@ -31,6 +31,7 @@ def clip(value, min_value, max_value):
 class ConstrainedRandomGenerator(Generator):
     __search = None
     __constraints = None
+    __size = None
 
     def __init__(self, search, constraints):
         super(ConstrainedRandomGenerator, self).__init__()
@@ -39,13 +40,14 @@ class ConstrainedRandomGenerator(Generator):
 
     def generate(self, problem):
         solution = Solution(problem)
-        translator = Integer(0, len(self.__search)-1)
+        translator = Integer(0, len(self.__search) - 1)
+        self.__size = len(problem.types)
 
         genome = []
-        domain = random.randint(0, len(self.__search)-1)
-        for alele in range(len(problem.types)):
+        domain = random.randint(0, len(self.__search) - 1)
+        for alele in range(self.__size):
             genome.append(translator.encode(domain))
-            domain = self.__search[domain][random.randint(0, len(self.__search[domain])-1)]
+            domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
         solution.variables = genome
 
         for constraint in self.__constraints:
@@ -56,10 +58,9 @@ class ConstrainedRandomGenerator(Generator):
     def substitute(self):
         genome = []
         domain = random.randint(0, len(self.__search)-1)
-        for alele in range(len(problem.types)):
+        for alele in range(self.__size):
             genome.append(domain)
             domain = self.__search[domain][random.randint(0, len(self.__search[domain])-1)]
-        solution.variables = genome
 
         for constraint in self.__constraints:
             genome[constraint[0]] = constraint[1]
