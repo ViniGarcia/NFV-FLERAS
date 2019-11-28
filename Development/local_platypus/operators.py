@@ -67,6 +67,9 @@ class ConstrainedRandomGenerator(Generator):
 
         return genome
 
+    def search(self):
+        return self.__search
+
 
 class RandomGenerator(Generator):
 
