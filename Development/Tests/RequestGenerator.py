@@ -93,9 +93,11 @@ class RequestGenerator:
 					else:
 						t_skeleton[i_node][metric] = random.uniform(float(self.__metrics["TRANSITION"][metric]["BEGIN"]), float(self.__metrics["TRANSITION"][metric]["END"]))
 
+			t_skeleton = {str(k):v for k,v in t_skeleton.items()}
 			l_skeleton["TRANSITION"] = t_skeleton
 			domains["DOMAINS"][e_node] = l_skeleton
 
+		domains["DOMAINS"] = {str(k):v for k,v in domains["DOMAINS"].items()}
 		return domains
 
 	def __init__(self, metrics):
@@ -334,7 +336,7 @@ class RequestGenerator:
 		return self.__status
 
 
-test = RequestGenerator({"RESOURCE":{"MEMORY":{"BEGIN":1536, "END":1536}, "VCPU":{"BEGIN":3, "END":3}, "IFACES":{"BEGIN":6, "END":6}}, "LOCAL":{}, "TRANSITION":{"DEN":{"BEGIN":1000, "END":5000}, "DIST":{"BEGIN":500, "END": 2500}}})
+test = RequestGenerator({"RESOURCE":{"MEMORY":{"BEGIN":512, "END":512}, "VCPU":{"BEGIN":1, "END":1}, "IFACES":{"BEGIN":2, "END":2}}, "LOCAL":{}, "TRANSITION":{"DEN":{"BEGIN":1000, "END":5000}, "DIST":{"BEGIN":500, "END": 2500}}})
 network = test.completeGraph(30)
-service = test.serviceGraph(["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9"], {"MEMORY":{"BEGIN":512, "END":512}, "VCPU":{"BEGIN":1, "END":1}, "IFACES":{"BEGIN":2, "END":2}}, "LINEAR")
-test.requestDocument("30x9.yaml", service, network)
+service = test.serviceGraph(["F1", "F2", "F3", "F4", "F5", "F6", "F7"], {"MEMORY":{"BEGIN":512, "END":512}, "VCPU":{"BEGIN":1, "END":1}, "IFACES":{"BEGIN":2, "END":2}}, "LINEAR")
+test.requestDocument("30x7.yaml", service, network)
