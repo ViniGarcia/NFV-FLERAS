@@ -36,6 +36,7 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 4. HELM (Holistic EvaLuation Methodology): multi-criteria and holistic deployment evaluation library
 5. CUSCO (CUstomazable Service COmposing): generic and flexible composition tool
 6. CUSMAP (CUstomazable Service MAPping): generic and flexible split and mapping tool
+7. GESEMA (GEnetic SErvice MApping): generic and flexible genetic heuristic for split and mapping (standalone)
 
 ### Support
 
