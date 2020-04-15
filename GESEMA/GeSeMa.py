@@ -31,7 +31,6 @@ class RequestProcessor:
 		if not "METRICS" in requestYAML or not "SERVICE" in requestYAML or not "DOMAINS" in requestYAML:
 			return -3
 
-
 		if not "LOCAL" in requestYAML["METRICS"] or not "TRANSITION" in requestYAML["METRICS"]:
 			return -4
 

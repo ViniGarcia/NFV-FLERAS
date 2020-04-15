@@ -4,6 +4,7 @@ import yaml
 import copy
 import itertools
 import numpy
+import random
 
 ##------##------##------##------ REQUEST PARSER CLASS ------##------##------##------##
 #NAME: RequestProcessor
@@ -298,73 +299,100 @@ class ServiceMapping():
 		self.__status = 1
 
 
-	def __evaluate(self, candidate):
+	def __rollback(self, partialCandidate, index, parameter, computation):
+		
+		for resource in computation[index]:
+			computation[partialCandidate[index]][resource] -= self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
+			if resource == parameter:
+				return
 
-		evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
-		constraints = []
-		computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]
+	def __evaluate(self, partialCandidate, index, evaluation, computation):
 
-		for index in range(len(candidate)):
+		for resource in computation[index]:
+			computation[partialCandidate[index]][resource] += self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
+			if computation[partialCandidate[index]][resource] > self.__domains[partialCandidate[index]]["RESOURCE"][resource]:
+				self.__rollback(partialCandidate, index, resource, computation)
+				return False
 
-			for resource in computation[0]:
-				computation[candidate[index]][resource] += self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
-				if computation[candidate[index]][resource] > self.__domains[candidate[index]]["RESOURCE"][resource]:
-					return None
+		for metric in self.__metrics["LOCAL"]:
+			evaluation[metric] += self.__domains[partialCandidate[index]]["LOCAL"][metric]
 
-			for metric in self.__metrics["LOCAL"]:
-				evaluation[metric] += self.__domains[candidate[index]]["LOCAL"][metric]
+		flag = True
+		for connection in self.__service["STRUCTURE"][index][2]:
+			if partialCandidate[index] != partialCandidate[connection]:
+				flag = False
+				break
+		if flag:
+			return evaluation
 
-			flag = True
-			for connection in self.__service["STRUCTURE"][index][2]:
-				if candidate[index] != candidate[connection]:
-					flag = False
-					break
-			if flag:
+		meanDictionary = None
+		meanFactor = 0
+		for connection in self.__service["STRUCTURE"][index][2]:
+			meanFactor += 1
+
+			if partialCandidate[index] == partialCandidate[connection]:
 				continue
 
-			meanDictionary = None
-			meanFactor = 0
-			for connection in self.__service["STRUCTURE"][index][2]:
-				meanFactor += 1
+			if meanDictionary == None:
+				meanDictionary = copy.copy(self.__domains[partialCandidate[connection]]["TRANSITION"][partialCandidate[index]])
+			else:
+				for metric in self.__metrics["TRANSITION"]:
+					meanDictionary[metric] += self.__domains[partialCandidate[connection]]["TRANSITION"][partialCandidate[index]][metric]
 
-				if candidate[index] == candidate[connection]:
-					continue
+		for metric in self.__metrics["TRANSITION"]:
+			evaluation[metric] += meanDictionary[metric] / meanFactor
 
-				if not candidate[index] in self.__domains[candidate[connection]]["TRANSITION"]:
-					return None
-
-				if meanDictionary == None:
-					meanDictionary = copy.copy(self.__domains[candidate[connection]]["TRANSITION"][candidate[index]])
-				else:
-					for metric in self.__metrics["TRANSITION"]:
-						meanDictionary[metric] += self.__domains[candidate[connection]]["TRANSITION"][candidate[index]][metric]
-
-			for metric in self.__metrics["TRANSITION"]:
-				evaluation[metric] += meanDictionary[metric] / meanFactor
-
-		return evaluation
+		return True
 
 
-	def execute(self):
+	def execute(self, rounds):
 
 		acceptedCandidates = [[],[]]
-		iterControl = [0] * len(self.__service["FUNCTION"])
-		while (True):
+		for control in range(rounds):
 			
-			for index in range(len(self.__service["FUNCTION"]) - 1):
-				if iterControl[index] == len(self.__domains):	
-					iterControl[index + 1] += 1
-					iterControl[index] = 0
-			if iterControl[len(self.__service["FUNCTION"]) - 1] == len(self.__domains):
+			evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
+			computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]
+			partialCandidate = None
+
+			search = {x:list(self.__domains[x]["TRANSITION"].keys()) for x in list(self.__domains.keys())}
+			for domain in search:
+				search[domain].append(domain)
+
+			flag = False
+			initialPoint = list(search.keys())
+			random.shuffle(initialPoint)
+			for domain in initialPoint:
+				partialCandidate = [domain]
+				flag = self.__evaluate(partialCandidate, 0, evaluation, computation)
+				if flag:
+					break
+			if not flag:
 				return acceptedCandidates
 
-			combination = tuple(iterControl[::-1])
-			result = self.__evaluate(combination)
-			if result != None:
-				acceptedCandidates[0].append(combination)
-				acceptedCandidates[1].append(result)
+			for index in range(1, len(self.__service["FUNCTION"])):
+				domainOptions = list(search.keys())
+				for connection in self.__service["STRUCTURE"][index][2]:
+					domainOptions = set(domainOptions).intersection(set(search[connection]))
+				
+				domainOptions = list(domainOptions)
+				random.shuffle(domainOptions)
+				if len(domainOptions) == 0:
+					flag = False
+					break
 
-			iterControl[0] += 1
+				for domain in domainOptions:
+					partialCandidate.append(domain)
+					flag = self.__evaluate(partialCandidate, index, evaluation, computation)
+					if flag:
+						break
+					partialCandidate.pop()
+				if not flag:
+					break
+			if not flag:
+				continue
+
+			acceptedCandidates[0].append(partialCandidate)
+			acceptedCandidates[1].append(evaluation)
 
 		return acceptedCandidates
 
@@ -424,12 +452,12 @@ class Mapping:
 		self.__algorithm = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
 
 
-	def execute(self):
+	def execute(self, rounds):
 
 		if self.__status != 1 and (self.__status > -30 and self.__status < 0):
 			return self.__status
 
-		evaluations = self.__algorithm.execute()
+		evaluations = self.__algorithm.execute(rounds)
 		return evaluations
 
 
@@ -488,23 +516,44 @@ class Mapping:
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
 o = None
+r = None
 
-if len(sys.argv) < 2 or len(sys.argv) > 5:
-	print("===================== EXHAUSTIVE MAPPING =====================")
-	print("-> *.py file_name [-o output_name -i|-f]")
+if len(sys.argv) < 4 or len(sys.argv) > 7:
+	print("===================== GREEDY MAPPING =====================")
+	print("-> *.py file_name -r nr_rounds [-o output_name -i|-f]")
 	print("==============================================================")
 	exit()
 
-if len(sys.argv) == 5:
-	if sys.argv[2] == "-o" or not sys.argv[4] in ["-i", "-f"]:
-		o = sys.argv[3]
+if len(sys.argv) == 7:
+	if sys.argv[2] == "-r" and sys.argv[4] == "-o" and sys.argv[6] in ["-i", "-f"]:
+		o = sys.argv[5]
+		try:
+			r = int(sys.argv[3])
+		except:
+			print("ERROR: INVALID ROUNDS: " + str(sys.argv[3]))
+			exit()
 	else:
-		print("ERROR: INVALID FLAG " + str(sys.argv[2]))
+		print("ERROR: INVALID FLAG")
+		exit()
+elif len(sys.argv) == 4:
+	if sys.argv[2] == "-r":
+		try:
+			r = int(sys.argv[3])
+		except:
+			print("ERROR: INVALID ROUNDS: " + str(sys.argv[3]))
+			exit()
+	else:
+		print("ERROR: INVALID FLAG")
+		exit()
+else:
+	print("ERROR: INVALID COMMAND")
+	exit()
+
 
 mapper = Mapping(sys.argv[1])
-result = mapper.execute()
+result = mapper.execute(r)
 if o != None:
-	if sys.argv[4] == "-i":
+	if sys.argv[6] == "-i":
 		mapper.outputIndex(o, result)
 	else:
 		mapper.outputFront(o, result)
