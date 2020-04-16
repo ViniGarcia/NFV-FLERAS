@@ -345,7 +345,33 @@ class ServiceMapping():
 		return True
 
 
-	def execute(self, rounds):
+	def __choose(self, options):
+
+		aggregations = [0] * len(options)
+
+		for origin in ["LOCAL", "TRANSITION"]:
+			metrics = list(self.__metrics[origin].keys())
+			for parameter in range(len(metrics)):
+				partial = [candidate[1][parameter] for candidate in options]
+				aMax, aMin = max(partial), min(partial)
+				if self.__metrics[origin][metrics[parameter]]["OBJECTIVE"] == "MAXIMIZATION":
+					for index in range(len(partial)):
+						if aMax != aMin:
+							aggregations[index] += (aMax - partial[index]) / (aMax - aMin)
+						else:
+							aggregations[index] += 0
+				else:
+					aMin = min(partial)
+					for index in range(len(partial)):
+						if aMax != aMin:
+							aggregations[index] = (partial[index] - aMin) / (aMax - aMin)
+						else:
+							aggregations[index] += 0
+
+		return aggregations.index(min(aggregations))
+
+
+	def execute(self, rounds, factor):
 
 		acceptedCandidates = [[],[]]
 		for control in range(rounds):
@@ -358,16 +384,38 @@ class ServiceMapping():
 			for domain in search:
 				search[domain].append(domain)
 
-			flag = False
 			initialPoint = list(search.keys())
 			random.shuffle(initialPoint)
-			for domain in initialPoint:
-				partialCandidate = [domain]
+			
+			saveEvaluation = copy.deepcopy(evaluation)
+			saveComputation = copy.deepcopy(computation)
+			greedyOptions = []
+
+			flag = False
+			for domain in range(len(initialPoint)):
+				partialCandidate = [initialPoint[domain]]
 				flag = self.__evaluate(partialCandidate, 0, evaluation, computation)
 				if flag:
-					break
-			if not flag:
+					greedyOptions.append((partialCandidate, evaluation, computation))
+					if domain < factor:
+						evaluation = copy.deepcopy(saveEvaluation)
+						computation = copy.deepcopy(saveComputation)
+						continue
+					else:
+						break
+				else:
+					continue
+			if len(greedyOptions) == 0:
 				return acceptedCandidates
+			elif len(greedyOptions) == 1:
+				partialCandidate = greedyOptions[0][0]
+				evaluation = greedyOptions[0][1]
+				computation = greedyOptions[0][2]
+			else:
+				greedyIndex = self.__choose(greedyOptions)
+				partialCandidate = greedyOptions[greedyIndex][0]
+				evaluation = greedyOptions[greedyIndex][1]
+				computation = greedyOptions[greedyIndex][2]
 
 			for index in range(1, len(self.__service["FUNCTION"])):
 				domainOptions = list(search.keys())
@@ -380,14 +428,40 @@ class ServiceMapping():
 					flag = False
 					break
 
-				for domain in domainOptions:
-					partialCandidate.append(domain)
+				savePartialCandidate = copy.deepcopy(partialCandidate)
+				saveEvaluation = copy.deepcopy(evaluation)
+				saveComputation = copy.deepcopy(computation)
+				greedyOptions = []
+
+				for domain in range(len(domainOptions)):
+					partialCandidate.append(domainOptions[domain])
 					flag = self.__evaluate(partialCandidate, index, evaluation, computation)
 					if flag:
-						break
-					partialCandidate.pop()
-				if not flag:
+						greedyOptions.append((partialCandidate, evaluation, computation))
+						if domain < factor:
+							partialCandidate = copy.deepcopy(savePartialCandidate)
+							evaluation = copy.deepcopy(saveEvaluation)
+							computation = copy.deepcopy(saveComputation)
+							continue
+						else:
+							break
+					else:
+						partialCandidate.pop()
+						evaluation = copy.deepcopy(saveEvaluation)
+						computation = copy.deepcopy(saveComputation)
+				if len(greedyOptions) == 0:
 					break
+				elif len(greedyOptions) == 1:
+					partialCandidate = greedyOptions[0][0]
+					evaluation = greedyOptions[0][1]
+					computation = greedyOptions[0][2]
+					flag = True
+				else:
+					greedyIndex = self.__choose(greedyOptions)
+					partialCandidate = greedyOptions[greedyIndex][0]
+					evaluation = greedyOptions[greedyIndex][1]
+					computation = greedyOptions[greedyIndex][2]
+					flag = True
 			if not flag:
 				continue
 
@@ -420,7 +494,7 @@ class Mapping:
 		is_efficient = numpy.ones(aggregations.shape[0], dtype = bool)
 		for i, c in enumerate(aggregations):
 			if is_efficient[i]:
-				is_efficient[is_efficient] = numpy.any(aggregations[is_efficient]<c, axis=1)
+				is_efficient[is_efficient] = numpy.any(aggregations[is_efficient]>c, axis=1)
 				is_efficient[i] = True
 
 		return is_efficient.tolist()
@@ -452,12 +526,12 @@ class Mapping:
 		self.__algorithm = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
 
 
-	def execute(self, rounds):
+	def execute(self, rounds, tests):
 
 		if self.__status != 1 and (self.__status > -30 and self.__status < 0):
 			return self.__status
 
-		evaluations = self.__algorithm.execute(rounds)
+		evaluations = self.__algorithm.execute(rounds, tests)
 		return evaluations
 
 
@@ -517,41 +591,45 @@ class Mapping:
 
 o = None
 r = None
+t = None
 
-if len(sys.argv) < 4 or len(sys.argv) > 7:
-	print("===================== GREEDY MAPPING =====================")
-	print("-> *.py file_name -r nr_rounds [-o output_name -i|-f]")
-	print("==============================================================")
+if len(sys.argv) < 6 or len(sys.argv) > 9:
+	print("===================== RANDOM/GREEDY MAPPING ============================")
+	print("-> *.py file_name -r nr_rounds -t nr_tests [-o output_name -i|-f]")
+	print("\t- -t 1 -> Random Search")
+	print("\t- -t n | n < max_domain_connections -> Stochastic Greedy Search")
+	print("\t- -t n | n = max_domain_connections -> Traditional Greedy Search")
+	print("========================================================================")
 	exit()
 
-if len(sys.argv) == 7:
-	if sys.argv[2] == "-r" and sys.argv[4] == "-o" and sys.argv[6] in ["-i", "-f"]:
-		o = sys.argv[5]
-		try:
-			r = int(sys.argv[3])
-		except:
-			print("ERROR: INVALID ROUNDS: " + str(sys.argv[3]))
-			exit()
-	else:
-		print("ERROR: INVALID FLAG")
+if len(sys.argv) >= 6:
+	if not os.path.isfile(sys.argv[1]):
+		print("ERROR: FILE DOES NOT EXIST!")
 		exit()
-elif len(sys.argv) == 4:
-	if sys.argv[2] == "-r":
+	if sys.argv[2] == "-r" and sys.argv[4] == "-t":
 		try:
 			r = int(sys.argv[3])
+			t = int(sys.argv[5])
 		except:
-			print("ERROR: INVALID ROUNDS: " + str(sys.argv[3]))
+			print("ERROR: -r AND -t MUST BE INTEGER NUMBERS!")
 			exit()
 	else:
-		print("ERROR: INVALID FLAG")
+		print("ERROR: ESSENTIAL FLAGS ARE NOT DEFINED (-r / -t)!")
+		exit()
+
+if len(sys.argv) == 9:
+	if sys.argv[6] == "-o" and sys.argv[8] in ["-i", "-f"]:
+		o = sys.argv[7]
+	else:
+		print("ERROR: INVALID OPTIONAL FLAGS FOUND (JUST -o AND -i|-f)!")
 		exit()
 else:
-	print("ERROR: INVALID COMMAND")
-	exit()
-
+	if len(sys.argv) > 6:
+		print("ERROR: INVALID DEFINITION OF OPTIONAL FLAGS!")
+		exit()
 
 mapper = Mapping(sys.argv[1])
-result = mapper.execute(r)
+result = mapper.execute(r, t)
 if o != None:
 	if sys.argv[6] == "-i":
 		mapper.outputIndex(o, result)
