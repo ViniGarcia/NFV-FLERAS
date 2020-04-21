@@ -405,15 +405,14 @@ class ServiceMapping(local_platypus.Problem):
 
 
 	def evaluate(self, solution):
-		candidate = solution.variables[:]
 		
-		if candidate in self.__taboo[0]:
-			solution.variables[:] = self.__generator.substitute()
-			candidate = solution.variables[:]
+		if solution.variables in self.__taboo[0]:
+			solution.variables = self.__generator.substitute()
 
-		if candidate in self.__taboo[1]:
-			self.__adjust(candidate)
+		if solution.variables in self.__taboo[1]:
+			self.__adjust(solution.variables)
 
+		candidate = solution.variables[:]
 		evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
 		constraints = []
 		computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]

@@ -368,6 +368,7 @@ class ServiceMapping():
 
 		return acceptedCandidates
 
+
 	def getStatus(self):
 		return self.__status
 
@@ -385,33 +386,96 @@ class Mapping:
 	__request = None
 	__algorithm = None
 	__problem = None
+	__objectives = None
 
-	def __paretoFront(self, aggregations):
 
-		aggregations = numpy.array(aggregations)
-		is_efficient = numpy.ones(aggregations.shape[0], dtype = bool)
-		for i, c in enumerate(aggregations):
-			if is_efficient[i]:
-				is_efficient[is_efficient] = numpy.any(aggregations[is_efficient]<c, axis=1)
-				is_efficient[i] = True
+	def __paretoFrontierSubroutine(self, results, frontiers, front_index, exchange_indexes):
 
-		return is_efficient.tolist()
+		new_front = []
+		add_front = []
 
-	def __paretoIndexes(self, aggregations):
+		for index in exchange_indexes:
+			it_dominates = True
 
-		aggregations = numpy.array(aggregations)
-		i_dominates_j = numpy.all(aggregations[:,None] <= aggregations, axis=-1) & numpy.any(aggregations[:,None] < aggregations, axis=-1)
-		remaining = numpy.arange(len(aggregations))
-		fronts = numpy.empty(len(aggregations), int)
-		frontier_index = 0
+			for candidate in range(len(frontiers[front_index])):
+				count_dominated = 0
 
-		while remaining.size > 0:
-			dominated = numpy.any(i_dominates_j[remaining[:,None], remaining], axis=0)
-			fronts[remaining[~dominated]] = frontier_index
-			remaining = remaining[dominated]
-			frontier_index += 1
+				for objective in range(len(self.__objectives)):
+					if self.__objectives[objective] == "MAXIMIZATION":
+						if results[index][objective] < results[frontiers[front_index][candidate]][objective]:
+							count_dominated += 1
+					elif self.__objectives[objective] == "MINIMIZATION":
+						if results[index][objective] > results[frontiers[front_index][candidate]][objective]:
+							count_dominated += 1
 
-		return fronts.tolist()
+				if count_dominated > 0:
+					it_dominates = False
+					break
+
+			if it_dominates:
+				new_front.append(index)
+			else:
+				add_front.append(index)
+
+		frontiers[front_index] = frontiers[front_index] + add_front
+		if len(new_front) > 0:
+			frontiers.insert(front_index, new_front)
+
+
+	def __paretoFrontiers(self, results):
+
+		frontiers = [[0], []]
+		indexes = [i for i in range(1, len(results))]
+
+		while True:
+			if len(indexes) == 0:
+				break
+			index = indexes.pop(0)
+
+			for front in range(len(frontiers)):
+				is_dominated = False
+				it_dominates = []
+
+				for candidate in range(len(frontiers[front])):
+					count_dominated = 0
+					result_equity = True
+
+					for objective in range(len(self.__objectives)):
+						if self.__objectives[objective] == "MAXIMIZATION":
+							if results[index][objective] < results[frontiers[front][candidate]][objective]:
+								count_dominated += 1
+							if result_equity and results[index][objective] != results[frontiers[front][candidate]][objective]:
+								result_equity = False
+						elif self.__objectives[objective] == "MINIMIZATION":
+							if results[index][objective] > results[frontiers[front][candidate]][objective]:
+								count_dominated += 1
+							if result_equity and results[index][objective] != results[frontiers[front][candidate]][objective]:
+								result_equity = False
+
+					if result_equity:
+						break
+					if count_dominated == len(self.__objectives):
+						is_dominated = True
+						break
+					if count_dominated == 0:
+						it_dominates.append(frontiers[front][candidate])
+
+				if result_equity:
+					frontiers[front].append(index)
+					break
+				if not is_dominated and len(it_dominates) < len(frontiers[front]):
+					frontiers[front].append(index)
+					if len(it_dominates) > 0:
+						frontiers[front] = list(set(frontiers[front]) - set(it_dominates))
+						self.__paretoFrontierSubroutine(results, frontiers, front + 1, it_dominates)
+					break
+				if is_dominated:
+					continue
+				if len(it_dominates) == len(frontiers[front]):
+					frontiers.insert(front, [index])
+					break
+
+		return frontiers[:-1]
 
 
 	def __init__(self, request):
@@ -420,6 +484,13 @@ class Mapping:
 		self.__status = self.__request.getStatus()
 		if self.__status != 1:
 			return
+
+		metrics = self.__request.getMetrics()
+		self.__objectives = []
+		for metric in metrics["LOCAL"]:
+			self.__objectives.append(metrics["LOCAL"][metric]["OBJECTIVE"])
+		for metric in metrics["TRANSITION"]:
+			self.__objectives.append(metrics["TRANSITION"][metric]["OBJECTIVE"])
 
 		self.__algorithm = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
 
@@ -433,53 +504,28 @@ class Mapping:
 		return evaluations
 
 
-	def outputIndex(self, filename, result):
+	def outputFrontiers(self, filename, result):
 
-		result.append(self.__paretoIndexes(result[1]))
+		indexFrontiers = self.__paretoFrontiers(result[1])
 		metricList = list(self.__request.getMetrics()["LOCAL"].keys()) + list(self.__request.getMetrics()["TRANSITION"].keys())
 		metricKeys = [self.__request.getMetricDictionary()[index] for index in range(len(metricList))]
 
-		file = open(o, "w+")
+		file = open(filename, "w+")
 		file.write("MAPPING;")
 		for metric in metricKeys:
 			file.write(metric + ";")
 		file.write("PARETO")
 		file.write("\n")
 
-		for index in range(len(result[0])):
-			file.write(str(list(result[0][index])) + ";")
-			for subindex in range(len(metricKeys)):
-				file.write(str(result[1][index][subindex]) + ";")
-			file.write(str(result[2][index]))
-			file.write("\n")
+		for front in range(len(indexFrontiers)):
+			for index in indexFrontiers[front]:
+				file.write(str(list(result[0][index])) + ";")
+				for subindex in range(len(metricKeys)):
+					file.write(str(result[1][index][subindex]) + ";")
+				file.write(str(front))
+				file.write("\n")
 
-		file.write("PF CANDIDATES:;" + str(result[2].count(0)))
-		file.close()
-
-	def outputFront(self, filename, result):
-
-		result.append(self.__paretoFront(result[1]))
-		metricList = list(self.__request.getMetrics()["LOCAL"].keys()) + list(self.__request.getMetrics()["TRANSITION"].keys())
-		metricKeys = [self.__request.getMetricDictionary()[index] for index in range(len(metricList))]
-
-		file = open(o, "w+")
-		file.write("MAPPING;")
-		for metric in metricKeys:
-			file.write(metric + ";")
-		file.write("PARETO")
-		file.write("\n")
-
-		for index in range(len(result[0])):
-			file.write(str(list(result[0][index])) + ";")
-			for subindex in range(len(metricKeys)):
-				file.write(str(result[1][index][subindex]) + ";")
-			if result[2][index]:
-				file.write(str(0))
-			else:
-				file.write(str(1))
-			file.write("\n")
-
-		file.write("PF CANDIDATES:;" + str(result[2].count(True)))
+		file.write("PF CANDIDATES:;" + str(len(indexFrontiers[0])))
 		file.close()
 
 	def getStatus(self):
@@ -491,12 +537,12 @@ o = None
 
 if len(sys.argv) < 2 or len(sys.argv) > 5:
 	print("===================== EXHAUSTIVE MAPPING =====================")
-	print("-> *.py file_name [-o output_name -i|-f]")
+	print("-> *.py file_name [-o output_name]")
 	print("==============================================================")
 	exit()
 
-if len(sys.argv) == 5:
-	if sys.argv[2] == "-o" or not sys.argv[4] in ["-i", "-f"]:
+if len(sys.argv) == 4:
+	if sys.argv[2] == "-o":
 		o = sys.argv[3]
 	else:
 		print("ERROR: INVALID FLAG " + str(sys.argv[2]))
@@ -504,7 +550,4 @@ if len(sys.argv) == 5:
 mapper = Mapping(sys.argv[1])
 result = mapper.execute()
 if o != None:
-	if sys.argv[4] == "-i":
-		mapper.outputIndex(o, result)
-	else:
-		mapper.outputFront(o, result)
+	mapper.outputFrontiers(o, result)
