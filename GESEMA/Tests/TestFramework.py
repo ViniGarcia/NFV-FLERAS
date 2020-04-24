@@ -7,7 +7,7 @@ import statistics
 import yaml
 import csv
 
-globalAlgorithms = {"-g":"GESEMA", "-ex":"Exhaustive", "-sg":"StochasticKGreedy", "-ra":"Random"}
+globalAlgorithms = {"-g":"GeSeMa", "-ex":"Exhaustive", "-sg":"StochasticKGreedy", "-ra":"Random", "-tg":"TraditionalGreedy"}
 
 
 def paretoFrontierSubroutine(results, frontiers, front_index, exchange_indexes, objectives):
@@ -118,7 +118,9 @@ def timing(rep, file, confs, modes):
                 elif request == "-ex":
                     subprocess.check_call("python 1.Exhaustive.py " + file, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-ra":
-                    subprocess.check_call("python 2.Random.py -f " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("python 2.Random.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                elif request == "-tg":
+                    subprocess.check_call("python 3.Greedy.py " + file, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-sg":
                     subprocess.check_call("python 4.SK-Greedy.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 timeResults.append(time.time() - start)
@@ -138,8 +140,6 @@ def timing(rep, file, confs, modes):
 
 def definitiveQuality(rep, file, confs, modes):
 
-    results = {}
-
     writer = open(file.split(".")[0] + "QUALITY.csv", "w+")
     writer.write("ALGORITHM;CONF;MEAN_RESULTS;STDEV_RESULTS;EXH_PARETO;EXH_WORST;MEAN_PARETO_G;STDEV_PARETO_G;MEAN_PARETO_F;STDEV_PARETO_F;REL_PARETO_F;REL_PARETO_WC_F;\n")
 
@@ -154,6 +154,9 @@ def definitiveQuality(rep, file, confs, modes):
     exhaustiveFronts = [distribution[-1] for distribution in exhaustiveData]
     pfWorst = max([int(f) for f in exhaustiveFronts[1:]])
 
+    if "-tg" in modes:
+        confs[modes.index("-tg")].append("UNIQUE")
+
     for request in modes:
         for execution in confs[modes.index(request)]:
             print("QUALITY TEST: " + file + " || " + str(globalAlgorithms[request]) + " (" + execution + ")")
@@ -167,7 +170,9 @@ def definitiveQuality(rep, file, confs, modes):
                 if request == "-g":
                     subprocess.check_call("python 5.GeSeMa.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-ra":
-                    subprocess.check_call("python 2.Random.py -f " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("python 2.Random.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                elif request == "-tg":
+                    subprocess.check_call("python 3.Greedy.py " + file + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-sg":
                     subprocess.check_call("python 4.SK-Greedy.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
 
@@ -184,6 +189,9 @@ def definitiveQuality(rep, file, confs, modes):
                 realPareto.append(analyzerFronts.count(0))
                 quantityFronts.append(len(analyzerFronts))
                 os.remove("output.csv")
+
+                if request == "-tg":
+                    break
 
             writer.write(globalAlgorithms[request] + ";" + execution + ";" + str(statistics.mean(quantityFronts)) + ";" + str(statistics.stdev(quantityFronts)) + ";" + str(pfCandidates) + ";" + str(pfWorst) + ";" + str(statistics.mean(generalFronts)) + ";" + str(statistics.stdev(generalFronts)) + ";" + str(statistics.mean(realPareto)) + ";" + str(statistics.stdev(realPareto)) + ";" + str(statistics.mean(realPareto)/pfCandidates) + ";" + str((statistics.mean(realPareto) - statistics.stdev(realPareto))/pfCandidates) + "\n")
 
@@ -205,6 +213,9 @@ def relativeQuality(rep, file, confs, modes):
     writer = open(file.split(".")[0] + "RELQUALITY.csv", "w+")
     writer.write("ALGORITHM;CONF;TOTAL_FRONTS;MEAN_PARETO_G;STDEV_PARETO_G;\n")
 
+    if "-tg" in modes:
+        confs[modes.index("-tg")].append("UNIQUE")
+
     allCandidates = {}
     setEvaluation = []
     for request in modes:
@@ -218,12 +229,15 @@ def relativeQuality(rep, file, confs, modes):
             
             allCandidates[request][execution] = [[],[]]
             for test in range(rep):
+                print("ROUND #" + str(test))
 
                 analyzerFronts = [] 
                 if request == "-g":
                     subprocess.check_call("python 5.GeSeMa.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-ra":
-                    subprocess.check_call("python 2.Random.py -f " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("python 2.Random.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                elif request == "-tg":
+                    subprocess.check_call("python 3.Greedy.py " + file + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-sg":
                     subprocess.check_call("python 4.SK-Greedy.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
 
@@ -240,6 +254,9 @@ def relativeQuality(rep, file, confs, modes):
                 allCandidates[request][execution][0] = allCandidates[request][execution][0] + analyzerColumns[0]
                 allCandidates[request][execution][1] = allCandidates[request][execution][1] + list(zip(*analyzerColumns[1:]))
                 os.remove("output.csv")
+
+                if request == "-tg":
+                    break
 
             allCandidates[request][execution].append(len(setEvaluation))
             setEvaluation = setEvaluation + allCandidates[request][execution][1]
@@ -262,18 +279,20 @@ def relativeQuality(rep, file, confs, modes):
 
 
 if len(sys.argv) < 7:
-    print("USAGE [TIMING TEST]: *.py -t [-ex] [-ra {LIST OF CONFIGURATIONS}] [-sg {LIST OF CONFIGURATIONS}] [-g {LIST OF CONFIGURATIONS}] -r ROUNDS -f FILE")
+    print("USAGE [TIMING TEST]: *.py -t [-ex] [-tg] [-ra {LIST OF CONFIGURATIONS}] [-sg {LIST OF CONFIGURATIONS}] [-g {LIST OF CONFIGURATIONS}] -r ROUNDS -f FILE")
     print("\t-t: Timing test flag")
     print("\t-ex: Exhaustive timing")
+    print("\t-tg: Traditional greedy")
     print("\t-ra: Random timing (SEQUENCE OF STRINGS BETWEEN \" OF CONFIGURATIONS)")
     print("\t-sg: SK-Greedy timing (SEQUENCE OF STRINGS BETWEEN \" OF CONFIGURATIONS)")
     print("\t-g: GeSeMa timing (SEQUENCE OF STRINGS BETWEEN \" OF CONFIGURATIONS)")
     print("\t-r: Number of timing rounds (INT)")
     print("\t-f: File path and name (STRING)")
     print("")
-    print("USAGE [QUALITY TEST]: *.py -dq|rq [-ra {LIST OF CONFIGURATIONS}] [-sg {LIST OF CONFIGURATIONS}] [-g {LIST OF CONFIGURATIONS}] -r ROUNDS -f FILE")
+    print("USAGE [QUALITY TEST]: *.py -dq|rq [-tg] [-ra {LIST OF CONFIGURATIONS}] [-sg {LIST OF CONFIGURATIONS}] [-g {LIST OF CONFIGURATIONS}] -r ROUNDS -f FILE")
     print("\t-dq: Definitive quality test flag -- based on exhaustive results")
     print("\t-rq: Relative quality test flag -- based on heuristics results only")
+    print("\t-tg: Traditional greedy")
     print("\t-ra: Random quality (SEQUENCE OF STRINGS BETWEEN \" OF CONFIGURATIONS)")
     print("\t-sg: SK-Greedy quality (SEQUENCE OF STRINGS BETWEEN \" OF CONFIGURATIONS)")
     print("\t-g: GeSeMa quality (SEQUENCE OF STRINGS BETWEEN \" OF CONFIGURATIONS)")
@@ -297,7 +316,7 @@ modes = []
 if sys.argv[1] == "-t":
     cConf = []
     cMode = sys.argv[2]
-    if not cMode in ["-g", "-ex", "-sg", "-ra"]:
+    if not cMode in ["-g", "-ex", "-sg", "-ra", "-tg"]:
         print("ERROR: INVALID FLAG OF ALGORITHM")
         exit()
     for index in range(3, len(sys.argv)):
@@ -305,7 +324,7 @@ if sys.argv[1] == "-t":
             confs.append(cConf)
             modes.append(cMode)
             break
-        if sys.argv[index] in ["-g", "-ex", "-sg", "-ra"]:
+        if sys.argv[index] in ["-g", "-ex", "-sg", "-ra", "-tg"]:
             confs.append(cConf)
             modes.append(cMode)
             cConf = []
@@ -318,7 +337,7 @@ if sys.argv[1] == "-t":
 elif sys.argv[1] == "-dq" or sys.argv[1] == "-rq":
     cConf = []
     cMode = sys.argv[2]
-    if not cMode in ["-g", "-sg", "-ra"]:
+    if not cMode in ["-g", "-sg", "-ra", "-tg"]:
         print("ERROR: INVALID FLAG OF ALGORITHM")
         exit()
     for index in range(3, len(sys.argv)):
@@ -326,7 +345,7 @@ elif sys.argv[1] == "-dq" or sys.argv[1] == "-rq":
             confs.append(cConf)
             modes.append(cMode)
             break
-        if sys.argv[index] in ["-g", "-sg", "-ra"]:
+        if sys.argv[index] in ["-g", "-sg", "-ra", "-tg"]:
             confs.append(cConf)
             modes.append(cMode)
             cConf = []

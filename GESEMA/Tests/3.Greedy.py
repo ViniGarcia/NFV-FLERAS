@@ -299,12 +299,26 @@ class ServiceMapping():
 		self.__status = 1
 
 
+	def __dependencies(self, search, dependencies):
+
+		constraints = {}
+		for dependency in dependencies:
+
+			constraints[dependency[0]] = [dependency[1], []]
+			for domain in search:
+				if dependency[1] in search[domain]:
+					constraints[1][dependency[0]].append(domain)	
+
+		return constraints
+
+
 	def __rollback(self, partialCandidate, index, parameter, computation):
 		
 		for resource in computation[index]:
 			computation[partialCandidate[index]][resource] -= self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
 			if resource == parameter:
 				return
+
 
 	def __evaluate(self, partialCandidate, index, evaluation, computation):
 
@@ -367,28 +381,54 @@ class ServiceMapping():
 		return aggregations.index(min(aggregations))
 
 
-	def execute(self, sk, rounds):
+	def execute(self):
 
 		accepted = [[],[]]
 		search = {x:list(self.__domains[x]["TRANSITION"].keys()) for x in list(self.__domains.keys())}
 		for domain in search:
 			search[domain].append(domain)
 
-		for execution in range(rounds):
-			current = []
-			shufller = list(self.__domains.keys())
+		constraints = self.__dependencies(search, self.__service["DEPENDENCY"])
+		if 0 in constraints:
+			if 1 in constraints:
+				if not constraints[0][0] in constraints[1][1]:
+					return accepted
+			start = [constraints[0][0]]
+		else:
+			if 1 in constraints:
+				start = constraints[1][1]
+			else:
+				start = range(len(self.__domains))
+
+		for initial in start:
+			current = [initial]
 			evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
 			computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]
 			found = True
+
+			if not self.__evaluate(current, 0, evaluation, computation):
+				continue
 
 			while len(current) < len(self.__service["FUNCTION"]):
 
 				saveEvaluation = copy.deepcopy(evaluation)
 				saveComputation = copy.deepcopy(computation)
 				greedyOptions = []
-				random.shuffle(shufller)
 
-				for domain in shufller[:sk]:
+				if len(current) in constraints:
+					valid = self.__evaluate(current + [domain], len(current), evaluation, computation)
+					if not valid:
+						found = False
+						break
+					current.append(constraints[len(current)][0])
+					continue
+
+				if len(current)+1 in constraints:
+					iterate = set(search[current[-1]]).intersection(constraints[len(current)+1][1])
+				else:
+					iterate = search[current[-1]] 
+
+				for domain in iterate:
 					valid = self.__evaluate(current + [domain], len(current), evaluation, computation)
 					if not valid:
 						continue
@@ -404,7 +444,6 @@ class ServiceMapping():
 				current.append(greedyOptions[index][0])
 				evaluation = greedyOptions[index][1]
 				computation = greedyOptions[index][2]
-				shufller = search[current[-1]]
 
 			if not found:
 				continue
@@ -541,12 +580,12 @@ class Mapping:
 		self.__algorithm = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains())
 
 
-	def execute(self, sk, rounds):
+	def execute(self):
 
 		if self.__status != 1 and (self.__status > -30 and self.__status < 0):
 			return self.__status
 
-		evaluations = self.__algorithm.execute(sk, rounds)
+		evaluations = self.__algorithm.execute()
 		return evaluations
 
 
@@ -578,42 +617,27 @@ class Mapping:
 ##------##------##------##------##-----##-----##-----##------##------##------##
 
 o = None
-sk = None
 r = None
+t = None
 
-if len(sys.argv) < 6 or len(sys.argv) > 8:
-	print("================== STOCHASTIC K GREEDY MAPPING =========================")
-	print("-> *.py file_name -sk k_value -r execution_rounds [-o output_name]")
+if len(sys.argv) < 2 or len(sys.argv) > 4:
+	print("======================== GREEDY MAPPING ================================")
+	print("-> *.py file_name [-o output_name]")
 	print("========================================================================")
 	exit()
 
-if len(sys.argv) >= 6:
-	if not os.path.isfile(sys.argv[1]):
-		print("ERROR: FILE DOES NOT EXIST!")
-		exit()
-	if sys.argv[2] == "-sk" and sys.argv[4] == "-r":
-		try:
-			sk = int(sys.argv[3])
-			r = int(sys.argv[5])
-		except:
-			print("ERROR: -sk AND -r MUST BE INTEGER NUMBERS!")
-			exit()
-	else:
-		print("ERROR: ESSENTIAL FLAGS ARE NOT DEFINED (-r / -t)!")
-		exit()
-
-if len(sys.argv) == 8:
-	if sys.argv[6] == "-o":
-		o = sys.argv[7]
+if len(sys.argv) == 4:
+	if sys.argv[2] == "-o":
+		o = sys.argv[3]
 	else:
 		print("ERROR: INVALID OPTIONAL FLAGS FOUND!")
 		exit()
 else:
-	if len(sys.argv) > 8:
+	if len(sys.argv) > 4:
 		print("ERROR: INVALID DEFINITION OF OPTIONAL FLAGS!")
 		exit()
 
 mapper = Mapping(sys.argv[1])
-result = mapper.execute(sk, r)
+result = mapper.execute()
 if o != None:
 	mapper.outputFrontiers(o, result)

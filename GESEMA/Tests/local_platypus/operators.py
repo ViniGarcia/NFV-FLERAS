@@ -21,12 +21,77 @@ from __future__ import absolute_import, division, print_function
 import copy
 import math
 import random
+from .greedy import gesema_greedy
 from .core import PlatypusError, Solution, ParetoDominance, Generator, Selector, Variator, Mutation, EPSILON
 from .types import Integer, Real, Binary, Permutation, Subset
 from .tools import add, subtract, multiply, is_zero, magnitude, orthogonalize, normalize, random_vector, zeros, roulette
 
 def clip(value, min_value, max_value):
     return max(min_value, min(value, max_value))
+
+class GreedyConstrainedRandomGenerator(Generator):
+    __metrics = None
+    __service = None
+    __domains = None
+
+    __search = None
+    __constraints = None
+    __size = None
+
+    __gcandidates = None
+    __gcontrol = None
+
+    def __init__(self, search, constraints, metrics, service, domains):
+        super(GreedyConstrainedRandomGenerator, self).__init__()
+        self.__metrics = metrics
+        self.__service = service
+        self.__domains = domains
+
+        self.__search = search
+        self.__constraints = constraints
+
+        self.__gcandidates = ((gesema_greedy(metrics, service, domains)).execute())[0]
+        self.__gcontrol = len(self.__gcandidates) - 1
+
+
+    def generate(self, problem):
+        solution = Solution(problem)
+        translator = Integer(0, len(self.__search) - 1)
+        self.__size = len(problem.types)
+        genome = []
+
+        if self.__gcontrol >= 0:
+            for alele in self.__gcandidates[self.__gcontrol]:
+                genome.append(translator.encode(alele))
+            solution.variables = genome
+            self.__gcontrol -= 1
+            return solution
+
+        domain = random.randint(0, len(self.__search) - 1)
+        for alele in range(self.__size):
+            genome.append(translator.encode(domain))
+            domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
+        solution.variables = genome
+
+        for constraint in self.__constraints:
+            solution.variables[constraint[0]] = problem.types[constraint[0]].encode(constraint[1])
+
+        return solution
+
+    def substitute(self):
+        genome = []
+        domain = random.randint(0, len(self.__search)-1)
+        for alele in range(self.__size):
+            genome.append(domain)
+            domain = self.__search[domain][random.randint(0, len(self.__search[domain])-1)]
+
+        for constraint in self.__constraints:
+            genome[constraint[0]] = constraint[1]
+
+        return genome
+
+    def search(self):
+        return self.__search
 
 class ConstrainedRandomGenerator(Generator):
     __search = None

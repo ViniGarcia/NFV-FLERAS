@@ -530,33 +530,29 @@ class Mapping:
 o = None
 r = None
 
-if len(sys.argv) < 5 or len(sys.argv) > 8:
+if len(sys.argv) < 4 or len(sys.argv) > 6:
 	print("===================== RANDOM MAPPING =====================")
-	print("-> *.py -f file_name -r nr_rounds [-o output_name]")
+	print("-> *.py file_name -r nr_rounds [-o output_name]")
 	print("==========================================================")
 	exit()
 
-if sys.argv[1] != "-f":
-	print("ERROR: FILE IS UNDEFINED")
-	exit()
-
-if sys.argv[3] == "-r":
+if sys.argv[2] == "-r":
 	try:
-		r = int(sys.argv[4])
+		r = int(sys.argv[3])
 	except:
-		print("ERROR: INVALID VALUE " + str(sys.argv[4]))
+		print("ERROR: INVALID VALUE " + str(sys.argv[3]))
 		exit()
 else:
-	print("ERROR: INVALID FLAG " + str(sys.argv[3]))
+	print("ERROR: INVALID FLAG " + str(sys.argv[2]))
 	exit()
 
-if len(sys.argv) == 7:
-	if sys.argv[5] == "-o":
-		o = sys.argv[6]
+if len(sys.argv) == 6:
+	if sys.argv[4] == "-o":
+		o = sys.argv[5]
 	else:
-		print("ERROR: INVALID FLAG " + str(sys.argv[6]))
+		print("ERROR: INVALID FLAG " + str(sys.argv[5]))
 
-mapper = Mapping(sys.argv[2], r)
+mapper = Mapping(sys.argv[1], r)
 result = mapper.execute()
 if o != None:
 	mapper.outputFrontiers(o, result)
