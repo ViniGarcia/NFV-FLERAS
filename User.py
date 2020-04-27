@@ -13,14 +13,14 @@
 from os.path import isfile
 from cmd import Cmd
 
+from SCAG.SFCTopology import SFCTopology
+
 from YAMLR.DomainsData import DomainsData
 from YAMLR.ComposingRequest import ComposingRequest
 from YAMLR.EmbeddingRequest import EmbeddingRequest
-from SCAG.SFCTopology import SFCTopology
-from CUSCO.SFCExpansion import SFCExpansion
-from CUSCO.GoalFunction import GoalFunction
-from CUSCO.SFCComposition import SFCComposition
-from CUSMAP.SFCSplitMap import SFCSplitAndMap
+
+from CUSCO.CUSCO import CUSCO
+from CUSMAP.CUSMAP import CUSMAP
 
 class FLERASCLI(Cmd):
 
@@ -124,8 +124,7 @@ class FLERASCLI(Cmd):
 			print("REQUEST SETUP IS REQUIRED")
 			return
 
-		expand = SFCExpansion(self.topology)
-		self.composition = SFCComposition(self.request, expand.seBranches())
+		self.composition = CUSCO(self.request, self.topology)
 		self.composition.scEvaluate()
 
 		print("SUCCESS!!")
@@ -139,8 +138,8 @@ class FLERASCLI(Cmd):
 			print("REQUEST SETUP IS REQUIRED")
 			return
 
-		self.mapping = SFCSplitAndMap(self.request, self.domains)
-		self.mapping.ssamNaturalRequest()
+		self.mapping = CUSMAP(self.request, self.domains)
+		self.mapping.smEvaluate()
 
 	def do_topologies(self, args):
 
@@ -167,13 +166,11 @@ class FLERASCLI(Cmd):
 			print("MAPPING TASK IS REQUIRED")
 			return
 
-		maps = self.mapping.ssamKeys()
-		sis = self.mapping.ssamIndexes()
-		front = self.mapping.ssamFrontiers()
+		maps = self.mapping.smIndexes()
 
 		print("################ MAPPINGS ##################")
-		for index in range(len(maps)):
-			print("MAPPING: " + str(maps[index]) + "  INDEX: " + str(sis[index]) + " FRONT: " + str(front[index]))
+		for mapping in maps:
+			print("MAPPING: " + str(mapping) + "  INDEX: " + str(maps[mapping]))
 		print("###########################################")
 
 	def do_advice(self, args):
@@ -187,38 +184,10 @@ class FLERASCLI(Cmd):
 
 		print("############### ADVICE #################")
 		if self.composition != None:
-			print("COMPOSITION: " + self.composition.scBestTopology())
+			print("COMPOSITION: " + self.composition.scSFCBest())
 		if self.mapping != None:
-			print("MAPPING: " + self.mapping.ssamAdvice())
+			print("MAPPING: " + self.mapping.smBest())
 		print("###########################################")
-
-	#xxx - Development
-	def do_report(self, args):
-
-		args = args.split()
-		if len(args) < 2:
-			print("TOO FEW ARGUMENTS TO SETUP REQUEST")
-			return
-
-		if not args[0] in ["C", "SM"]:
-			print("TYPE IS NEED AS FIRST ARGUMENT (C FOR COMPOSING OR SM FOR SPLIT/MAP)")
-			return
-
-		if args[0] == "SM":
-			
-			if self.mapping == None:
-				print("MAPPING TASK IS REQUIRED")
-				return
-
-			maps = self.mapping.ssamKeys()
-			sis = self.mapping.ssamIndexes()
-			front = self.mapping.ssamFrontiers()
-
-			file = open(args[1], "w+")
-			file.write("MAPPING;SUITABILITY;FRONTIER\n")
-			for index in range(len(maps)):
-				file.write(str(maps[index]) + ";" + str(sis[index]) + ";" + str(front[index]) + "\n")
-			file.close()
 
 	def do_exit(self, args):
 

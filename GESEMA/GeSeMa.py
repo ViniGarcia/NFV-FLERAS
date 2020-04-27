@@ -31,7 +31,6 @@ class RequestProcessor:
 		if not "METRICS" in requestYAML or not "SERVICE" in requestYAML or not "DOMAINS" in requestYAML:
 			return -3
 
-
 		if not "LOCAL" in requestYAML["METRICS"] or not "TRANSITION" in requestYAML["METRICS"]:
 			return -4
 
@@ -406,15 +405,14 @@ class ServiceMapping(local_platypus.Problem):
 
 
 	def evaluate(self, solution):
-		candidate = solution.variables[:]
 		
-		if candidate in self.__taboo[0]:
-			solution.variables[:] = self.__generator.substitute()
-			candidate = solution.variables[:]
+		if solution.variables in self.__taboo[0]:
+			solution.variables = self.__generator.substitute()
 
-		if candidate in self.__taboo[1]:
-			self.__adjust(candidate)
+		if solution.variables in self.__taboo[1]:
+			self.__adjust(solution.variables)
 
+		candidate = solution.variables[:]
 		evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
 		constraints = []
 		computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]
@@ -555,7 +553,7 @@ class Mapping:
 		return completeList
 
 
-	def __init__(self, request, algorithm, population, tournament, crossover, crossoverProbability, mutation, mutationProbability):
+	def __init__(self, request, algorithm, population, tournament, generator, crossover, crossoverProbability, mutation, mutationProbability):
 
 		self.__request = RequestProcessor(request)
 		self.__status = self.__request.getStatus()
@@ -568,17 +566,20 @@ class Mapping:
 		if tournament < 2 or tournament > population:
 			self.__status = -40
 			return
-		if not crossover in ["SBX", "HUX", "PMX", "SSX"]:
+		if not generator in ["GREEDY", "RANDOM"]:
 			self.__status = -41
 			return
-		if crossoverProbability <= 0 or crossoverProbability > 1:
+		if not crossover in ["SBX", "HUX", "PMX", "SSX"]:
 			self.__status = -42
 			return
-		if not mutation in ["FLIP", "SWAP"]:
+		if crossoverProbability <= 0 or crossoverProbability > 1:
 			self.__status = -43
 			return
-		if mutationProbability <= 0 or mutationProbability > 1:
+		if not mutation in ["FLIP", "SWAP"]:
 			self.__status = -44
+			return
+		if mutationProbability <= 0 or mutationProbability > 1:
+			self.__status = -45
 			return
 
 		if crossover == "SBX":
@@ -598,7 +599,10 @@ class Mapping:
 
 		domains = self.__request.getDomains()
 		search = {x:list(domains[x]["TRANSITION"].keys()) for x in list(domains.keys())}
-		generation = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"])
+		if generator == "GREEDY":
+			generation = local_platypus.operators.GreedyConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"], self.__request.getMetrics(), self.__request.getService(), domains)
+		elif generator == "RANDOM":
+			generation = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"])
 
 		self.__problem = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains(), generation)
 		if local_platypus.Problem.MAXIMIZE in self.__problem.directions and algorithm == "NSGA2":
@@ -610,7 +614,7 @@ class Mapping:
 		elif algorithm == "SPEA2":
 			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = generation, selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		else:
-			self.__status = -45
+			self.__status = -46
 
 
 	def execute(self, iterations):
@@ -619,12 +623,12 @@ class Mapping:
 			return self.__status
 
 		if not isinstance(iterations, int):
-			self.__status = -46
-			return -46
-
-		if iterations < 1:
 			self.__status = -47
 			return -47
+
+		if iterations < 1:
+			self.__status = -48
+			return -48
 
 		self.__algorithm.run(iterations)
 		final = [[], []]
@@ -645,18 +649,18 @@ class Mapping:
 			return self.__status
 
 		if not isinstance(step, int):
-			self.__status = -46
-			return -46
-
-		if step < 1:
 			self.__status = -47
 			return -47
+
+		if step < 1:
+			self.__status = -48
+			return -48
 		
 		last = []
 		results = []
 		index = 0
 		while True:
-			#self.__algorithm.nfe = False #Only for test #1 and #2
+			#self.__algorithm.nfe = False #Reset the algorithm population -- only for particular tests
 			index += 1
 			self.__algorithm.run(step)
 			final = [[], []]
@@ -696,6 +700,7 @@ def usage():
 	print("\t-a algorithm_name: SPEA2 || NSGA2 (std: SPEA2)")
 	print("\t-p population_size: 0 < population_size < +n (std: 50)")
 	print("\t-t tournament_size: 0 < tournament_size <= population_size (std: 2)")
+	print("\t-gs generator_start_mode: RANDOM || GREEDY (std: RANDOM)")
 	print("\t-c crossover_technique: SBX || HUX || PMX || SSX (std: SBX)")
 	print("\t-cp crossover_probability: 0 <= crossover_probability <= 1 (std: 1)")
 	print("\t-m mutation_technique: FLIP || SWAP (std: FLIP)")
@@ -709,6 +714,7 @@ def usage():
 a = "SPEA2"
 p = 50
 t = 2
+gs = "RANDOM"
 c = "SBX"
 cp = 1.0
 m = "FLIP"
@@ -741,6 +747,9 @@ for flag in range(2, len(sys.argv), 2):
 			print("ERROR: TOURNAMENT SIZE NOT ALLOWED!!\n")
 			exit()
 		t = int(sys.argv[flag + 1])
+		continue
+	if sys.argv[flag] == "-gs":
+		gs = sys.argv[flag + 1]
 		continue
 	if sys.argv[flag] == "-c":
 		c = sys.argv[flag + 1]
@@ -780,7 +789,7 @@ for flag in range(2, len(sys.argv), 2):
 	print("ERROR: INVALID FLAG "+ sys.argv[flag])
 	exit()
 
-processor = Mapping(sys.argv[1], a, p, t, c, cp, m, mp)
+processor = Mapping(sys.argv[1], a, p, t, gs, c, cp, m, mp)
 if s == None:
 	result = processor.execute(g)
 else:
@@ -795,7 +804,7 @@ if o != None:
 	file.write("\n")
 
 	for index in range(len(result[0])):
-		file.write(str(result[0][index]) + ";")
+		file.write(str([int(c) for c in result[0][index]]) + ";")
 		for metric in result[1][index]:
 			file.write(str(result[1][index][metric]) + ";")
 		file.write("\n")

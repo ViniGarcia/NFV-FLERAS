@@ -33,7 +33,7 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 1. YAMLR (YAML Request): NFV service request model
 2. SCAG (Service ChAin Grammar): simple NFV service topology specification model
 3. CUSTOM (CUtomazable Service Topology Model): complete NFV service topology specification model
-4. HELM (Holistic EvaLuation Methodology): multi-criteria and holistic deployment evaluation library
+4. CHEF (Classification and Holistic Evaluation Framework): multi-criteria and holistic deployment evaluation/classification framework
 5. CUSCO (CUstomazable Service COmposing): generic and flexible composition tool
 6. CUSMAP (CUstomazable Service MAPping): generic and flexible split and mapping tool
 7. GESEMA (GEnetic SErvice MApping): generic and flexible genetic heuristic for split and mapping (standalone)
@@ -52,10 +52,9 @@ Marcelo Caggiani Luizelli (Federal University of Pampa - Brazil)<br/>
 
 ### Publications
 
-<p align="justify">-> Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço <-<br/>
-V. F. Garcia and M. C. Luizelli and E. P. Duarte Junior and C. R. P. dos Santos, "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço," in XXIV Workshop de Gerência e Operações de Redes e Serviços (XXXVII Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May. 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf</p>
+<p align="justify">V. F. Garcia and M. C. Luizelli and E. P. Duarte Junior and C. R. P. dos Santos, "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço" in XXIV Workshop de Gerência e Operações de Redes e Serviços (XXXVII Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May. 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf</p>
+<p align="justify">Fulber-Garcia, V.; Luizelli, M. C.; Santos, C. R. P. d.; Duarte Jr., E. P., "CUSCO: A Customizable Solution for NFV Composition" in International Conference on Advanced Information Networking and Applications, pp. 204-216, Mar. 2020. link: https://link.springer.com/chapter/10.1007/978-3-030-44041-1_19</p>
 
 ### References
 
-<p align="justify">-> NFV Resource Allocation <-<br/>
-[1] J. Gil Herrera and J. F. Botero, "Resource Allocation in NFV: A Comprehensive Survey," in IEEE Transactions on Network and Service Management, vol. 13, no. 3, pp. 518-532, Sept. 2016. doi: 10.1109/TNSM.2016.2598420</p>
+<p align="justify">[1] J. Gil Herrera and J. F. Botero, "Resource Allocation in NFV: A Comprehensive Survey," in IEEE Transactions on Network and Service Management, vol. 13, no. 3, pp. 518-532, Sept. 2016. doi: 10.1109/TNSM.2016.2598420</p>

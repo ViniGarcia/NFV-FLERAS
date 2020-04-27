@@ -1,4 +1,4 @@
-########### HELM CLASS DESCRIPTION ############
+########### CHEF CLASS DESCRIPTION ############
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -28,7 +28,7 @@
 #-5 -> Wrong argument in metric weight description
 #-6 -> Invalid metric weight
 
-#-7 -> HELM is not configured
+#-7 -> CHEF is not configured
 #-8 -> Wrong argument for evaluation
 #-9 -> Wrong argument for partial result
 #-10 -> Partial results does not match with evaluation metrics
@@ -38,9 +38,9 @@
 
 from numpy import array
 
-############### HELM CLASS BEGIN ################
+############### CHEF CLASS BEGIN ################
 
-class HELM:
+class CHEF:
     __status = None
 
     __evalMetrics = None
@@ -54,11 +54,11 @@ class HELM:
         if evalMetrics == None:
             self.__status = 0
         else:
-            self.hConfigure(evalMetrics)
+            self.cConfigure(evalMetrics)
 
     ######## PRIVATE METHODS ########
 
-    def __hSI(self):
+    def __cSI(self):
 
         partialResults = {}
         weightSum = 0
@@ -68,7 +68,7 @@ class HELM:
 
         for metric in partialResults:
             partialResults[metric] = array(partialResults[metric])
-            if self.__evalMetrics[metric][0] == "max":
+            if self.__evalMetrics[metric][0] == "MAX":
                 if partialResults[metric].max(axis=0) != partialResults[metric].min(axis=0):
                     partialResults[metric] = ((partialResults[metric] - partialResults[metric].min(axis=0)) / (partialResults[metric].max(axis=0) - partialResults[metric].min(axis=0))) * self.__evalMetrics[metric][1] / weightSum
                 else:
@@ -88,7 +88,7 @@ class HELM:
 
     ######## PUBLIC METHODS ########
 
-    def hConfigure(self, evalMetrics):
+    def cConfigure(self, evalMetrics):
 
         if not isinstance(evalMetrics, dict):
             self.__status = -1
@@ -101,7 +101,7 @@ class HELM:
             if not isinstance(evalMetrics[key][0], str):
                 self.__status = -3
                 return -3
-            if evalMetrics[key][0] != "max" and evalMetrics[key][0] != "min":
+            if evalMetrics[key][0] != "MAX" and evalMetrics[key][0] != "MIN":
                 self.__status = -4
                 return -4
             if not isinstance(evalMetrics[key][1], float) and not isinstance(evalMetrics[key][1], int):
@@ -117,7 +117,7 @@ class HELM:
             self.__status = 1
             return 1
 
-    def hEvaluate(self, partialResults):
+    def cEvaluate(self, partialResults):
 
         if not self.__status == 1:
             return -7
@@ -139,7 +139,7 @@ class HELM:
         self.__partialResults = partialResults
         self.__lastIndexing = None
 
-        return self.__hSI()
+        return self.__cSI()
 
     def getStatus(self):
         return self.__status
@@ -153,4 +153,4 @@ class HELM:
     def getEvalMetrics(self):
         return self.__evalMetrics
 
-################ HELM CLASS END #################
+################ CHEF CLASS END #################
