@@ -1,4 +1,4 @@
-######## GENERAL REQUEST CLASS DESCRIPTION ########
+######## YAMLR GENERAL CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -55,13 +55,13 @@
 
 ###############################################
 
-######## GENERAL REQUEST CLASS BEGIN ########
+######## YAMLR GENERAL CLASS BEGIN ########
 
 import os
 import yaml
 import re
 
-class GeneralRequest:
+class YAMLRGeneral:
 
 	__status = None
 
@@ -79,11 +79,11 @@ class GeneralRequest:
 
 		self.__status = 0
 		if requestFile != None and domainsList != None:
-			self.grRequest(requestFile, domainsList)
+			self.ygRequest(requestFile, domainsList)
 
 	######## PRIVATE METHODS ########
 
-	def __grBranch(self, elementsList, start):
+	def __ygBranch(self, elementsList, start):
 
 		skipBrace = 0
 		segments = 0
@@ -104,7 +104,7 @@ class GeneralRequest:
 				if skipBrace == 0:
 					segments += 1
 
-	def __grData(self):
+	def __ygData(self):
 
 		if not isinstance(self.__metadata["ID"], str):
 			self.__status = -27
@@ -187,7 +187,7 @@ class GeneralRequest:
 
 		return True
 
-	def __grValidate(self):
+	def __ygValidate(self):
 
 		if self.__metadata == None:
 			self.__status = -1
@@ -226,7 +226,7 @@ class GeneralRequest:
 		branchSegments = []
 		for index in range(len(splittedTopo)):
 			if splittedTopo[index] == '{':
-				branchSegments.append(self.__grBranch(splittedTopo, index))
+				branchSegments.append(self.__ygBranch(splittedTopo, index))
 			if splittedTopo[index] in topoSymbols:
 				continue
 			if splittedTopo[index] in topoOElemenets:
@@ -310,12 +310,12 @@ class GeneralRequest:
 					self.__status = -26
 					return
 
-		if self.__grData():
+		if self.__ygData():
 			self.__status = 1
 
 	######## PUBLIC METHODS ########
 
-	def grRequest(self, requestFile, domainsList):
+	def ygRequest(self, requestFile, domainsList):
 
 		if not isinstance(domainsList, list):
 			return
@@ -353,62 +353,62 @@ class GeneralRequest:
 		if "DEPLOYMENT" in yamlParsed:
 			self.__deployment = yamlParsed["DEPLOYMENT"]
 
-		self.__grValidate()
+		self.__ygValidate()
 
-	def grStatus(self):
+	def ygStatus(self):
 
 		return self.__status
 
-	def grDomains(self):
+	def ygDomains(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__domainsList
 
-	def grMetadata(self):
+	def ygMetadata(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__metadata
 
-	def grService(self):
+	def ygService(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service
 
-	def grFunction(self):
+	def ygFunction(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__function
 
-	def grPolicies(self):
+	def ygPolicies(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__policies
 
-	def grServiceON(self):
+	def ygServiceON(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["OUTNODES"]
 
-	def grServiceOE(self):
+	def ygServiceOE(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["OELEMENTS"]
 
-	def grServiceBechmark(self):
+	def ygServiceBechmark(self):
 
 		if self.__status != 1:
 			return None
@@ -421,7 +421,7 @@ class GeneralRequest:
 
 		return serviceBecnhmark
 
-	def grServiceFlavours(self):
+	def ygServiceFlavours(self):
 
 		if self.__status != 1:
 			return None
@@ -432,21 +432,21 @@ class GeneralRequest:
 
 		return serviceFlavous
 
-	def grServiceTopology(self):
+	def ygServiceTopology(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["TOPOLOGY"]
 
-	def grFunctionBranches(self):
+	def ygFunctionBranches(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__function["BRANCHINGS"]
 
-	def grFunctionGoals(self):
+	def ygFunctionGoals(self):
 
 		if self.__status != 1:
 			return None
@@ -457,7 +457,7 @@ class GeneralRequest:
 
 		return goals
 
-	def grFunctionWeights(self):
+	def ygFunctionWeights(self):
 
 		if self.__status != 1:
 			return None
@@ -468,7 +468,7 @@ class GeneralRequest:
 
 		return weights
 
-	def grPoliciesMetrics(self):
+	def ygPoliciesMetrics(self):
 
 		if self.__status != 1:
 			return None
@@ -480,4 +480,4 @@ class GeneralRequest:
 
 		return metrics
 
-######## GENERAL REQUEST CLASS END ########
+######## YALMR GENERAL CLASS END ########

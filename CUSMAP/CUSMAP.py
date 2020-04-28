@@ -27,7 +27,7 @@
 #################################################
 from itertools import islice
 
-from CUSMAP.OptimalSM import OptimalSM
+from CUSMAP.CUSMAPExhaustive import CUSMAPExhaustive
 from CHEF.CHEF import CHEF
 
 class CUSMAP:
@@ -57,10 +57,10 @@ class CUSMAP:
 
 	def __smCreateMatrix(self):
 
-		domains = self.__domRequest.ddDomains()
-		resources = self.__domRequest.ddResources()
-		local = self.__domRequest.ddLocalValues()
-		transition = self.__domRequest.ddTransitionValues()
+		domains = self.__domRequest.ydDomains()
+		resources = self.__domRequest.ydResources()
+		local = self.__domRequest.ydLocalValues()
+		transition = self.__domRequest.ydTransitionValues()
 
 		baseDictionary = {}
 		for key in domains:
@@ -88,7 +88,7 @@ class CUSMAP:
 
 	def __smCheckDomains(self):
 
-		if set(self.__sfcRequest.erDomains()) <= set(self.__domRequest.ddDomains()):
+		if set(self.__sfcRequest.yeDomains()) <= set(self.__domRequest.ydDomains()):
 			return True
 		else:
 			self.__status = -1
@@ -96,9 +96,9 @@ class CUSMAP:
 
 	def __smCheckPolicies(self):
 
-		requestPolicies = self.__sfcRequest.erPoliciesMetrics()
-		domainsLMetrics = self.__domRequest.ddLocalMetrics()
-		domainsTMetrics = self.__domRequest.ddTransitionMetrics()
+		requestPolicies = self.__sfcRequest.yePoliciesMetrics()
+		domainsLMetrics = self.__domRequest.ydLocalMetrics()
+		domainsTMetrics = self.__domRequest.ydTransitionMetrics()
 
 		if set(requestPolicies["DOMAIN"]) <= set(domainsLMetrics):
 			if set(requestPolicies["TRANSITION"]) <= set(domainsTMetrics):
@@ -112,7 +112,7 @@ class CUSMAP:
 
 	def __smCheckTopology(self, topology):
 
-		validSymbols = self.__sfcRequest.erServiceOE() + self.__sfcRequest.erServiceON() + self.__sfcRequest.erDomains() + ['<', '>', '{', '}', '/', 'IP']
+		validSymbols = self.__sfcRequest.yeServiceOE() + self.__sfcRequest.yeServiceON() + self.__sfcRequest.yeDomains() + ['<', '>', '{', '}', '/', 'IP']
 		splittedTopo = topology.split()
 
 		for symbol in splittedTopo:
@@ -125,7 +125,7 @@ class CUSMAP:
 
 		immPolicies = {"LOCAL": {}, "TRANSITION":{}}
 		aggPolicies = {"LOCAL": {}, "TRANSITION":{}}
-		rawPolicies = self.__sfcRequest.erPolicies()
+		rawPolicies = self.__sfcRequest.yePolicies()
 
 		for policy in rawPolicies["IMMEDIATE"]:
 			if policy["TYPE"] == "DOMAIN":
@@ -141,11 +141,11 @@ class CUSMAP:
 
 		self.__immediateDictionary = immPolicies
 		self.__aggregateDictionary = aggPolicies
-		self.__flavoursDictionary = self.__sfcRequest.erServiceFlavours()
+		self.__flavoursDictionary = self.__sfcRequest.yeServiceFlavours()
 
 	def __smPrepareCHEF(self):
 
-		cusmapMetrics = self.__sfcRequest.erPolicies()
+		cusmapMetrics = self.__sfcRequest.yePolicies()
 		chefMetrics = {}
 		for metric in cusmapMetrics["AGGREGATE"]:
 			chefMetrics[metric["ID"]] = (metric["GOAL"], metric["WEIGHT"])
@@ -187,20 +187,20 @@ class CUSMAP:
 			return
 
 		evaluations = {}
-		processor = OptimalSM(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
-		if self.__smCheckTopology(self.__sfcRequest.erServiceTopology()):
-			arguments = self.__smPreprocessTopology(self.__sfcRequest.erServiceTopology())
-			processor.osmProcess(self.__sfcRequest.erServiceOE(), self.__sfcRequest.erServiceON(), arguments[0], arguments[1])
-			evaluations[self.__sfcRequest.erServiceTopology()] = processor.osmEvaluation()
+		processor = CUSMAPExhaustive(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
+		if self.__smCheckTopology(self.__sfcRequest.yeServiceTopology()):
+			arguments = self.__smPreprocessTopology(self.__sfcRequest.yeServiceTopology())
+			processor.ceProcess(self.__sfcRequest.yeServiceOE(), self.__sfcRequest.yeServiceON(), arguments[0], arguments[1])
+			evaluations[self.__sfcRequest.yeServiceTopology()] = processor.ceEvaluation()
 		else:
 			self.__status = -4
 			return
 
-		if len(evaluations[self.__sfcRequest.erServiceTopology()]["DIST"]) == 0:
+		if len(evaluations[self.__sfcRequest.yeServiceTopology()]["DIST"]) == 0:
 			return
 
 		partial = {}
-		aggregations = evaluations[self.__sfcRequest.erServiceTopology()]
+		aggregations = evaluations[self.__sfcRequest.yeServiceTopology()]
 		for index in range(len(aggregations["AGG"])):
 			partial[aggregations["DIST"][index]] = aggregations["AGG"][index]["AGGREGATE"]
 		self.__evaluations = self.__chef.cEvaluate(partial)
@@ -226,12 +226,12 @@ class CUSMAP:
 			return None
 
 		mapping = max(self.__evaluations.items(), key=lambda x: x[1])[0]
-		base = self.__sfcRequest.erServiceTopology().split()
+		base = self.__sfcRequest.yeServiceTopology().split()
 		result = base.copy()
 		offload = 0
 
 		for index in range(len(base)):
-			if base[index] in self.__sfcRequest.erServiceOE():
+			if base[index] in self.__sfcRequest.yeServiceOE():
 				if base[index + 1] != "<":
 					result.insert(index + offload + 1, "<")
 					result.insert(index + offload + 2, mapping[int(offload/3)])

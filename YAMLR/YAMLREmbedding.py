@@ -1,4 +1,4 @@
-######## EMBEDDING REQUEST CLASS DESCRIPTION ########
+######## YAMLR EMBEDDING CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -41,13 +41,13 @@
 
 ###############################################
 
-######## EMBEDDING REQUEST CLASS BEGIN ########
+######## YAMLR EMBEDDING CLASS BEGIN ########
 
 import os
 import yaml
 import re
 
-class EmbeddingRequest:
+class YAMLREmbedding:
 
 	__status = None
 
@@ -65,11 +65,11 @@ class EmbeddingRequest:
 
 		self.__status = 0
 		if requestFile != None and domainsList != None:
-			self.erRequest(requestFile, domainsList)
+			self.yeRequest(requestFile, domainsList)
 
 	######## PRIVATE METHODS ########
 
-	def __erBranch(self, elementsList, start):
+	def __yeBranch(self, elementsList, start):
 
 		skipBrace = 0
 		segments = 0
@@ -90,7 +90,7 @@ class EmbeddingRequest:
 				if skipBrace == 0:
 					segments += 1
 
-	def __erData(self):
+	def __yeData(self):
 
 		if not isinstance(self.__metadata["ID"], str):
 			self.__status = -16
@@ -150,7 +150,7 @@ class EmbeddingRequest:
 
 		return True
 
-	def __erValidate(self):
+	def __yeValidate(self):
 
 		if self.__metadata == None:
 			self.__status = -1
@@ -186,7 +186,7 @@ class EmbeddingRequest:
 		branchSegments = []
 		for index in range(len(splittedTopo)):
 			if splittedTopo[index] == '{':
-				branchSegments.append(self.__erBranch(splittedTopo, index))
+				branchSegments.append(self.__yeBranch(splittedTopo, index))
 			if splittedTopo[index] in topoSymbols:
 				continue
 			if splittedTopo[index] in topoOElemenets:
@@ -222,12 +222,12 @@ class EmbeddingRequest:
 					self.__status = -15
 					return
 
-		if self.__erData():
+		if self.__yeData():
 			self.__status = 1
 
 	######## PUBLIC METHODS ########
 
-	def erRequest(self, requestFile, domainsList):
+	def yeRequest(self, requestFile, domainsList):
 
 		if not isinstance(domainsList, list):
 			return
@@ -265,62 +265,62 @@ class EmbeddingRequest:
 		if "DEPLOYMENT" in yamlParsed:
 			self.__deployment = yamlParsed["DEPLOYMENT"]
 
-		self.__erValidate()
+		self.__yeValidate()
 
-	def erStatus(self):
+	def yeStatus(self):
 
 		return self.__status
 
-	def erDomains(self):
+	def yeDomains(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__domainsList
 
-	def erMetadata(self):
+	def yeMetadata(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__metadata
 
-	def erService(self):
+	def yeService(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service
 
-	def erFunction(self):
+	def yeFunction(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__function
 
-	def erPolicies(self):
+	def yePolicies(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__policies
 
-	def erServiceON(self):
+	def yeServiceON(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["OUTNODES"]
 
-	def erServiceOE(self):
+	def yeServiceOE(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["OELEMENTS"]
 
-	def erServiceBechmark(self):
+	def yeServiceBechmark(self):
 
 		if self.__status != 1:
 			return None
@@ -333,7 +333,7 @@ class EmbeddingRequest:
 
 		return serviceBecnhmark
 
-	def erServiceFlavours(self):
+	def yeServiceFlavours(self):
 
 		if self.__status != 1:
 			return None
@@ -344,21 +344,21 @@ class EmbeddingRequest:
 
 		return serviceFlavous
 
-	def erServiceTopology(self):
+	def yeServiceTopology(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["TOPOLOGY"]
 
-	def erFunctionBranches(self):
+	def yeFunctionBranches(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__function["BRANCHINGS"]
 
-	def erFunctionGoals(self):
+	def yeFunctionGoals(self):
 
 		if self.__status != 1:
 			return None
@@ -369,7 +369,7 @@ class EmbeddingRequest:
 
 		return goals
 
-	def erFunctionWeights(self):
+	def yeFunctionWeights(self):
 
 		if self.__status != 1:
 			return None
@@ -380,7 +380,7 @@ class EmbeddingRequest:
 
 		return weights
 
-	def erPoliciesMetrics(self):
+	def yePoliciesMetrics(self):
 
 		if self.__status != 1:
 			return None
@@ -392,4 +392,4 @@ class EmbeddingRequest:
 
 		return metrics
 
-######## EMBEDDING REQUEST CLASS END ########
+######## YAMLR EMBEDDING CLASS END ########

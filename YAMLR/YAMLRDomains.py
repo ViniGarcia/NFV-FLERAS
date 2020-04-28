@@ -1,4 +1,4 @@
-######## DOMAINS DATA CLASS DESCRIPTION ########
+######## YALMR DOMAINS CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -28,12 +28,12 @@
 
 ###############################################
 
-######## DOMAINS DATA CLASS BEGIN ########
+######## YALMR DOMAINS CLASS BEGIN ########
 
 import yaml
 import os
 
-class DomainsData:
+class YAMLRDomains:
 	__status = None
 
 	__domainsIDs = None
@@ -48,11 +48,11 @@ class DomainsData:
 		if domainFile == None:
 			self.__status = 0
 		else:
-			self.ddProcess(domainFile)
+			self.ydProcess(domainFile)
 
 	######## PRIVATE METHODS ########
 
-	def __ddValidate(self, domainYaml):
+	def __ydValidate(self, domainYaml):
 
 		if not "DOMAINS" in domainYaml or not "RESOURCES" in domainYaml or not "LOCAL" in domainYaml or not "TRANSITION" in domainYaml:
 			self.__status = -3
@@ -101,7 +101,7 @@ class DomainsData:
 
 	######## PUBLIC METHODS ########
 
-	def ddProcess(self, domainFile):
+	def ydProcess(self, domainFile):
 
 		if not os.path.isfile(domainFile):
 			self.__status = -1
@@ -116,7 +116,7 @@ class DomainsData:
 			self.__status = -2
 			return
 
-		if self.__ddValidate(domainYaml):
+		if self.__ydValidate(domainYaml):
 			self.__domainsIDs = domainYaml["DOMAINS"]
 			self.__domainsResources = domainYaml["RESOURCES"]
 			self.__localMetrics = domainYaml["LOCAL"]
@@ -125,25 +125,25 @@ class DomainsData:
 		else:
 			return
 
-	def ddStatus(self):
+	def ydStatus(self):
 
 		return self.__status
 
-	def ddDomains(self):
+	def ydDomains(self):
 
 		if self.__status != 1:
 			return
 
 		return self.__domainsIDs
 
-	def ddResources(self):
+	def ydResources(self):
 
 		if self.__status != 1:
 			return
 
 		return self.__domainsResources
 
-	def  ddLocalMetrics(self):
+	def  ydLocalMetrics(self):
 
 		if self.__status != 1:
 			return
@@ -154,7 +154,7 @@ class DomainsData:
 
 		return localMetricsIDs
 
-	def ddTransitionMetrics(self):
+	def ydTransitionMetrics(self):
 
 		if self.__status != 1:
 			return
@@ -165,7 +165,7 @@ class DomainsData:
 
 		return transitionMetricsIDs
 
-	def ddLocalValues(self):
+	def ydLocalValues(self):
 
 		if self.__status != 1:
 			return
@@ -176,7 +176,7 @@ class DomainsData:
 
 		return localMetrics
 
-	def ddTransitionValues(self):
+	def ydTransitionValues(self):
 
 		if self.__status != 1:
 			return
@@ -187,4 +187,4 @@ class DomainsData:
 
 		return transitionMetrics
 
-######## DOMAINS DATA CLASS END ########
+######## YALMR DOMAINS CLASS END ########

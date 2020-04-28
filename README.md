@@ -36,7 +36,7 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 4. CHEF (Classification and Holistic Evaluation Framework): multi-criteria and holistic deployment evaluation/classification framework
 5. CUSCO (CUstomazable Service COmposing): generic and flexible composition tool
 6. CUSMAP (CUstomazable Service MAPping): generic and flexible split and mapping tool
-7. GESEMA (GEnetic SErvice MApping): generic and flexible genetic heuristic for split and mapping (standalone)
+7. GESEMA (GEnetic SErvice MApping): generic and flexible genetic heuristic for split and mapping (standalone -- not integrated yet)
 
 ### Support
 
@@ -49,11 +49,13 @@ Alexandre Huff (Federal Technological University of Paraná - Brazil)<br/>
 Elias Procópio Duarte Júnior (Federal University of Paraná - Brazil)<br/>
 Carlos Raniery Paula dos Santos (Federal University of Santa Maria - Brazil)<br/>
 Marcelo Caggiani Luizelli (Federal University of Pampa - Brazil)<br/>
+Eduardo Jaques Spinosa (Federal University of Paraná - Brazil)<br/>
 
 ### Publications
 
-<p align="justify">V. F. Garcia and M. C. Luizelli and E. P. Duarte Junior and C. R. P. dos Santos, "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço" in XXIV Workshop de Gerência e Operações de Redes e Serviços (XXXVII Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May. 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf</p>
+<p align="justify">V. F. Garcia; M. C. Luizelli; E. P. Duarte Junior; C. R. P. dos Santos, "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço" in Workshop de Gerência e Operações de Redes e Serviços (Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May. 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf</p>
 <p align="justify">Fulber-Garcia, V.; Luizelli, M. C.; Santos, C. R. P. d.; Duarte Jr., E. P., "CUSCO: A Customizable Solution for NFV Composition" in International Conference on Advanced Information Networking and Applications, pp. 204-216, Mar. 2020. link: https://link.springer.com/chapter/10.1007/978-3-030-44041-1_19</p>
+<p align="justify">Fulber-Garcia, V.; Santos, C. R. P. d.; Spinosa, E. J.; Duarte Jr., E. P., "Mapeamento Customizado de Serviços de Rede em Múltiplos Domínios Baseado em Heurísticas Genéticas" in Simpósio Brasileiro de Redes e Sistemas Distribuídos, pp. [TO APPEAR], Dec. 2020. link: [TO APPEAR]</p>
 
 ### References
 

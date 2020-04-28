@@ -21,8 +21,8 @@
 
 import copy
 
-from CUSCO.SFCExpansion import SFCExpansion
-from CUSCO.GoalFunction import GoalFunction
+from CUSCO.CUSCOExpansion import CUSCOExpansion
+from CUSCO.CUSCOFunction import CUSCOFunction
 from CHEF.CHEF import CHEF
 
 class CUSCO:
@@ -62,7 +62,7 @@ class CUSCO:
 
 	def __scBranchesPrepare(self):
 
-		sfcBranches = self.__sfcRequest.crFunctionBranches()
+		sfcBranches = self.__sfcRequest.ycFunctionBranches()
 		branchUpdate = {}
 		branchFactors = []
 
@@ -85,7 +85,7 @@ class CUSCO:
 
 	def __scOElementsPrepare(self):
 
-		sfcOElements = self.__sfcRequest.crServiceBechmark()
+		sfcOElements = self.__sfcRequest.ycServiceBechmark()
 		self.__oElementsData = {}
 
 		for OE in sfcOElements:
@@ -93,7 +93,7 @@ class CUSCO:
 
 	def __scCHEFPrepare(self):
 
-		cuscoMetrics = self.__sfcRequest.crFunction()["METRICS"]
+		cuscoMetrics = self.__sfcRequest.ycFunction()["METRICS"]
 		chefMetrics = {}
 		for metric in cuscoMetrics:
 			chefMetrics[metric["ID"]] = (metric["GOAL"], metric["WEIGHT"])
@@ -101,7 +101,7 @@ class CUSCO:
 
 	def __scEvaluateSingle(self, index):
 
-		activeInstance = GoalFunction(self.__sfcRequest)
+		activeInstance = CUSCOFunction(self.__sfcRequest)
 		funcInstances = [activeInstance]
 		funcSaves = []
 		actualBranch = 0
@@ -109,7 +109,7 @@ class CUSCO:
 		nextBranch = 1
 
 		sfcElements = self.__sfcDictionary[index].split()
-		boundaryEPs = self.__sfcRequest.crServiceON()
+		boundaryEPs = self.__sfcRequest.ycServiceON()
 
 		for eIndex in range(1, len(sfcElements)):
 
@@ -119,8 +119,8 @@ class CUSCO:
 				actualSegment = 0
 				nextBranch += 1
 
-				newInstance = GoalFunction(None)
-				newInstance.gfBranchSetup(activeInstance.gfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
+				newInstance = CUSCOFunction(None)
+				newInstance.cfBranchSetup(activeInstance.cfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
 				funcInstances.append(newInstance)
 				activeInstance = newInstance
 				continue
@@ -131,7 +131,7 @@ class CUSCO:
 					segmentsList.insert(0, funcInstances.pop())
 
 				activeInstance = funcInstances[-1]
-				activeInstance.gfBranchUnify(segmentsList)
+				activeInstance.cfBranchUnify(segmentsList)
 
 				save = funcSaves.pop()
 				actualBranch = save[0]
@@ -141,16 +141,16 @@ class CUSCO:
 			if sfcElements[eIndex] == '/':
 				actualSegment += 1
 
-				newInstance = GoalFunction(None)
-				newInstance.gfBranchSetup(funcInstances[(actualSegment+1)*-1].gfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
+				newInstance = CUSCOFunction(None)
+				newInstance.cfBranchSetup(funcInstances[(actualSegment+1)*-1].cfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
 				funcInstances.append(newInstance)
 				activeInstance = newInstance
 				continue
 
 			if not sfcElements[eIndex] in boundaryEPs:
-				activeInstance.gfProcess(self.__oElementsData[sfcElements[eIndex]])
+				activeInstance.cfProcess(self.__oElementsData[sfcElements[eIndex]])
 
-		self.__aggregateDictionary[index] = activeInstance.gfAggregation()
+		self.__aggregateDictionary[index] = activeInstance.cfAggregation()
 
 	######## PUBLIC METHODS ########
 
@@ -160,7 +160,7 @@ class CUSCO:
 		self.__sfcOriginal = {}
 		self.__sfcDictionary = {}
 
-		sfcList = SFCExpansion(sfcTopology).seBranches()
+		sfcList = CUSCOExpansion(sfcTopology).ceBranches()
 		for index in range(len(sfcList)):
 			self.__sfcOriginal[index] = sfcList[index]
 			self.__sfcDictionary[index] = sfcList[index]

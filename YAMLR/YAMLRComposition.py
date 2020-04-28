@@ -1,4 +1,4 @@
-######## COMPOSING REQUEST CLASS DESCRIPTION ########
+######## YAMLR COMPOSITION CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -46,13 +46,13 @@
 
 ###############################################
 
-######## COMPOSING REQUEST CLASS BEGIN ########
+######## YALMR COMPOSITION CLASS BEGIN ########
 
 import os
 import yaml
 import re
 
-class ComposingRequest:
+class YAMLRComposition:
 
 	__status = None
 
@@ -69,11 +69,11 @@ class ComposingRequest:
 
 		self.__status = 0
 		if requestFile != None and domainsList != None:
-			self.crRequest(requestFile, domainsList)
+			self.ycRequest(requestFile, domainsList)
 
 	######## PRIVATE METHODS ########
 
-	def __crBranch(self, elementsList, start):
+	def __ycBranch(self, elementsList, start):
 
 		skipBrace = 0
 		segments = 0
@@ -94,7 +94,7 @@ class ComposingRequest:
 				if skipBrace == 0:
 					segments += 1
 
-	def __crData(self):
+	def __ycData(self):
 
 		if not isinstance(self.__metadata["ID"], str):
 			self.__status = -22
@@ -139,7 +139,7 @@ class ComposingRequest:
 
 		return True
 
-	def __crValidate(self):
+	def __ycValidate(self):
 
 		if self.__metadata == None:
 			self.__status = -1
@@ -175,7 +175,7 @@ class ComposingRequest:
 		branchSegments = []
 		for index in range(len(splittedTopo)):
 			if splittedTopo[index] == '{':
-				branchSegments.append(self.__crBranch(splittedTopo, index))
+				branchSegments.append(self.__ycBranch(splittedTopo, index))
 			if splittedTopo[index] in topoSymbols:
 				continue
 			if splittedTopo[index] in topoOElemenets:
@@ -243,12 +243,12 @@ class ComposingRequest:
 				self.__status = -21
 				return
 
-		if self.__crData():
+		if self.__ycData():
 			self.__status = 1
 
 	######## PUBLIC METHODS ########
 
-	def crRequest(self, requestFile, domainsList):
+	def ycRequest(self, requestFile, domainsList):
 
 		if not isinstance(domainsList, list):
 			return
@@ -282,55 +282,55 @@ class ComposingRequest:
 		if "DEPLOYMENT" in yamlParsed:
 			self.__deployment = yamlParsed["DEPLOYMENT"]
 
-		self.__crValidate()
+		self.__ycValidate()
 
-	def crStatus(self):
+	def ycStatus(self):
 
 		return self.__status
 
-	def crDomains(self):
+	def ycDomains(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__domainsList
 
-	def crMetadata(self):
+	def ycMetadata(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__metadata
 
-	def crService(self):
+	def ycService(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service
 
-	def crFunction(self):
+	def ycFunction(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__function
 
-	def crServiceON(self):
+	def ycServiceON(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["OUTNODES"]
 
-	def crServiceOE(self):
+	def ycServiceOE(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["OELEMENTS"]
 
-	def crServiceBechmark(self):
+	def ycServiceBechmark(self):
 
 		if self.__status != 1:
 			return None
@@ -343,21 +343,21 @@ class ComposingRequest:
 
 		return serviceBecnhmark
 
-	def crServiceTopology(self):
+	def ycServiceTopology(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["TOPOLOGY"]
 
-	def crFunctionBranches(self):
+	def ycFunctionBranches(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__function["BRANCHINGS"]
 
-	def crFunctionGoals(self):
+	def ycFunctionGoals(self):
 
 		if self.__status != 1:
 			return None
@@ -368,7 +368,7 @@ class ComposingRequest:
 
 		return goals
 
-	def crFunctionWeights(self):
+	def ycFunctionWeights(self):
 
 		if self.__status != 1:
 			return None
@@ -379,4 +379,4 @@ class ComposingRequest:
 
 		return weights
 
-######## COMPOSING REQUEST CLASS END ########
+######## YALMR COMPOSITION CLASS END ########

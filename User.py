@@ -15,9 +15,9 @@ from cmd import Cmd
 
 from SCAG.SFCTopology import SFCTopology
 
-from YAMLR.DomainsData import DomainsData
-from YAMLR.ComposingRequest import ComposingRequest
-from YAMLR.EmbeddingRequest import EmbeddingRequest
+from YAMLR.YAMLRDomains import YAMLRDomains
+from YAMLR.YAMLRComposition import YAMLRComposition
+from YAMLR.YAMLREmbedding import YAMLREmbedding
 
 from CUSCO.CUSCO import CUSCO
 from CUSMAP.CUSMAP import CUSMAP
@@ -55,9 +55,9 @@ class FLERASCLI(Cmd):
 			print("INVALID FILE")
 			return
 
-		self.domains = DomainsData(args)
-		if self.domains.ddStatus() != 1:
-			print("DOMAINS VALIDATION FAILED - ERROR " + str(self.domains.ddStatus()))
+		self.domains = YAMLRDomains(args)
+		if self.domains.ydStatus() != 1:
+			print("DOMAINS VALIDATION FAILED - ERROR " + str(self.domains.ydStatus()))
 			self.domains = None
 			return
 
@@ -87,27 +87,27 @@ class FLERASCLI(Cmd):
 			return
 
 		if args[0] == "C":
-			self.request = ComposingRequest(args[1], self.domains.ddDomains())
-			if self.request.crStatus() != 1:
-				print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.crStatus()))
+			self.request = YAMLRComposition(args[1], self.domains.ydDomains())
+			if self.request.ycStatus() != 1:
+				print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.ycStatus()))
 				self.request = None
 				return
-			self.topology = SFCTopology(self.request.crServiceON(), self.request.crServiceOE(), self.domains.ddDomains())
-			self.topology.stValidate(self.request.crServiceTopology())
+			self.topology = SFCTopology(self.request.ycServiceON(), self.request.ycServiceOE(), self.domains.ydDomains())
+			self.topology.stValidate(self.request.ycServiceTopology())
 			if self.topology.stStatus() != 1:
-				print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.crStatus()))
+				print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.ycStatus()))
 				self.request = None
 		else:
 			if args[0] == "SM":
-				self.request = EmbeddingRequest(args[1], self.domains.ddDomains())
-				if self.request.erStatus() != 1:
-					print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.erStatus()))
+				self.request = YAMLREmbedding(args[1], self.domains.ydDomains())
+				if self.request.yeStatus() != 1:
+					print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.yeStatus()))
 					self.request = None
 					return
-				self.topology = SFCTopology(self.request.erServiceON(), self.request.erServiceOE(), self.domains.ddDomains())
-				self.topology.stValidate(self.request.erServiceTopology())
+				self.topology = SFCTopology(self.request.yeServiceON(), self.request.yeServiceOE(), self.domains.ydDomains())
+				self.topology.stValidate(self.request.yeServiceTopology())
 				if self.topology.stStatus() != 1:
-					print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.erStatus()))
+					print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.yeStatus()))
 					self.request = None
 
 		self.type = args[0]
