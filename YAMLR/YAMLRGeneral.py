@@ -218,7 +218,7 @@ class YAMLRGeneral:
 			self.__status = -9
 			return
 
-		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IP']
+		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IN']
 		topoOElemenets = self.__service["OELEMENTS"]
 		topoEPoints = self.__service["OUTNODES"]
 		splittedTopo = self.__service["TOPOLOGY"].split()

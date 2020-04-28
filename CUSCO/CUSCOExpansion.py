@@ -467,13 +467,13 @@ class CUSCOExpansion:
 
 	def __cePartialOrder(self):
 
-		pOrderSegments = self.__sfcTopology.stPOrder()
+		pOrderSegments = self.__sfcTopology.cPOrder()
 		for segment in pOrderSegments:
-			availablePermutations = list(itertools.permutations(segment.poOPEs()))
+			availablePermutations = list(itertools.permutations(segment.poElements()))
 			acceptedPermutations = []
 
 			for permutation in availablePermutations:
-				if self.__ceValidatePermutation(permutation, segment.poOD(), segment.poCD()):
+				if self.__ceValidatePermutation(permutation, segment.poODependencies(), segment.poCDependencies()):
 					acceptedPermutations.append(list(permutation))
 
 			if len(acceptedPermutations) == 0:
@@ -482,7 +482,7 @@ class CUSCOExpansion:
 
 			segment.poSetupCombinations(acceptedPermutations)
 
-		return self.__ceCombinePermutations(pOrderSegments, self.__sfcTopology.stTopology())
+		return self.__ceCombinePermutations(pOrderSegments, self.__sfcTopology.cTopology())
 
 	def __ceSeparateBranches(self, splittedSFC):
 
@@ -546,7 +546,7 @@ class CUSCOExpansion:
 	def __ceRestructBranchEnd(self, base, combination):
 
 		nonTerminal = []
-		boundaryEPs = self.__sfcTopology.stBoundaryEPs()
+		boundaryEPs = self.__sfcTopology.cEPs()
 		flag = True
 		skip = 0
 
@@ -590,7 +590,7 @@ class CUSCOExpansion:
 			branchesStructure = []
 
 			for index in range(len(sfcBranches)):
-				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.stBoundaryEPs())
+				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.cEPs())
 				branchInstance.bAnalyzeBegin()
 
 				if branchInstance.bBeginMatchList() != []:
@@ -607,8 +607,12 @@ class CUSCOExpansion:
 			sfcBranches = self.__ceSeparateBranches(topology)
 			branchesStructure = []
 
+			if len(sfcBranches) == 0:
+				availableTopologies.append(self.__ceStringfy(topology))
+				continue
+
 			for index in range(len(sfcBranches)):
-				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.stBoundaryEPs())
+				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.cEPs())
 				branchInstance.bAnalyzeEnd()
 
 				if branchInstance.bEndMatchList() != []:
@@ -627,7 +631,7 @@ class CUSCOExpansion:
 	def ceExpand(self, sfcTopology):
 
 		self.__sfcTopology = sfcTopology
-		if self.__sfcTopology.stStatus() != 1:
+		if self.__sfcTopology.cStatus() != 1:
 			self.__status = -1
 
 		self.__sfcPOrder = self.__cePartialOrder()

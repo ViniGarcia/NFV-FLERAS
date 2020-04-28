@@ -1,0 +1,96 @@
+METADATA:
+  ID: !!str CUSCOService
+  DESCRIPTION: >
+    This request contains the case study service evaluated in the CUSCO article (AINA 2020). 
+    This service has seven different network functions and nine instances. Furthermore, the
+    service topology has a non-terminal branch with two branches. Two partial ordering segments
+    are defined to be explored during the composition task of deployment. For each segment, a
+    coupling dependency is stated between MF and the functions SDPI and CDPI. Three evaluation
+    metrics are computed to optimize the composition: "TrafficRatio", "RequestRatio", and "Size".
+    This request can be validated for a composition (YAMLR Composition), but it is not validated
+    for an embedding (YAML Composition) nor a general sequence of deployment (YAML General) due
+    to the non-definition of the embedding objective function.
+
+SERVICE:
+  TOPOLOGY: !!str IN FPP TC { [ HIPS SDPI MF ] ( SDPI MF * ) / [ HIPS CDPI MF ] ( CDPI MF * ) } LB EN
+  OELEMENTS:
+    - !!str &NF1 FPP
+    - !!str &NF2 TC
+    - !!str &NF3 HIPS
+    - !!str &NF4 SDPI
+    - !!str &NF5 CDPI
+    - !!str &NF6 MF
+    - !!str &NF7 LB
+  OUTNODES:
+    - !!str EN
+
+GOAL_FUNCTION:
+    METRICS:
+      - ID: &MTC1 !!str TrafficRatio
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.3334
+        INPUT: !!int 100
+        EVALUATION: !!str "MULT"
+        UPDATE: *MTC1
+      - ID: &MTC2 !!str RequestRatio
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.3333
+        INPUT: !!int 200
+        EVALUATION: !!str "SUB"
+        UPDATE: !!str "STATIC"
+      - ID: &MTC3 !!str Size
+        GOAL: !!str "MIN"
+        WEIGHT: !!float 0.3333
+        INPUT: !!int 0
+        EVALUATION: !!str "SUM"
+        UPDATE: !!str "STATIC"
+    BRANCHINGS:
+      *MTC1:
+        UPDATE: !!str "MULT"
+        FACTORS:
+          - [!!float 0.5, !!float 0.5]
+      *MTC2:
+        UPDATE: !!str "MULT"
+        FACTORS:
+          - [!!float 0.5, !!float 0.5]
+      *MTC3:
+        UPDATE: !!str "MULT"
+        FACTORS:
+          - [!!float 0.5, !!float 0.5]
+
+DEPLOYMENT:
+  *NF1:
+    BENCHMARK:
+      *MTC1: !!float 0.33
+      *MTC2: !!float 200
+      *MTC3: !!int 1
+  *NF2:
+    BENCHMARK:
+      *MTC1: !!float 1.0
+      *MTC2: !!float 200
+      *MTC3: !!int 1
+  *NF3:
+    BENCHMARK:
+      *MTC1: !!float 0.66
+      *MTC2: !!float 84.4564
+      *MTC3: !!int 1
+  *NF4:
+    BENCHMARK:
+      *MTC1: !!float 1.0
+      *MTC2: !!float 44.4051
+      *MTC3: !!int 1
+  *NF5:
+    BENCHMARK:
+      *MTC1: !!float 1.0
+      *MTC2: !!float 95.9090
+      *MTC3: !!int 1
+  *NF6:
+    BENCHMARK:
+      *MTC1: !!float 0.66
+      *MTC2: !!float 78.9368
+      *MTC3: !!int 1
+  *NF7:
+    BENCHMARK:
+      *MTC1: !!float 1.0
+      *MTC2: !!float 87.7749
+      *MTC3: !!int 1

@@ -112,7 +112,7 @@ class CUSMAP:
 
 	def __smCheckTopology(self, topology):
 
-		validSymbols = self.__sfcRequest.yeServiceOE() + self.__sfcRequest.yeServiceON() + self.__sfcRequest.yeDomains() + ['<', '>', '{', '}', '/', 'IP']
+		validSymbols = self.__sfcRequest.yeServiceOE() + self.__sfcRequest.yeServiceON() + self.__sfcRequest.yeDomains() + ['<', '>', '{', '}', '/', 'IN']
 		splittedTopo = topology.split()
 
 		for symbol in splittedTopo:

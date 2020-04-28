@@ -13,7 +13,7 @@
 from os.path import isfile
 from cmd import Cmd
 
-from SCAG.SFCTopology import SFCTopology
+from CUSTOM.CUSTOM import CUSTOM
 
 from YAMLR.YAMLRDomains import YAMLRDomains
 from YAMLR.YAMLRComposition import YAMLRComposition
@@ -92,10 +92,10 @@ class FLERASCLI(Cmd):
 				print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.ycStatus()))
 				self.request = None
 				return
-			self.topology = SFCTopology(self.request.ycServiceON(), self.request.ycServiceOE(), self.domains.ydDomains())
-			self.topology.stValidate(self.request.ycServiceTopology())
-			if self.topology.stStatus() != 1:
-				print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.ycStatus()))
+			self.topology = CUSTOM(self.request.ycServiceOE(), [], self.domains.ydDomains(), [], self.request.ycServiceON())
+			self.topology.cValidate(self.request.ycServiceTopology())
+			if self.topology.cStatus() != 1:
+				print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.cStatus()))
 				self.request = None
 		else:
 			if args[0] == "SM":
@@ -104,10 +104,10 @@ class FLERASCLI(Cmd):
 					print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.yeStatus()))
 					self.request = None
 					return
-				self.topology = SFCTopology(self.request.yeServiceON(), self.request.yeServiceOE(), self.domains.ydDomains())
-				self.topology.stValidate(self.request.yeServiceTopology())
-				if self.topology.stStatus() != 1:
-					print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.yeStatus()))
+				self.topology = CUSTOM(self.request.yeServiceOE(), [], self.domains.ydDomains(), [], self.request.yeServiceON())
+				self.topology.cValidate(self.request.yeServiceTopology())
+				if self.topology.cStatus() != 1:
+					print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.cStatus()))
 					self.request = None
 
 		self.type = args[0]
@@ -140,6 +140,8 @@ class FLERASCLI(Cmd):
 
 		self.mapping = CUSMAP(self.request, self.domains)
 		self.mapping.smEvaluate()
+
+		print("SUCCESS!!")
 
 	def do_topologies(self, args):
 

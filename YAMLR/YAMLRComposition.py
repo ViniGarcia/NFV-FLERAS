@@ -24,7 +24,7 @@
 #-6   -> INVALID TOPOLOGY (TOPOLOGY)
 #-7   -> INVALID OPERATIONAL ELEMENTS (TOPOLOGY)
 #-8   -> INVALID END POINTS (TOPOLOGY)
-#-9  -> INVALID TOPOLOGY ELEMENTS (TOPOLOGY)
+#-9   -> INVALID TOPOLOGY ELEMENTS (TOPOLOGY)
 #-10  -> INVALID GOAL (GOAL FUNCTION)
 #-11  -> INVALID METRIC (GOAL FUNCTION)
 #-12  -> INVALID METRIC EVALUATION (GOAL FUNCTION)
@@ -167,7 +167,7 @@ class YAMLRComposition:
 			self.__status = -8
 			return
 
-		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IP']
+		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IN']
 		topoOElemenets = self.__service["OELEMENTS"]
 		topoEPoints = self.__service["OUTNODES"]
 		splittedTopo = self.__service["TOPOLOGY"].split()

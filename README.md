@@ -7,6 +7,10 @@ NFV FLERAS: NFV FLExible Resource Allocation System
 
 <p align="justify">FLERAS is a system to execute NFV Resource Allocation (NFV-RA) [1] processes. To do that, FLERAS uses a novel NFV service request model (structured in YAML) that relaxes the definition of goal functions and policies used for the NFV-RA execution. Furthermore, FLERAS provides a formal and robust NFV service topology specification model based on a context-free grammar (SCAG -- simplified version --- or CUSTOM -- complete version). Finally, a new generic evaluation method (i.e., can be employed in any deployment stage) based on indexing is also presented to jointly evaluate many metrics with different granularity and objectives that forms objective functions. This methodology reduces every multiple evaluation problems into a unique index maximization problem, thus providing a unified result (Suitability Index) for each deployment candidate. FLERAS is a work in progress, new tools and models, as well as papers and presentation, will be updated in this GitHub.</p>
 
+### Important information!
+
+<p align="justify"> Currently, FLERAS uses CUSTOM to specify network service topologies. However, CUSCO, CUSMAP, and GeSeMa enable a limited subset of specification capabilities from CUSTOM (called SCAG). The particular implementation of SCAG is deprecated since the release of CUSTOM, but for the usage of currently available customizable deployment solutions, consider the SCAG production rules to specify the service topologies (these rules are available in 2.Deprecated/SCAG).</p>
+
 ### How was it developed?
 
 FLERAS is being developed using standard Python 3 language and other libraries such as:<br/>

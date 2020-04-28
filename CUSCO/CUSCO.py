@@ -161,6 +161,7 @@ class CUSCO:
 		self.__sfcDictionary = {}
 
 		sfcList = CUSCOExpansion(sfcTopology).ceBranches()
+
 		for index in range(len(sfcList)):
 			self.__sfcOriginal[index] = sfcList[index]
 			self.__sfcDictionary[index] = sfcList[index]

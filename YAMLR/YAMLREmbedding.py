@@ -178,7 +178,7 @@ class YAMLREmbedding:
 			self.__status = -8
 			return
 
-		topoSymbols = ['<', '>', '{', '}', '/', 'IP']
+		topoSymbols = ['<', '>', '{', '}', '/', 'IN']
 		topoOElemenets = self.__service["OELEMENTS"]
 		topoEPoints = self.__service["OUTNODES"]
 		splittedTopo = self.__service["TOPOLOGY"].split()

@@ -298,7 +298,7 @@ import nltk
 class CUSTOM:
 	__status = None
 
-	__topologyEPs = None
+	__topologyENs = None
 	__topologyVNFs = None
 	__topologyPNFs = None
 	__topologyDomains = None
@@ -384,7 +384,7 @@ class CUSTOM:
 
 	######## PRIVATE METHODS ########
 
-	def __stPorders(self):
+	def __cPorders(self):
 
 		self.__servicePorders = []
 		splittedSFC = self.__serviceTopology.split()
@@ -414,7 +414,7 @@ class CUSTOM:
 
 	######## PUBLIC METHODS ########
 
-	def stValidate(self, serviceTopology):
+	def cValidate(self, serviceTopology):
 
 		self.__serviceTopology = None
 		self.__servicePorders = None
@@ -424,7 +424,7 @@ class CUSTOM:
 			return False
 
 		self.__serviceTopology = serviceTopology
-		self.__stPorders()
+		self.__cPorders()
 
 		for porder in self.__servicePorders:
 			if not porder.poValid():
@@ -434,53 +434,53 @@ class CUSTOM:
 		self.__status = 1
 		return True
 
-	def stStatus(self):
+	def cStatus(self):
 
 		return self.__status
 
-	def stTopology(self):
+	def cTopology(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__serviceTopology
 
-	def stVNFs(self):
+	def cVNFs(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__topologyVNFs
 
-	def stPNFs(self):
+	def cPNFs(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__topologyPNFs
 
-	def stDomains(self):
+	def cDomains(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__topologyDomains
 
-	def stMachines(self):
+	def cMachines(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__topologyMachines
 
-	def stEPs(self):
+	def cEPs(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__topologyEPs
+		return self.__topologyENs
 
-	def stPOrder(self):
+	def cPOrder(self):
 
 		if self.__status != 1:
 			return None
@@ -488,5 +488,18 @@ class CUSTOM:
 		return self.__servicePorders
 
 ############### CUSTOM CLASS END ################
+
+#import sys
+#sys.path.insert(0,'..')
+
+#from YAMLR.YAMLRDomains import YAMLRDomains
+#from YAMLR.YAMLRComposition import YAMLRComposition
+
+#dom = YAMLRDomains("1.Example/Domains[FENDE].yaml")
+#req = YAMLRComposition("1.Example/Service[CUSCO].yaml", dom.ydDomains())
+#print(req.ycStatus())
+
+#test = CUSTOM(req.ycServiceOE(), [], dom.ydDomains(), [], req.ycServiceON())
+
 
 #################################################
