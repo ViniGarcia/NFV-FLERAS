@@ -131,7 +131,7 @@ class YAMLRComposition:
 			self.__status = -26
 			return False
 
-		for data in self.__deployment:
+		for data in list(set(self.__deployment.keys()) - {"BRANCHINGS"}):
 			for metric in self.__deployment[data]["BENCHMARK"]:
 				if not isinstance(self.__deployment[data]["BENCHMARK"][metric], int) and not isinstance(self.__deployment[data]["BENCHMARK"][metric], float):
 					self.__status = -27
@@ -215,31 +215,31 @@ class YAMLRComposition:
 		if '{' in splittedTopo:
 
 			for metric in functionMetrics:
-				if not metric in self.__function["BRANCHINGS"]:
+				if not metric in self.__deployment["BRANCHINGS"]:
 					self.__status = -16
 					return
 
-				if not "UPDATE" in self.__function["BRANCHINGS"][metric] or not "FACTORS" in self.__function["BRANCHINGS"][metric]:
+				if not "UPDATE" in self.__deployment["BRANCHINGS"][metric] or not "FACTORS" in self.__deployment["BRANCHINGS"][metric]:
 					self.__status = -17
 					return
 
-				updateOperation = self.__function["BRANCHINGS"][metric]["UPDATE"]
+				updateOperation = self.__deployment["BRANCHINGS"][metric]["UPDATE"]
 				if updateOperation != "MULT" and updateOperation != "DIV" and updateOperation != "SUB" and updateOperation != "SUM":
 					self.__status = -18
 					return
 
-				if splittedTopo.count('{') != len(self.__function["BRANCHINGS"][metric]["FACTORS"]):
+				if splittedTopo.count('{') != len(self.__deployment["BRANCHINGS"][metric]["FACTORS"]):
 					self.__status = -19
 					return
 
-				for index in range(len(self.__function["BRANCHINGS"][metric]["FACTORS"])):
-					if len(self.__function["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
+				for index in range(len(self.__deployment["BRANCHINGS"][metric]["FACTORS"])):
+					if len(self.__deployment["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
 						self.__status = -20
 						return
 
 		else:
 
-			if len(self.__function["BRANCHINGS"]) != 0:
+			if len(self.__deployment["BRANCHINGS"]) != 0:
 				self.__status = -21
 				return
 
@@ -275,12 +275,13 @@ class YAMLRComposition:
 			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "OELEMENTS" in yamlParsed["SERVICE"] and "OUTNODES" in yamlParsed["SERVICE"]:
 				self.__service = yamlParsed["SERVICE"]
 
-		if "GOAL_FUNCTION" in yamlParsed:
-			if "METRICS" in yamlParsed["GOAL_FUNCTION"] and "BRANCHINGS" in yamlParsed["GOAL_FUNCTION"]:
-				self.__function = yamlParsed["GOAL_FUNCTION"]
+		if "COMP_OBJECTIVE_FUNCTION" in yamlParsed:
+			if "METRICS" in yamlParsed["COMP_OBJECTIVE_FUNCTION"]:
+				self.__function = yamlParsed["COMP_OBJECTIVE_FUNCTION"]
 
 		if "DEPLOYMENT" in yamlParsed:
-			self.__deployment = yamlParsed["DEPLOYMENT"]
+			if "BRANCHINGS" in yamlParsed["DEPLOYMENT"]:
+				self.__deployment = yamlParsed["DEPLOYMENT"]
 
 		self.__ycValidate()
 
@@ -336,7 +337,7 @@ class YAMLRComposition:
 			return None
 
 		serviceBecnhmark = []
-		for metric in self.__deployment:
+		for metric in list(set(self.__deployment.keys()) - {"BRANCHINGS"}):
 			metricBenchmark = self.__deployment[metric]["BENCHMARK"].copy()
 			metricBenchmark["ID"] = metric
 			serviceBecnhmark.append(metricBenchmark)
@@ -355,7 +356,7 @@ class YAMLRComposition:
 		if self.__status != 1:
 			return None
 
-		return self.__function["BRANCHINGS"]
+		return self.__deployment["BRANCHINGS"]
 
 	def ycFunctionGoals(self):
 

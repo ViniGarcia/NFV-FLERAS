@@ -35,7 +35,7 @@ SERVICE:
   OUTNODES:
     - !!str EN1
 
-GOAL_FUNCTION:
+COMP_OBJECTIVE_FUNCTION:
     METRICS:
       - ID: &MTC1 !!str FlowRate
         GOAL: !!str "MIN"
@@ -49,34 +49,17 @@ GOAL_FUNCTION:
         INPUT: !!int 40
         EVALUATION: !!str "MULT"
         UPDATE: *MTC1
-    BRANCHINGS: 
-      *MTC1:
-        UPDATE: !!str "MULT"
-        FACTORS:  
-          - [!!float 0.6, !!float 0.2, !!float 0.2]
-          - [!!float 0.9, !!float 1.0]
-          - [!!float 0.9, !!float 1.0]
-      *MTC2: 
-        UPDATE: !!str "MULT"
-        FACTORS:  
-          - [!!float 0.6, !!float 0.2, !!float 0.2]
-          - [!!float 0.9, !!float 1.0]
-          - [!!float 0.9, !!float 1.0]
 
-POLICIES:
+EMB_OBJECTIVE_FUNCTION:
   IMMEDIATE:
     - ID: !!str RTT
       MIN: !!int 0
       MAX: !!int 20
       TYPE: !!str TRANSITION
-      GOAL: !!str MIN
-      WEIGHT: !!float 0.5
     - ID: !!str COST
       MIN: !!int 0
       MAX: !!int 1000
       TYPE: !!str DOMAIN
-      GOAL: !!str MIN
-      WEIGHT: !!float 0.3
   AGGREGATE:
     - ID: !!str RTT
       MIN: !!int 0
@@ -174,3 +157,16 @@ DEPLOYMENT:
     BENCHMARK:
       *MTC1: !!float 1.0
       *MTC2: !!float 20
+  BRANCHINGS: 
+      *MTC1:
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.6, !!float 0.2, !!float 0.2]
+          - [!!float 0.9, !!float 1.0]
+          - [!!float 0.9, !!float 1.0]
+      *MTC2: 
+        UPDATE: !!str "MULT"
+        FACTORS:  
+          - [!!float 0.6, !!float 0.2, !!float 0.2]
+          - [!!float 0.9, !!float 1.0]
+          - [!!float 0.9, !!float 1.0]

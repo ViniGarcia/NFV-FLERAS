@@ -141,7 +141,6 @@ class YAMLRGeneral:
 			self.__status = -31
 			return False
 
-		immWeights = 0
 		aggWeights = 0
 		for policy in self.__policies["IMMEDIATE"] + self.__policies["AGGREGATE"]:
 			if not isinstance(policy["ID"], str):
@@ -153,24 +152,24 @@ class YAMLRGeneral:
 			if not isinstance(policy["MAX"], int) and not isinstance(policy["MAX"], float):
 				self.__status = -32
 				return False
-			if not isinstance(policy["WEIGHT"], int) and not isinstance(policy["WEIGHT"], float):
-				self.__status = -32
-				return False
 			if policy["MIN"] > policy["MAX"]:
 				self.__status = -33
+				return False
+
+		for policy in self.__policies["AGGREGATE"]:
+			if not isinstance(policy["WEIGHT"], int) and not isinstance(policy["WEIGHT"], float):
+				self.__status = -32
 				return False
 			if policy["WEIGHT"] <= 0 or policy["WEIGHT"] > 1:
 				self.__status = -34
 				return False
-			if policy in self.__policies["IMMEDIATE"]:
-				immWeights += policy["WEIGHT"]
-			else:
-				aggWeights += policy["WEIGHT"]
-		if immWeights + aggWeights != 1:
+			aggWeights += policy["WEIGHT"]
+
+		if aggWeights != 1:
 			self.__status = -35
 			return False
 
-		for data in self.__deployment:
+		for data in list(set(self.__deployment.keys()) - {"BRANCHINGS"}):
 			if not isinstance(self.__deployment[data]["FLAVOUR"]["MEMORY"], int):
 				self.__status = -36
 				return False
@@ -269,42 +268,46 @@ class YAMLRGeneral:
 		if '{' in splittedTopo:
 
 			for metric in functionMetrics:
-				if not metric in self.__function["BRANCHINGS"]:
+				if not metric in self.__deployment["BRANCHINGS"]:
 					self.__status = -18
 					return
 
-				if not "UPDATE" in self.__function["BRANCHINGS"][metric] or not "FACTORS" in self.__function["BRANCHINGS"][metric]:
+				if not "UPDATE" in self.__deployment["BRANCHINGS"][metric] or not "FACTORS" in self.__deployment["BRANCHINGS"][metric]:
 					self.__status = -19
 					return
 
-				updateOperation = self.__function["BRANCHINGS"][metric]["UPDATE"]
+				updateOperation = self.__deployment["BRANCHINGS"][metric]["UPDATE"]
 				if updateOperation != "MULT" and updateOperation != "DIV" and updateOperation != "SUB" and updateOperation != "SUM":
 					self.__status = -20
 					return
 
-				if splittedTopo.count('{') != len(self.__function["BRANCHINGS"][metric]["FACTORS"]):
+				if splittedTopo.count('{') != len(self.__deployment["BRANCHINGS"][metric]["FACTORS"]):
 					self.__status = -21
 					return
 
-				for index in range(len(self.__function["BRANCHINGS"][metric]["FACTORS"])):
-					if len(self.__function["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
+				for index in range(len(self.__deployment["BRANCHINGS"][metric]["FACTORS"])):
+					if len(self.__deployment["BRANCHINGS"][metric]["FACTORS"][index]) != branchSegments[index]:
 						self.__status = -22
 						return
 
 		else:
 
-			if len(self.__function["BRANCHINGS"]) != 0:
+			if len(self.__deployment["BRANCHINGS"]) != 0:
 				self.__status = -23
 				return
 
 		if self.__policies != None:
 
-			for policy in self.__policies["IMMEDIATE"] + self.__policies["AGGREGATE"]:
-				if not "ID" in policy or not "MIN" in policy or not "MAX" in policy or not "TYPE" in policy or not "GOAL" in policy or not "WEIGHT" in policy:
+			for policy in self.__policies["AGGREGATE"] + self.__policies["IMMEDIATE"]:
+				if not "ID" in policy or not "MIN" in policy or not "MAX" in policy or not "TYPE" in policy:
 					self.__status = -24
 					return
 				if policy["TYPE"] != "TRANSITION" and policy["TYPE"] != "DOMAIN":
 					self.__status = -25
+					return
+			for policy in self.__policies["AGGREGATE"]:
+				if not "GOAL" in policy or not "WEIGHT" in policy:
+					self.__status = -24
 					return
 				if policy["GOAL"] != "MIN" and policy["GOAL"] != "MAX":
 					self.__status = -26
@@ -342,16 +345,17 @@ class YAMLRGeneral:
 			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "OELEMENTS" in yamlParsed["SERVICE"] and "OUTNODES" in yamlParsed["SERVICE"]:
 				self.__service = yamlParsed["SERVICE"]
 
-		if "GOAL_FUNCTION" in yamlParsed:
-			if "METRICS" in yamlParsed["GOAL_FUNCTION"] and "BRANCHINGS" in yamlParsed["GOAL_FUNCTION"]:
-				self.__function = yamlParsed["GOAL_FUNCTION"]
+		if "COMP_OBJECTIVE_FUNCTION" in yamlParsed:
+			if "METRICS" in yamlParsed["COMP_OBJECTIVE_FUNCTION"]:
+				self.__function = yamlParsed["COMP_OBJECTIVE_FUNCTION"]
 
-		if "POLICIES" in yamlParsed:
-			if "IMMEDIATE" in yamlParsed["POLICIES"] and "AGGREGATE" in yamlParsed["POLICIES"]:
-				self.__policies = yamlParsed["POLICIES"]
+		if "EMB_OBJECTIVE_FUNCTION" in yamlParsed:
+			if "IMMEDIATE" in yamlParsed["EMB_OBJECTIVE_FUNCTION"] and "AGGREGATE" in yamlParsed["EMB_OBJECTIVE_FUNCTION"]:
+				self.__policies = yamlParsed["EMB_OBJECTIVE_FUNCTION"]
 
 		if "DEPLOYMENT" in yamlParsed:
-			self.__deployment = yamlParsed["DEPLOYMENT"]
+			if "BRANCHINGS" in yamlParsed["DEPLOYMENT"]:
+				self.__deployment = yamlParsed["DEPLOYMENT"]
 
 		self.__ygValidate()
 
@@ -414,7 +418,7 @@ class YAMLRGeneral:
 			return None
 
 		serviceBecnhmark = []
-		for metric in self.__deployment:
+		for metric in list(set(self.__deployment.keys()) - {"BRANCHINGS"}):
 			metricBenchmark = self.__deployment[metric]["BENCHMARK"].copy()
 			metricBenchmark["ID"] = metric
 			serviceBecnhmark.append(metricBenchmark)
@@ -444,7 +448,7 @@ class YAMLRGeneral:
 		if self.__status != 1:
 			return None
 
-		return self.__function["BRANCHINGS"]
+		return self.__deployment["BRANCHINGS"]
 
 	def ygFunctionGoals(self):
 
