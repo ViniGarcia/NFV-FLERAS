@@ -10,13 +10,16 @@ METADATA:
     function: "FlowRate" and "MemoryUsage". For the embedding task, in turn, two
     immediate evaluation metrics (RTT and COST) are used as exclusion criteria,
     and a single aggregation metric (RTT) is used as both exclusion criteria (see
-    MIN and MAX) and classification criteria (objective function). This request
-    can be validated for a composition (YAMLR Composition) or a sequence of
-    composition and embedding (YAML General), but it is not validated only for
-    embedding (YAML Embedding) due to the definition of partial orderings.
+    MIN and MAX) and classification criteria (objective function). It is important
+    to note that, the composition of this service topology requires the domains
+    information regarding NF4 infrastructure dependencies (available in 
+    "Domains[Generic]" file).This request can be validated for a composition (YAMLR
+    Composition) or a sequence of composition and embedding (YAML General), but it
+    is not validated only for embedding (YAML Embedding) due to the definition of
+    partial orderings.
 
 SERVICE:
-  TOPOLOGY: !!str IN [ NF1 NF2 NF3 ] ( NF2 NF3 * ) { [ NF4 NF5 NF7 ] / NF4 NF5 NF6 { NF2 NF7 / NF2 NF8 } NF9 / NF4 NF5 NF6 } NF11 NF1 { NF2 NF4 / NF3 NF4 } NF5 EN1
+  TOPOLOGY: !!str IN [ NF1 NF2 NF3 ] ( NF2 NF3 * ) { [ NF4 NF5 NF7 ] / NF4 < DOM1 > NF5 < DOM1 > NF6 { NF2 NF7 / NF2 NF8 } NF9 / NF4 NF5 NF6 } NF11 NF1 { NF2 NF4 < DOM2 > / NF3 NF4 } NF5 EN1
   OELEMENTS:
     - !!str &NF1 NF1
     - !!str &NF2 NF2

@@ -8,7 +8,7 @@ METADATA:
     branching with two branches. The embedding should consider two immediate metrics as
     exclusion criteria (RTT and COST), and a single metric as exclusion and optimization
     criteria (COST). It is important to note that, the embedding of this service topology
-    requires the FENDE environment information (available in "Domains [FENDE] file"). This
+    requires the FENDE environment information (available in "Domains[FENDE]" file). This
     request can be validated for an embedding (YAMLR Embedding), but it is not validated for
     a composition (YAML Composition) nor for a general sequence of deployment (YAML General)
     due to the non-definition of the composition objective function.

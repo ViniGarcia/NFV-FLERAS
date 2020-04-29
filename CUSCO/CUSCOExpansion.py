@@ -136,14 +136,12 @@ class Branch:
 
 			branchMatch = []
 			branchBase = []
-			modIndex = 0
 			for index in range(bIndex):
-				branchMatch.append(allSegments[0][modIndex + index])
+				branchMatch.append(allSegments[0][index])
 				if self.__beginMatchesInfra[index]:
 					branchMatch.append('<')
 					branchMatch.append(self.__beginMatchesInfra[index])
 					branchMatch.append('>')
-					modIndex += 3
 
 			branchBase.append('{')
 			for subSegment in allSegments:
