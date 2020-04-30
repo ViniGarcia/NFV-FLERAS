@@ -112,7 +112,7 @@ class CUSMAP:
 
 	def __smCheckTopology(self, topology):
 
-		validSymbols = self.__sfcRequest.yeServiceOE() + self.__sfcRequest.yeServiceON() + self.__sfcRequest.yeDomains() + ['<', '>', '{', '}', '/', 'IN']
+		validSymbols = self.__sfcRequest.yeServiceNF() + self.__sfcRequest.yeServiceEN() + self.__sfcRequest.yeDomains() + ['<', '>', '{', '}', '/', 'IN']
 		splittedTopo = topology.split()
 
 		for symbol in splittedTopo:
@@ -148,7 +148,7 @@ class CUSMAP:
 		cusmapMetrics = self.__sfcRequest.yePolicies()
 		chefMetrics = {}
 		for metric in cusmapMetrics["AGGREGATE"]:
-			chefMetrics[metric["ID"]] = (metric["GOAL"], metric["WEIGHT"])
+			chefMetrics[metric["ID"]] = (metric["OBJECTIVE"], metric["WEIGHT"])
 		self.__chef = CHEF(chefMetrics)
 
 	def __smPreprocessTopology(self, topology):
@@ -190,7 +190,7 @@ class CUSMAP:
 		processor = CUSMAPExhaustive(self.__immediateDictionary, self.__aggregateDictionary, self.__flavoursDictionary, self.__domMatrix)
 		if self.__smCheckTopology(self.__sfcRequest.yeServiceTopology()):
 			arguments = self.__smPreprocessTopology(self.__sfcRequest.yeServiceTopology())
-			processor.ceProcess(self.__sfcRequest.yeServiceOE(), self.__sfcRequest.yeServiceON(), arguments[0], arguments[1])
+			processor.ceProcess(self.__sfcRequest.yeServiceNF(), self.__sfcRequest.yeServiceEN(), arguments[0], arguments[1])
 			evaluations[self.__sfcRequest.yeServiceTopology()] = processor.ceEvaluation()
 		else:
 			self.__status = -4
@@ -231,7 +231,7 @@ class CUSMAP:
 		offload = 0
 
 		for index in range(len(base)):
-			if base[index] in self.__sfcRequest.yeServiceOE():
+			if base[index] in self.__sfcRequest.yeServiceNF():
 				if base[index + 1] != "<":
 					result.insert(index + offload + 1, "<")
 					result.insert(index + offload + 2, mapping[int(offload/3)])

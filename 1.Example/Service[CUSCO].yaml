@@ -13,7 +13,7 @@ METADATA:
 
 SERVICE:
   TOPOLOGY: !!str IN FPP TC { [ HIPS SDPI MF ] ( SDPI MF * ) / [ HIPS CDPI MF ] ( CDPI MF * ) } LB EN
-  OELEMENTS:
+  FUNCTIONS:
     - !!str &NF1 FPP
     - !!str &NF2 TC
     - !!str &NF3 HIPS
@@ -21,29 +21,28 @@ SERVICE:
     - !!str &NF5 CDPI
     - !!str &NF6 MF
     - !!str &NF7 LB
-  OUTNODES:
+  EGRESSNODES:
     - !!str EN
 
 COMP_OBJECTIVE_FUNCTION:
-    METRICS:
-      - ID: &MTC1 !!str TrafficRatio
-        GOAL: !!str "MIN"
-        WEIGHT: !!float 0.3334
-        INPUT: !!int 100
-        EVALUATION: !!str "MULT"
-        UPDATE: *MTC1
-      - ID: &MTC2 !!str RequestRatio
-        GOAL: !!str "MIN"
-        WEIGHT: !!float 0.3333
-        INPUT: !!int 200
-        EVALUATION: !!str "SUB"
-        UPDATE: !!str "STATIC"
-      - ID: &MTC3 !!str Size
-        GOAL: !!str "MIN"
-        WEIGHT: !!float 0.3333
-        INPUT: !!int 0
-        EVALUATION: !!str "SUM"
-        UPDATE: !!str "STATIC"
+  - ID: &MTC1 !!str TrafficRatio
+    OBJECTIVE: !!str "MIN"
+    WEIGHT: !!float 0.3334
+    INPUT: !!int 100
+    EVALUATION: !!str "MULT"
+    UPDATE: *MTC1
+  - ID: &MTC2 !!str RequestRatio
+    OBJECTIVE: !!str "MIN"
+    WEIGHT: !!float 0.3333
+    INPUT: !!int 200
+    EVALUATION: !!str "SUB"
+    UPDATE: !!str "STATIC"
+  - ID: &MTC3 !!str Size
+    OBJECTIVE: !!str "MIN"
+    WEIGHT: !!float 0.3333
+    INPUT: !!int 0
+    EVALUATION: !!str "SUM"
+    UPDATE: !!str "STATIC"
 
 DEPLOYMENT:
   *NF1:

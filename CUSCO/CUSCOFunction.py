@@ -66,7 +66,7 @@ class CUSCOFunction:
 		self.__sfcFunction = {}
 		self.__evaluationAggregate = {}
 
-		for metric in sfcRequest.ycFunction()["METRICS"]:
+		for metric in sfcRequest.ycFunction():
 			self.__sfcFunction[metric["ID"]] = metric.copy()
 			self.__evaluationAggregate[metric["ID"]] = 0
 

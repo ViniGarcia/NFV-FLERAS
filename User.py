@@ -83,7 +83,7 @@ class FLERASCLI(Cmd):
 				self.request = None
 				return
 
-			self.topology = CUSTOM(self.request.ycServiceOE(), [], domains_list, [], self.request.ycServiceON())
+			self.topology = CUSTOM(self.request.ycServiceNF(), [], domains_list, [], self.request.ycServiceEN())
 			self.topology.cValidate(self.request.ycServiceTopology())
 			if self.topology.cStatus() != 1:
 				print("CUSTOM ERROR " + str(self.topology.cStatus()) + ": INVALID SERVICE TOPOLOGY!")
@@ -97,7 +97,7 @@ class FLERASCLI(Cmd):
 				self.request = None
 				return
 
-			self.topology = CUSTOM(self.request.yeServiceOE(), [], domains_list, [], self.request.yeServiceON())
+			self.topology = CUSTOM(self.request.yeServiceNF(), [], domains_list, [], self.request.yeServiceEN())
 			self.topology.cValidate(self.request.yeServiceTopology())
 			if self.topology.cStatus() != 1:
 				print("CUSTOM ERROR " + str(self.topology.cStatus()) + ": INVALID SERVICE TOPOLOGY!")

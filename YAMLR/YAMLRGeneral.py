@@ -113,17 +113,17 @@ class YAMLRGeneral:
 		if not isinstance(self.__service["TOPOLOGY"], str):
 			self.__status = -28
 			return False
-		for element in self.__service["OELEMENTS"]:
+		for element in self.__service["FUNCTIONS"]:
 			if not isinstance(element, str):
 				self.__status = -28
 				return False
-		for outnode in self.__service["OUTNODES"]:
+		for outnode in self.__service["EGRESSNODES"]:
 			if not isinstance(outnode, str):
 				self.__status = -28
 				return False
 
 		funcWeights = 0
-		for metric in self.__function["METRICS"]:
+		for metric in self.__function:
 			if not isinstance(metric["ID"], str):
 				self.__status = -29
 				return False
@@ -210,16 +210,16 @@ class YAMLRGeneral:
 		if len(self.__service["TOPOLOGY"]) == 0:
 			self.__status = -7
 			return
-		if len(self.__service["OELEMENTS"]) == 0:
+		if len(self.__service["FUNCTIONS"]) == 0:
 			self.__status = -8
 			return
-		if len(self.__service["OUTNODES"]) == 0:
+		if len(self.__service["EGRESSNODES"]) == 0:
 			self.__status = -9
 			return
 
 		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IN']
-		topoOElemenets = self.__service["OELEMENTS"]
-		topoEPoints = self.__service["OUTNODES"]
+		topoOElemenets = self.__service["FUNCTIONS"]
+		topoEPoints = self.__service["EGRESSNODES"]
 		splittedTopo = self.__service["TOPOLOGY"].split()
 
 		branchSegments = []
@@ -238,8 +238,8 @@ class YAMLRGeneral:
 			return
 
 		functionMetrics = []
-		for metric in self.__function["METRICS"]:
-			if metric["GOAL"] != "MIN" and metric["GOAL"] != "MAX":
+		for metric in self.__function:
+			if metric["OBJECTIVE"] != "MIN" and metric["OBJECTIVE"] != "MAX":
 				self.__status = -11
 				return
 			if not "ID" in metric or not "WEIGHT" in metric or not "INPUT" in metric or not "EVALUATION" in metric or not "UPDATE" in metric:
@@ -250,7 +250,7 @@ class YAMLRGeneral:
 				return
 			functionMetrics.append(metric["ID"])
 
-		for element in self.__service["OELEMENTS"]:
+		for element in self.__service["FUNCTIONS"]:
 			if not element in self.__deployment:
 				self.__status = -14
 				return
@@ -306,10 +306,10 @@ class YAMLRGeneral:
 					self.__status = -25
 					return
 			for policy in self.__policies["AGGREGATE"]:
-				if not "GOAL" in policy or not "WEIGHT" in policy:
+				if not "OBJECTIVE" in policy or not "WEIGHT" in policy:
 					self.__status = -24
 					return
-				if policy["GOAL"] != "MIN" and policy["GOAL"] != "MAX":
+				if policy["OBJECTIVE"] != "MIN" and policy["OBJECTIVE"] != "MAX":
 					self.__status = -26
 					return
 
@@ -333,7 +333,7 @@ class YAMLRGeneral:
 		openedFile.close()
 
 		try:
-			yamlParsed = yaml.load(fileData)
+			yamlParsed = yaml.safe_load(fileData)
 		except:
 			return
 
@@ -342,12 +342,11 @@ class YAMLRGeneral:
 				self.__metadata = yamlParsed["METADATA"]
 
 		if "SERVICE" in yamlParsed:
-			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "OELEMENTS" in yamlParsed["SERVICE"] and "OUTNODES" in yamlParsed["SERVICE"]:
+			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "FUNCTIONS" in yamlParsed["SERVICE"] and "EGRESSNODES" in yamlParsed["SERVICE"]:
 				self.__service = yamlParsed["SERVICE"]
 
 		if "COMP_OBJECTIVE_FUNCTION" in yamlParsed:
-			if "METRICS" in yamlParsed["COMP_OBJECTIVE_FUNCTION"]:
-				self.__function = yamlParsed["COMP_OBJECTIVE_FUNCTION"]
+			self.__function = yamlParsed["COMP_OBJECTIVE_FUNCTION"]
 
 		if "EMB_OBJECTIVE_FUNCTION" in yamlParsed:
 			if "IMMEDIATE" in yamlParsed["EMB_OBJECTIVE_FUNCTION"] and "AGGREGATE" in yamlParsed["EMB_OBJECTIVE_FUNCTION"]:
@@ -403,14 +402,14 @@ class YAMLRGeneral:
 		if self.__status != 1:
 			return None
 
-		return self.__service["OUTNODES"]
+		return self.__service["EGRESSNODES"]
 
 	def ygServiceOE(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__service["OELEMENTS"]
+		return self.__service["FUNCTIONS"]
 
 	def ygServiceBechmark(self):
 
@@ -456,8 +455,8 @@ class YAMLRGeneral:
 			return None
 
 		goals = {}
-		for metric in self.__function["METRICS"]:
-			goals[metric["ID"]] = metric["GOAL"]
+		for metric in self.__function:
+			goals[metric["ID"]] = metric["OBJECTIVE"]
 
 		return goals
 
@@ -467,7 +466,7 @@ class YAMLRGeneral:
 			return None
 
 		weights = {}
-		for metric in self.__function["METRICS"]:
+		for metric in self.__function:
 			weights[metric["ID"]] = metric["WEIGHT"]
 
 		return weights

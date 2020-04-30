@@ -103,17 +103,17 @@ class YAMLRComposition:
 		if not isinstance(self.__service["TOPOLOGY"], str):
 			self.__status = -23
 			return False
-		for element in self.__service["OELEMENTS"]:
+		for element in self.__service["FUNCTIONS"]:
 			if not isinstance(element, str):
 				self.__status = -23
 				return False
-		for outnode in self.__service["OUTNODES"]:
+		for outnode in self.__service["EGRESSNODES"]:
 			if not isinstance(outnode, str):
 				self.__status = -23
 				return False
 
 		funcWeights = 0
-		for metric in self.__function["METRICS"]:
+		for metric in self.__function:
 			if not isinstance(metric["ID"], str):
 				self.__status = -24
 				return False
@@ -160,16 +160,16 @@ class YAMLRComposition:
 		if len(self.__service["TOPOLOGY"]) == 0:
 			self.__status = -6
 			return
-		if len(self.__service["OELEMENTS"]) == 0:
+		if len(self.__service["FUNCTIONS"]) == 0:
 			self.__status = -7
 			return
-		if len(self.__service["OUTNODES"]) == 0:
+		if len(self.__service["EGRESSNODES"]) == 0:
 			self.__status = -8
 			return
 
 		topoSymbols = ['<', '>', '{', '}', '(', ')', '[', ']', '/', '*', 'IN']
-		topoOElemenets = self.__service["OELEMENTS"]
-		topoEPoints = self.__service["OUTNODES"]
+		topoOElemenets = self.__service["FUNCTIONS"]
+		topoEPoints = self.__service["EGRESSNODES"]
 		splittedTopo = self.__service["TOPOLOGY"].split()
 
 		branchSegments = []
@@ -188,8 +188,8 @@ class YAMLRComposition:
 			return
 
 		functionMetrics = []
-		for metric in self.__function["METRICS"]:
-			if metric["GOAL"] != "MIN" and metric["GOAL"] != "MAX":
+		for metric in self.__function:
+			if metric["OBJECTIVE"] != "MIN" and metric["OBJECTIVE"] != "MAX":
 				self.__status = -10
 				return
 			if not "ID" in metric or not "WEIGHT" in metric or not "INPUT" in metric or not "EVALUATION" in metric or not "UPDATE" in metric:
@@ -200,7 +200,7 @@ class YAMLRComposition:
 				return
 			functionMetrics.append(metric["ID"])
 
-		for element in self.__service["OELEMENTS"]:
+		for element in self.__service["FUNCTIONS"]:
 			if not element in self.__deployment:
 				self.__status = -13
 				return
@@ -272,12 +272,11 @@ class YAMLRComposition:
 				self.__metadata = yamlParsed["METADATA"]
 
 		if "SERVICE" in yamlParsed:
-			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "OELEMENTS" in yamlParsed["SERVICE"] and "OUTNODES" in yamlParsed["SERVICE"]:
+			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "FUNCTIONS" in yamlParsed["SERVICE"] and "EGRESSNODES" in yamlParsed["SERVICE"]:
 				self.__service = yamlParsed["SERVICE"]
 
 		if "COMP_OBJECTIVE_FUNCTION" in yamlParsed:
-			if "METRICS" in yamlParsed["COMP_OBJECTIVE_FUNCTION"]:
-				self.__function = yamlParsed["COMP_OBJECTIVE_FUNCTION"]
+			self.__function = yamlParsed["COMP_OBJECTIVE_FUNCTION"]
 
 		if "DEPLOYMENT" in yamlParsed:
 			if "BRANCHINGS" in yamlParsed["DEPLOYMENT"]:
@@ -317,19 +316,19 @@ class YAMLRComposition:
 
 		return self.__function
 
-	def ycServiceON(self):
+	def ycServiceEN(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__service["OUTNODES"]
+		return self.__service["EGRESSNODES"]
 
-	def ycServiceOE(self):
+	def ycServiceNF(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__service["OELEMENTS"]
+		return self.__service["FUNCTIONS"]
 
 	def ycServiceBechmark(self):
 
@@ -358,14 +357,14 @@ class YAMLRComposition:
 
 		return self.__deployment["BRANCHINGS"]
 
-	def ycFunctionGoals(self):
+	def ycFunctionObjectives(self):
 
 		if self.__status != 1:
 			return None
 
 		goals = {}
-		for metric in self.__function["METRICS"]:
-			goals[metric["ID"]] = metric["GOAL"]
+		for metric in self.__function:
+			goals[metric["ID"]] = metric["OBJECTIVE"]
 
 		return goals
 
@@ -375,7 +374,7 @@ class YAMLRComposition:
 			return None
 
 		weights = {}
-		for metric in self.__function["METRICS"]:
+		for metric in self.__function:
 			weights[metric["ID"]] = metric["WEIGHT"]
 
 		return weights

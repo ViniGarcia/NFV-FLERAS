@@ -93,10 +93,10 @@ class CUSCO:
 
 	def __scCHEFPrepare(self):
 
-		cuscoMetrics = self.__sfcRequest.ycFunction()["METRICS"]
+		cuscoMetrics = self.__sfcRequest.ycFunction()
 		chefMetrics = {}
 		for metric in cuscoMetrics:
-			chefMetrics[metric["ID"]] = (metric["GOAL"], metric["WEIGHT"])
+			chefMetrics[metric["ID"]] = (metric["OBJECTIVE"], metric["WEIGHT"])
 		self.__chef = CHEF(chefMetrics)
 
 	def __scEvaluateSingle(self, index):
@@ -109,7 +109,7 @@ class CUSCO:
 		nextBranch = 1
 
 		sfcElements = self.__sfcDictionary[index].split()
-		boundaryEPs = self.__sfcRequest.ycServiceON()
+		boundaryEPs = self.__sfcRequest.ycServiceEN()
 
 		for eIndex in range(1, len(sfcElements)):
 

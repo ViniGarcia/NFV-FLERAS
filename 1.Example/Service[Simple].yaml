@@ -12,29 +12,28 @@ METADATA:
 
 SERVICE:
   TOPOLOGY: !!str IN [ NF1 NF2 NF3 NF4 NF5 ] EN1
-  OELEMENTS:
+  FUNCTIONS:
     - !!str &NF1 NF1
     - !!str &NF2 NF2
     - !!str &NF3 NF3
     - !!str &NF4 NF4
     - !!str &NF5 NF5
-  OUTNODES:
+  EGRESSNODES:
     - !!str EN1
 
 COMP_OBJECTIVE_FUNCTION:
-    METRICS:
-      - ID: &MTC1 !!str FlowRate
-        GOAL: !!str "MIN"
-        WEIGHT: !!float 0.8
-        INPUT: !!int 40
-        EVALUATION: !!str "MULT"
-        UPDATE: *MTC1
-      - ID: &MTC2 !!str MemoryUsage
-        GOAL: !!str "MIN"
-        WEIGHT: !!float 0.2
-        INPUT: !!int 40
-        EVALUATION: !!str "MULT"
-        UPDATE: *MTC1
+  - ID: &MTC1 !!str FlowRate
+    OBJECTIVE: !!str "MIN"
+    WEIGHT: !!float 0.8
+    INPUT: !!int 40
+    EVALUATION: !!str "MULT"
+    UPDATE: *MTC1
+  - ID: &MTC2 !!str MemoryUsage
+    OBJECTIVE: !!str "MIN"
+    WEIGHT: !!float 0.2
+    INPUT: !!int 40
+    EVALUATION: !!str "MULT"
+    UPDATE: *MTC1
 
 EMB_OBJECTIVE_FUNCTION:
   IMMEDIATE:
@@ -51,7 +50,7 @@ EMB_OBJECTIVE_FUNCTION:
       MIN: !!int 0
       MAX: !!int 100
       TYPE: !!str TRANSITION
-      GOAL: !!str MIN
+      OBJECTIVE: !!str MIN
       WEIGHT: !!float 1.0
 
 DEPLOYMENT:
