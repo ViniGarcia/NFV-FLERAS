@@ -660,7 +660,7 @@ class Mapping:
 		results = []
 		index = 0
 		while True:
-			#self.__algorithm.nfe = False #Only for test #1 and #2
+			#self.__algorithm.nfe = False #Reset the algorithm population -- only for particular tests
 			index += 1
 			self.__algorithm.run(step)
 			final = [[], []]

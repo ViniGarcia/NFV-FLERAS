@@ -136,14 +136,12 @@ class Branch:
 
 			branchMatch = []
 			branchBase = []
-			modIndex = 0
 			for index in range(bIndex):
-				branchMatch.append(allSegments[0][modIndex + index])
+				branchMatch.append(allSegments[0][index])
 				if self.__beginMatchesInfra[index]:
 					branchMatch.append('<')
 					branchMatch.append(self.__beginMatchesInfra[index])
 					branchMatch.append('>')
-					modIndex += 3
 
 			branchBase.append('{')
 			for subSegment in allSegments:
@@ -371,7 +369,7 @@ class Branch:
 ######## BRANCH CLASS END ########
 
 
-######## SFC EXPANSION CLASS DESCRIPTION ########
+######## CUSCO EXPANSION CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -395,13 +393,11 @@ class Branch:
 
 #################################################
 
-######## SFC EXPANSION CLASS BEGIN ########
+######## CUSCO EXPANSION CLASS BEGIN ########
 
-from SCAG.SFCTopology import SFCTopology, PartialOrder
-from YAMLR.GeneralRequest import GeneralRequest
 import itertools
 
-class SFCExpansion:
+class CUSCOExpansion:
 	__status = None
 
 	__sfcTopology = None
@@ -415,11 +411,11 @@ class SFCExpansion:
 		if sfcTopology == None:
 			self.__status = 0
 		else:
-			self.seExpand(sfcTopology)
+			self.ceExpand(sfcTopology)
 
 	######## PRIVATE METHODS ########
 
-	def __seStringfy(self, charList):
+	def __ceStringfy(self, charList):
 
 			stringData = [charList[0]]
 			for index in range(1, len(charList)):
@@ -428,7 +424,7 @@ class SFCExpansion:
 
 			return ''.join(stringData)
 
-	def __seValidatePermutation(self, permutation, oDependency, cDependency):
+	def __ceValidatePermutation(self, permutation, oDependency, cDependency):
 
 		for dependency in cDependency:
 			if permutation.index(dependency[0]) != permutation.index(dependency[1])-1:
@@ -440,7 +436,7 @@ class SFCExpansion:
 
 		return True
 
-	def __seCombinePermutations(self, pOrderSegments, sfcTopology):
+	def __ceCombinePermutations(self, pOrderSegments, sfcTopology):
 
 		allPermutations = []
 		for segment in pOrderSegments:
@@ -467,15 +463,15 @@ class SFCExpansion:
 
 		return allCombinations
 
-	def __sePartialOrder(self):
+	def __cePartialOrder(self):
 
-		pOrderSegments = self.__sfcTopology.stPOrder()
+		pOrderSegments = self.__sfcTopology.cPOrder()
 		for segment in pOrderSegments:
-			availablePermutations = list(itertools.permutations(segment.poOPEs()))
+			availablePermutations = list(itertools.permutations(segment.poElements()))
 			acceptedPermutations = []
 
 			for permutation in availablePermutations:
-				if self.__seValidatePermutation(permutation, segment.poOD(), segment.poCD()):
+				if self.__ceValidatePermutation(permutation, segment.poODependencies(), segment.poCDependencies()):
 					acceptedPermutations.append(list(permutation))
 
 			if len(acceptedPermutations) == 0:
@@ -484,9 +480,9 @@ class SFCExpansion:
 
 			segment.poSetupCombinations(acceptedPermutations)
 
-		return self.__seCombinePermutations(pOrderSegments, self.__sfcTopology.stTopology())
+		return self.__ceCombinePermutations(pOrderSegments, self.__sfcTopology.cTopology())
 
-	def __seSeparateBranches(self, splittedSFC):
+	def __ceSeparateBranches(self, splittedSFC):
 
 		sfcBranches = []
 
@@ -508,7 +504,7 @@ class SFCExpansion:
 
 		return sfcBranches
 
-	def __seRestructBranchBegin(self, base, combination):
+	def __ceRestructBranchBegin(self, base, combination):
 
 		for cIndex in range(len(combination)):
 
@@ -545,10 +541,10 @@ class SFCExpansion:
 
 		return base
 
-	def __seRestructBranchEnd(self, base, combination):
+	def __ceRestructBranchEnd(self, base, combination):
 
 		nonTerminal = []
-		boundaryEPs = self.__sfcTopology.stBoundaryEPs()
+		boundaryEPs = self.__sfcTopology.cEPs()
 		flag = True
 		skip = 0
 
@@ -584,15 +580,15 @@ class SFCExpansion:
 
 		return base
 
-	def __seBranches(self):
+	def __ceBranches(self):
 
 		bBranchTopologies = []
 		for topology in self.__sfcPOrder:
-			sfcBranches = self.__seSeparateBranches(topology)
+			sfcBranches = self.__ceSeparateBranches(topology)
 			branchesStructure = []
 
 			for index in range(len(sfcBranches)):
-				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.stBoundaryEPs())
+				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.cEPs())
 				branchInstance.bAnalyzeBegin()
 
 				if branchInstance.bBeginMatchList() != []:
@@ -602,15 +598,19 @@ class SFCExpansion:
 
 			combinationList = list(itertools.product(*branchesStructure))
 			for combination in combinationList:
-				bBranchTopologies.append(self.__seRestructBranchBegin(topology, combination))
+				bBranchTopologies.append(self.__ceRestructBranchBegin(topology, combination))
 
 		availableTopologies = []
 		for topology in bBranchTopologies:
-			sfcBranches = self.__seSeparateBranches(topology)
+			sfcBranches = self.__ceSeparateBranches(topology)
 			branchesStructure = []
 
+			if len(sfcBranches) == 0:
+				availableTopologies.append(self.__ceStringfy(topology))
+				continue
+
 			for index in range(len(sfcBranches)):
-				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.stBoundaryEPs())
+				branchInstance = Branch(sfcBranches[index], self.__sfcTopology.cEPs())
 				branchInstance.bAnalyzeEnd()
 
 				if branchInstance.bEndMatchList() != []:
@@ -620,45 +620,45 @@ class SFCExpansion:
 
 				combinationList = list(itertools.product(*branchesStructure))
 				for combination in combinationList:
-					availableTopologies.append(self.__seStringfy(self.__seRestructBranchEnd(topology, combination)))
+					availableTopologies.append(self.__ceStringfy(self.__ceRestructBranchEnd(topology, combination)))
 
 		return availableTopologies
 
 	######## PUBLIC METHODS ########
 
-	def seExpand(self, sfcTopology):
+	def ceExpand(self, sfcTopology):
 
 		self.__sfcTopology = sfcTopology
-		if self.__sfcTopology.stStatus() != 1:
+		if self.__sfcTopology.cStatus() != 1:
 			self.__status = -1
 
-		self.__sfcPOrder = self.__sePartialOrder()
+		self.__sfcPOrder = self.__cePartialOrder()
 		if self.__status == -2:
 			return
-		self.__sfcBranches = self.__seBranches()
+		self.__sfcBranches = self.__ceBranches()
 
 		self.__status = 1
 
-	def seStatus(self):
+	def ceStatus(self):
 
 		return self.__status
 
-	def sePOrder(self):
+	def cePOrder(self):
 
 		if self.__status != 1:
 			return None
 
 		stringPOrders = []
 		for pOrder in self.__sfcPOrder:
-			stringPOrders.append(self.__seStringfy(pOrder))
+			stringPOrders.append(self.__ceStringfy(pOrder))
 
 		return stringPOrders
 
-	def seBranches(self):
+	def ceBranches(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__sfcBranches
 
-######## SFC EXPANSION CLASS END ########
+######## CUSCO EXPANSION CLASS END ########

@@ -1,0 +1,82 @@
+METADATA:
+  ID: !!str FENDEService
+  DESCRIPTION: >
+    This request presents a case study of embedding a generic service onto the FENDE
+    virtualization environment. The specified service has seven network functions, as
+    well as nine instances. Two network functions (EO1 and EO2) are pinned in particular
+    domains (infrastructure dependencies). The service topology also presents a non-terminal
+    branching with two branches. The embedding should consider two immediate metrics as
+    exclusion criteria (RTT and COST), and a single metric as exclusion and optimization
+    criteria (COST). It is important to note that, the embedding of this service topology
+    requires the FENDE environment information (available in "Domains[FENDE]" file). This
+    request can be validated for an embedding (YAMLR Embedding), but it is not validated for
+    a composition (YAML Composition) nor for a general sequence of deployment (YAML General)
+    due to the non-definition of the composition objective function.
+
+SERVICE:
+  TOPOLOGY: !!str IN EO1 < FendePOA > EO2 { EO3 < FendeCTBA > EO5 EO6 / EO4 EO5 EO6 } EO7 EN
+  FUNCTIONS:
+    - !!str &NF1 EO1
+    - !!str &NF2 EO2
+    - !!str &NF3 EO3
+    - !!str &NF4 EO4
+    - !!str &NF5 EO5
+    - !!str &NF6 EO6
+    - !!str &NF7 EO7
+  EGRESSNODES:
+    - !!str EN
+
+EMB_OBJECTIVE_FUNCTION:
+  IMMEDIATE:
+    - ID: !!str RTT
+      MIN: !!int 0
+      MAX: !!int 30
+      TYPE: !!str TRANSITION
+    - ID: !!str COST
+      MIN: !!int 0
+      MAX: !!int 5
+      TYPE: !!str DOMAIN
+  AGGREGATE:
+    - ID: !!str COST
+      MIN: !!int 0
+      MAX: !!int 30
+      TYPE: !!str DOMAIN
+      OBJECTIVE: !!str MIN
+      WEIGHT: !!float 1.0
+
+DEPLOYMENT:
+  *NF1:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+  *NF2:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 3
+      CPUS: !!int 1
+  *NF3:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+  *NF4:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+  *NF5:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+  *NF6:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 2
+      CPUS: !!int 1
+  *NF7:
+    FLAVOUR:
+      MEMORY: !!int 512
+      NET_IFACES: !!int 3
+      CPUS: !!int 1

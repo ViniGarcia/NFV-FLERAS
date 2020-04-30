@@ -1,4 +1,4 @@
-######## EMBEDDING REQUEST CLASS DESCRIPTION ########
+######## YAMLR EMBEDDING CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -41,19 +41,18 @@
 
 ###############################################
 
-######## EMBEDDING REQUEST CLASS BEGIN ########
+######## YAMLR EMBEDDING CLASS BEGIN ########
 
 import os
 import yaml
 import re
 
-class EmbeddingRequest:
+class YAMLREmbedding:
 
 	__status = None
 
 	__metadata = None
 	__service = None
-	__function = None
 	__policies = None
 	__deployment = None
 
@@ -65,11 +64,11 @@ class EmbeddingRequest:
 
 		self.__status = 0
 		if requestFile != None and domainsList != None:
-			self.erRequest(requestFile, domainsList)
+			self.yeRequest(requestFile, domainsList)
 
 	######## PRIVATE METHODS ########
 
-	def __erBranch(self, elementsList, start):
+	def __yeBranch(self, elementsList, start):
 
 		skipBrace = 0
 		segments = 0
@@ -90,7 +89,7 @@ class EmbeddingRequest:
 				if skipBrace == 0:
 					segments += 1
 
-	def __erData(self):
+	def __yeData(self):
 
 		if not isinstance(self.__metadata["ID"], str):
 			self.__status = -16
@@ -99,16 +98,15 @@ class EmbeddingRequest:
 		if not isinstance(self.__service["TOPOLOGY"], str):
 			self.__status = -17
 			return False
-		for element in self.__service["OELEMENTS"]:
+		for element in self.__service["FUNCTIONS"]:
 			if not isinstance(element, str):
 				self.__status = -17
 				return False
-		for outnode in self.__service["OUTNODES"]:
+		for outnode in self.__service["EGRESSNODES"]:
 			if not isinstance(outnode, str):
 				self.__status = -17
 				return False
 
-		immWeights = 0
 		aggWeights = 0
 		for policy in self.__policies["IMMEDIATE"] + self.__policies["AGGREGATE"]:
 			if not isinstance(policy["ID"], str):
@@ -120,24 +118,23 @@ class EmbeddingRequest:
 			if not isinstance(policy["MAX"], int) and not isinstance(policy["MAX"], float):
 				self.__status = -18
 				return False
-			if not isinstance(policy["WEIGHT"], int) and not isinstance(policy["WEIGHT"], float):
-				self.__status = -18
-				return False
 			if policy["MIN"] > policy["MAX"]:
 				self.__status = -19
+				return False
+		for policy in self.__policies["AGGREGATE"]:
+			if not isinstance(policy["WEIGHT"], int) and not isinstance(policy["WEIGHT"], float):
+				self.__status = -18
 				return False
 			if policy["WEIGHT"] <= 0 or policy["WEIGHT"] > 1:
 				self.__status = -20
 				return False
-			if policy in self.__policies["IMMEDIATE"]:
-				immWeights += policy["WEIGHT"]
-			else:
-				aggWeights += policy["WEIGHT"]
-		if immWeights + aggWeights != 1:
+			aggWeights += policy["WEIGHT"]
+
+		if aggWeights != 1:
 			self.__status = -21
 			return False
 
-		for data in self.__deployment:
+		for data in list(set(self.__deployment.keys()) - {"BRANCHINGS"}):
 			if not isinstance(self.__deployment[data]["FLAVOUR"]["MEMORY"], int):
 				self.__status = -22
 				return False
@@ -150,7 +147,7 @@ class EmbeddingRequest:
 
 		return True
 
-	def __erValidate(self):
+	def __yeValidate(self):
 
 		if self.__metadata == None:
 			self.__status = -1
@@ -171,22 +168,22 @@ class EmbeddingRequest:
 		if len(self.__service["TOPOLOGY"]) == 0:
 			self.__status = -6
 			return
-		if len(self.__service["OELEMENTS"]) == 0:
+		if len(self.__service["FUNCTIONS"]) == 0:
 			self.__status = -7
 			return
-		if len(self.__service["OUTNODES"]) == 0:
+		if len(self.__service["EGRESSNODES"]) == 0:
 			self.__status = -8
 			return
 
-		topoSymbols = ['<', '>', '{', '}', '/', 'IP']
-		topoOElemenets = self.__service["OELEMENTS"]
-		topoEPoints = self.__service["OUTNODES"]
+		topoSymbols = ['<', '>', '{', '}', '/', 'IN']
+		topoOElemenets = self.__service["FUNCTIONS"]
+		topoEPoints = self.__service["EGRESSNODES"]
 		splittedTopo = self.__service["TOPOLOGY"].split()
 
 		branchSegments = []
 		for index in range(len(splittedTopo)):
 			if splittedTopo[index] == '{':
-				branchSegments.append(self.__erBranch(splittedTopo, index))
+				branchSegments.append(self.__yeBranch(splittedTopo, index))
 			if splittedTopo[index] in topoSymbols:
 				continue
 			if splittedTopo[index] in topoOElemenets:
@@ -198,7 +195,7 @@ class EmbeddingRequest:
 			self.__status = -9
 			return
 
-		for element in self.__service["OELEMENTS"]:
+		for element in self.__service["FUNCTIONS"]:
 			if not element in self.__deployment:
 				self.__status = -10
 				return
@@ -212,22 +209,26 @@ class EmbeddingRequest:
 		if self.__policies != None:
 
 			for policy in self.__policies["IMMEDIATE"] + self.__policies["AGGREGATE"]:
-				if not "ID" in policy or not "MIN" in policy or not "MAX" in policy or not "TYPE" in policy or not "GOAL" in policy or not "WEIGHT" in policy:
+				if not "ID" in policy or not "MIN" in policy or not "MAX" in policy or not "TYPE" in policy:
 					self.__status = -13
 					return
 				if policy["TYPE"] != "TRANSITION" and policy["TYPE"] != "DOMAIN":
 					self.__status = -14
 					return
-				if policy["GOAL"] != "MIN" and policy["GOAL"] != "MAX":
+			for policy in self.__policies["AGGREGATE"]:
+				if not "OBJECTIVE" in policy or not "WEIGHT" in policy:
+					self.__status = -13
+					return
+				if policy["OBJECTIVE"] != "MIN" and policy["OBJECTIVE"] != "MAX":
 					self.__status = -15
 					return
 
-		if self.__erData():
+		if self.__yeData():
 			self.__status = 1
 
 	######## PUBLIC METHODS ########
 
-	def erRequest(self, requestFile, domainsList):
+	def yeRequest(self, requestFile, domainsList):
 
 		if not isinstance(domainsList, list):
 			return
@@ -251,89 +252,78 @@ class EmbeddingRequest:
 				self.__metadata = yamlParsed["METADATA"]
 
 		if "SERVICE" in yamlParsed:
-			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "OELEMENTS" in yamlParsed["SERVICE"] and "OUTNODES" in yamlParsed["SERVICE"]:
+			if "TOPOLOGY" in yamlParsed["SERVICE"]  and "FUNCTIONS" in yamlParsed["SERVICE"] and "EGRESSNODES" in yamlParsed["SERVICE"]:
 				self.__service = yamlParsed["SERVICE"]
 
-		if "GOAL_FUNCTION" in yamlParsed:
-			if "METRICS" in yamlParsed["GOAL_FUNCTION"] and "BRANCHINGS" in yamlParsed["GOAL_FUNCTION"]:
-				self.__function = yamlParsed["GOAL_FUNCTION"]
-
-		if "POLICIES" in yamlParsed:
-			if "IMMEDIATE" in yamlParsed["POLICIES"] and "AGGREGATE" in yamlParsed["POLICIES"]:
-				self.__policies = yamlParsed["POLICIES"]
+		if "EMB_OBJECTIVE_FUNCTION" in yamlParsed:
+			if "IMMEDIATE" in yamlParsed["EMB_OBJECTIVE_FUNCTION"] and "AGGREGATE" in yamlParsed["EMB_OBJECTIVE_FUNCTION"]:
+				self.__policies = yamlParsed["EMB_OBJECTIVE_FUNCTION"]
 
 		if "DEPLOYMENT" in yamlParsed:
 			self.__deployment = yamlParsed["DEPLOYMENT"]
 
-		self.__erValidate()
+		self.__yeValidate()
 
-	def erStatus(self):
+	def yeStatus(self):
 
 		return self.__status
 
-	def erDomains(self):
+	def yeDomains(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__domainsList
 
-	def erMetadata(self):
+	def yeMetadata(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__metadata
 
-	def erService(self):
+	def yeService(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service
 
-	def erFunction(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__function
-
-	def erPolicies(self):
+	def yePolicies(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__policies
 
-	def erServiceON(self):
+	def yeServiceEN(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__service["OUTNODES"]
+		return self.__service["EGRESSNODES"]
 
-	def erServiceOE(self):
+	def yeServiceNF(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__service["OELEMENTS"]
+		return self.__service["FUNCTIONS"]
 
-	def erServiceBechmark(self):
+	def yeServiceBechmark(self):
 
 		if self.__status != 1:
 			return None
 
 		serviceBecnhmark = []
-		for metric in self.__deployment:
+		for metric in list(set(self.__deployment.keys()) - {"BRANCHINGS"}):
 			metricBenchmark = self.__deployment[metric]["BENCHMARK"].copy()
 			metricBenchmark["ID"] = metric
 			serviceBecnhmark.append(metricBenchmark)
 
 		return serviceBecnhmark
 
-	def erServiceFlavours(self):
+	def yeServiceFlavours(self):
 
 		if self.__status != 1:
 			return None
@@ -344,43 +334,14 @@ class EmbeddingRequest:
 
 		return serviceFlavous
 
-	def erServiceTopology(self):
+	def yeServiceTopology(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__service["TOPOLOGY"]
 
-	def erFunctionBranches(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__function["BRANCHINGS"]
-
-	def erFunctionGoals(self):
-
-		if self.__status != 1:
-			return None
-
-		goals = {}
-		for metric in self.__function["METRICS"]:
-			goals[metric["ID"]] = metric["GOAL"]
-
-		return goals
-
-	def erFunctionWeights(self):
-
-		if self.__status != 1:
-			return None
-
-		weights = {}
-		for metric in self.__function["METRICS"]:
-			weights[metric["ID"]] = metric["WEIGHT"]
-
-		return weights
-
-	def erPoliciesMetrics(self):
+	def yePoliciesMetrics(self):
 
 		if self.__status != 1:
 			return None
@@ -392,4 +353,4 @@ class EmbeddingRequest:
 
 		return metrics
 
-######## EMBEDDING REQUEST CLASS END ########
+######## YAMLR EMBEDDING CLASS END ########

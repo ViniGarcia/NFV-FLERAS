@@ -246,7 +246,7 @@ class PartialOrder:
 
 #--------------------------------------------------
 
-######## SFC TOPOLOGY CLASS DESCRIPTION ########
+######## SCAG CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service) 
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -273,11 +273,11 @@ class PartialOrder:
 
 #################################################
 
-######## SFC TOPOLOGY CLASS BEGIN ########
+######## SCAG CLASS BEGIN ########
 
 import nltk
 
-class SFCTopology:
+class SCAG:
 	__status = None
 
 	__sfcParser = None
@@ -292,9 +292,9 @@ class SFCTopology:
 	def __init__(self, boundaryEPs, operationalPEs, availableDomains):
 
 		kernelGrammar = """
-			S 			 -> "IP" OPBLOCK
+			S 			 -> "IN" OPBLOCK
 
-			OPBLOCK 	 -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EP
+			OPBLOCK 	 -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EN
 			ROPBLOCK	 -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK
 			TPBLOCK  	 -> PORDER | MASKPELEM
 			
@@ -317,9 +317,9 @@ class SFCTopology:
 			grammarPELEM += ' "' + PE + '" |'
 		grammarPELEM = grammarPELEM[:len(grammarPELEM)-1] + '\n'
 
-		grammarEP = 'EP ->'
-		for EP in boundaryEPs:
-			grammarEP += ' "' + EP + '" |'
+		grammarEP = 'EN ->'
+		for EN in boundaryEPs:
+			grammarEP += ' "' + EN + '" |'
 		grammarEP = grammarEP[:len(grammarEP)-1] + '\n'
 
 		grammarDomain = 'DOMAIN ->'
@@ -335,7 +335,7 @@ class SFCTopology:
 
 	######## PRIVATE METHODS ########
 
-	def __stPorders(self):
+	def __sPorders(self):
 
 		self.__sfcPorders = []
 		splittedSFC = self.__sfcTopology.split()
@@ -365,7 +365,7 @@ class SFCTopology:
 
 	######## PUBLIC METHODS ######## 
 
-	def stValidate(self, sfcTopology):
+	def sValidate(self, sfcTopology):
 		
 		self.__sfcTopology = None
 		self.__sfcPorders = None
@@ -375,7 +375,7 @@ class SFCTopology:
 			return False
 
 		self.__sfcTopology = sfcTopology
-		self.__stPorders()
+		self.__sPorders()
 
 		for porder in self.__sfcPorders:
 			if not porder.poValid():
@@ -385,29 +385,29 @@ class SFCTopology:
 		self.__status = 1
 		return True
 
-	def stStatus(self):
+	def sStatus(self):
 
 		return self.__status
 
-	def stTopology(self):
+	def sTopology(self):
 		
 		if self.__status != 1:
 			return None
 
 		return self.__sfcTopology
 
-	def stBoundaryEPs(self):
+	def sBoundaryEPs(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__boundaryEPs
 
-	def stPOrder(self):
+	def sPOrder(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__sfcPorders
 
-######## SFC TOPOLOGY CLASS END ########
+######## SCAG CLASS END ########

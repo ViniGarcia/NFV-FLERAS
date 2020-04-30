@@ -1,4 +1,4 @@
-######## OPTIMAL SM CLASS DESCRIPTION ########
+######## CUSMAP EXHAUSTIVE CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -20,15 +20,10 @@
 
 #################################################
 
-import sys
-sys.path.insert(0, '../')
-
 import copy
 from itertools import product
 
-from YAMLR.EmbeddingRequest import EmbeddingRequest
-
-class OptimalSM:
+class CUSMAPExhaustive:
 	__status = None
 
 	__sfcImmPolicies = None
@@ -48,13 +43,13 @@ class OptimalSM:
 	def __init__(self, sfcImmPolicies, sfcAggPolicies, sfcFlavours, domMatrix):
 
 		if sfcImmPolicies != None and sfcAggPolicies != None and sfcFlavours != None and domMatrix != None:
-			self.osmSetup(sfcImmPolicies, sfcAggPolicies, sfcFlavours, domMatrix)
+			self.ceSetup(sfcImmPolicies, sfcAggPolicies, sfcFlavours, domMatrix)
 		else:
 			self.__status = 0
 
 	######## PRIVATE METHODS ########
 
-	def __osmInteractions(self, elements, dependencies, domains):
+	def __ceInteractions(self, elements, dependencies, domains):
 
 		self.__currentInteractions = dependencies
 		self.__currentIndexes = []
@@ -65,7 +60,7 @@ class OptimalSM:
 					self.__currentInteractions[index] = domains.copy()
 				self.__currentIndexes.append(index)
 
-	def __osmCombineDomains(self):
+	def __ceCombineDomains(self):
 
 		ordered = []
 		for index in self.__currentIndexes:
@@ -121,7 +116,7 @@ class OptimalSM:
 		#print("TRANSIÇÕES POSSIVEIS: ", len(acceptedCombinations))
 		return acceptedCombinations
 
-	def __osmCombineResources(self, domCombinations):
+	def __ceCombineResources(self, domCombinations):
 
 		printTest = {'MEMORY':0, 'NET_IFACES':0, 'CPUS':0}
 		acceptedCombinations = []
@@ -148,11 +143,9 @@ class OptimalSM:
 			if accept:
 				acceptedCombinations.append(distribution)
 
-		#print("RECURSOS: ", len(acceptedCombinations))
-		#print("DROPS RECURSOS: ", printTest)
 		return acceptedCombinations
 
-	def __osmCombinePolicies(self, resCombinations):
+	def __ceCombinePolicies(self, resCombinations):
 
 		printDrops = {'IMMEDIATE':0, 'AGGREGATE':0}
 		acceptedCombinations = {"DIST":[], "AGG":[]}
@@ -264,14 +257,11 @@ class OptimalSM:
 				acceptedCombinations["DIST"].append(distribution)
 				acceptedCombinations["AGG"].append(aggregationsAnalysis)
 
-		#print('POLITICAS: ', len(acceptedCombinations["DIST"]))
-		#print('DROPS POLITICAS: ', printDrops)
-
 		return acceptedCombinations
 
 	######## PUBLIC METHODS ########
 
-	def osmSetup(self, sfcImmPolicies, sfcAggPolicies, sfcFlavours, domMatrix):
+	def ceSetup(self, sfcImmPolicies, sfcAggPolicies, sfcFlavours, domMatrix):
 
 		self.__sfcImmPolicies = sfcImmPolicies
 		self.__sfcAggPolicies = sfcAggPolicies
@@ -279,24 +269,24 @@ class OptimalSM:
 		self.__domMatrix = domMatrix
 		self.__status = 1
 
-	def osmProcess(self, elements, outNodes, topology, dependencies):
+	def ceProcess(self, elements, outNodes, topology, dependencies):
 
 		self.__currentTopology = topology
 		self.__currentOutNodes = outNodes
-		self.__osmInteractions(elements, dependencies, list(self.__domMatrix.keys()))
-		self.__distEvaluations = self.__osmCombinePolicies(self.__osmCombineResources(self.__osmCombineDomains()))
+		self.__ceInteractions(elements, dependencies, list(self.__domMatrix.keys()))
+		self.__distEvaluations = self.__ceCombinePolicies(self.__ceCombineResources(self.__ceCombineDomains()))
 		self.__status = 2
 		#print("")
 
-	def osmStatus(self):
+	def ceStatus(self):
 
 		return self.__status
 
-	def osmEvaluation(self):
+	def ceEvaluation(self):
 
 		if self.__status != 2:
 			return None
 
 		return self.__distEvaluations
 
-######## OPTIMAL SM CLASS END ########
+######## CUSMAP EXHAUSTIVE CLASS END ########

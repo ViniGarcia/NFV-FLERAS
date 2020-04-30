@@ -1,4 +1,4 @@
-######## GOAL FUNCTION CLASS DESCRIPTION ########
+######## CUSCO FUNCTION CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -20,9 +20,7 @@
 
 import copy
 
-from YAMLR.GeneralRequest import GeneralRequest
-
-class GoalFunction:
+class CUSCOFunction:
 	__status = None
 
 	__sfcFunction = None
@@ -33,13 +31,13 @@ class GoalFunction:
 	def __init__(self, sfcRequest):
 
 		if sfcRequest != None:
-			self.gfSetup(sfcRequest)
+			self.cfSetup(sfcRequest)
 		else:
 			self.__status = 0
 
 	######## PRIVATE METHODS ########
 
-	def __gfEvaluateMetric(self, metric, value):
+	def __cfEvaluateMetric(self, metric, value):
 
 		if (metric["EVALUATION"] == "MULT"):
 			return metric["INPUT"] * value
@@ -50,7 +48,7 @@ class GoalFunction:
 		if (metric["EVALUATION"] == "SUB"):
 			return metric["INPUT"] - value
 
-	def __gfUpdateMetric(self, update, operation, value):
+	def __cfUpdateMetric(self, update, operation, value):
 
 		if (operation["EVALUATION"] == "MULT"):
 			update["INPUT"] = update["INPUT"] * value
@@ -63,18 +61,18 @@ class GoalFunction:
 
 	######## PUBLIC METHODS ########
 
-	def gfSetup(self, sfcRequest):
+	def cfSetup(self, sfcRequest):
 
 		self.__sfcFunction = {}
 		self.__evaluationAggregate = {}
 
-		for metric in sfcRequest.crFunction()["METRICS"]:
+		for metric in sfcRequest.ycFunction():
 			self.__sfcFunction[metric["ID"]] = metric.copy()
 			self.__evaluationAggregate[metric["ID"]] = 0
 
 		self.__status = 1
 
-	def gfBranchSetup(self, sfcFunction, branchOperations, branchValues):
+	def cfBranchSetup(self, sfcFunction, branchOperations, branchValues):
 
 		self.__sfcFunction = copy.deepcopy(sfcFunction)
 		self.__evaluationAggregate = {}
@@ -93,53 +91,53 @@ class GoalFunction:
 
 		self.__status = 1
 
-	def gfBranchUnify(self, segmentsResults):
+	def cfBranchUnify(self, segmentsResults):
 
 		for metric in self.__sfcFunction:
 			self.__sfcFunction[metric]["INPUT"] = 0
 
 			for result in segmentsResults:
-				self.__evaluationAggregate[metric] += result.gfAggregation()[metric]
-				self.__sfcFunction[metric]["INPUT"] += result.gfFunction()[metric]["INPUT"]
+				self.__evaluationAggregate[metric] += result.cfAggregation()[metric]
+				self.__sfcFunction[metric]["INPUT"] += result.cfFunction()[metric]["INPUT"]
 
-	def gfOnlyEvaluate(self, elementValues):
+	def cfOnlyEvaluate(self, elementValues):
 
 		results = {}
 		for metric in self.__sfcFunction:
-			results[metric] = self.__gfEvaluateMetric(self.__sfcFunction[metric], elementValues[metric])
+			results[metric] = self.__cfEvaluateMetric(self.__sfcFunction[metric], elementValues[metric])
 
 		return results
 
-	def gfOnlyUpdate(self, elementValues):
+	def cfOnlyUpdate(self, elementValues):
 
 		for metric in self.__sfcFunction:
 			updater = self.__sfcFunction[metric]["UPDATE"]
 			if updater != "STATIC":
-				self.__gfUpdateMetric(self.__sfcFunction[metric], self.__sfcFunction[updater], elementValues[updater])
+				self.__cfUpdateMetric(self.__sfcFunction[metric], self.__sfcFunction[updater], elementValues[updater])
 
-	def gfProcess(self, elementValues):
+	def cfProcess(self, elementValues):
 
-		results = self.gfOnlyEvaluate(elementValues)
+		results = self.cfOnlyEvaluate(elementValues)
 		for evaluation in results:
 			self.__evaluationAggregate[evaluation] += results[evaluation]
-		self.gfOnlyUpdate(elementValues)
+		self.cfOnlyUpdate(elementValues)
 
-	def gfStatus(self):
+	def cfStatus(self):
 
 		return self.__status
 
-	def gfFunction(self):
+	def cfFunction(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__sfcFunction
 
-	def gfAggregation(self):
+	def cfAggregation(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__evaluationAggregate
 
-######## GOAL FUNCTION CLASS END ########
+######## CUSCO FUNCTION CLASS END ########

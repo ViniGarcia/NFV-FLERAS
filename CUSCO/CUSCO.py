@@ -1,4 +1,4 @@
-######## SFC COMPOSITION CLASS DESCRIPTION ########
+######## CUSCO CLASS DESCRIPTION ########
 
 #PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
 #CREATED BY: VINICIUS FULBER GARCIA
@@ -21,12 +21,11 @@
 
 import copy
 
-from YAMLR.GeneralRequest import GeneralRequest
-from SCAG.SFCTopology import SFCTopology
-from CUSCO.SFCExpansion import SFCExpansion
-from CUSCO.GoalFunction import GoalFunction
+from CUSCO.CUSCOExpansion import CUSCOExpansion
+from CUSCO.CUSCOFunction import CUSCOFunction
+from CHEF.CHEF import CHEF
 
-class SFCComposition:
+class CUSCO:
 	__status = None
 
 	__sfcRequest = None
@@ -37,15 +36,16 @@ class SFCComposition:
 	__branchesData = None
 
 	__aggregateDictionary = None
-	__normalizedDicitionary = None
 	__indexesDictionary = None
+
+	__chef = None
 
 	######## CONSTRUCTOR ########
 
-	def __init__(self, sfcRequest, sfcList):
+	def __init__(self, sfcRequest, sfcTopology):
 
-		if sfcRequest != None and sfcList != None:
-			self.scSetup(sfcRequest, sfcList)
+		if sfcRequest != None and sfcTopology != None:
+			self.scSetup(sfcRequest, sfcTopology)
 		else:
 			self.__status = 0
 
@@ -62,7 +62,7 @@ class SFCComposition:
 
 	def __scBranchesPrepare(self):
 
-		sfcBranches = self.__sfcRequest.crFunctionBranches()
+		sfcBranches = self.__sfcRequest.ycFunctionBranches()
 		branchUpdate = {}
 		branchFactors = []
 
@@ -85,15 +85,23 @@ class SFCComposition:
 
 	def __scOElementsPrepare(self):
 
-		sfcOElements = self.__sfcRequest.crServiceBechmark()
+		sfcOElements = self.__sfcRequest.ycServiceBechmark()
 		self.__oElementsData = {}
 
 		for OE in sfcOElements:
 			self.__oElementsData[OE["ID"]] = OE
 
+	def __scCHEFPrepare(self):
+
+		cuscoMetrics = self.__sfcRequest.ycFunction()
+		chefMetrics = {}
+		for metric in cuscoMetrics:
+			chefMetrics[metric["ID"]] = (metric["OBJECTIVE"], metric["WEIGHT"])
+		self.__chef = CHEF(chefMetrics)
+
 	def __scEvaluateSingle(self, index):
 
-		activeInstance = GoalFunction(self.__sfcRequest)
+		activeInstance = CUSCOFunction(self.__sfcRequest)
 		funcInstances = [activeInstance]
 		funcSaves = []
 		actualBranch = 0
@@ -101,7 +109,7 @@ class SFCComposition:
 		nextBranch = 1
 
 		sfcElements = self.__sfcDictionary[index].split()
-		boundaryEPs = self.__sfcRequest.crServiceON()
+		boundaryEPs = self.__sfcRequest.ycServiceEN()
 
 		for eIndex in range(1, len(sfcElements)):
 
@@ -111,8 +119,8 @@ class SFCComposition:
 				actualSegment = 0
 				nextBranch += 1
 
-				newInstance = GoalFunction(None)
-				newInstance.gfBranchSetup(activeInstance.gfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
+				newInstance = CUSCOFunction(None)
+				newInstance.cfBranchSetup(activeInstance.cfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
 				funcInstances.append(newInstance)
 				activeInstance = newInstance
 				continue
@@ -123,7 +131,7 @@ class SFCComposition:
 					segmentsList.insert(0, funcInstances.pop())
 
 				activeInstance = funcInstances[-1]
-				activeInstance.gfBranchUnify(segmentsList)
+				activeInstance.cfBranchUnify(segmentsList)
 
 				save = funcSaves.pop()
 				actualBranch = save[0]
@@ -133,77 +141,35 @@ class SFCComposition:
 			if sfcElements[eIndex] == '/':
 				actualSegment += 1
 
-				newInstance = GoalFunction(None)
-				newInstance.gfBranchSetup(funcInstances[(actualSegment+1)*-1].gfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
+				newInstance = CUSCOFunction(None)
+				newInstance.cfBranchSetup(funcInstances[(actualSegment+1)*-1].cfFunction(), self.__branchesData[0], self.__branchesData[1][actualBranch-1][actualSegment])
 				funcInstances.append(newInstance)
 				activeInstance = newInstance
 				continue
 
 			if not sfcElements[eIndex] in boundaryEPs:
-				activeInstance.gfProcess(self.__oElementsData[sfcElements[eIndex]])
+				activeInstance.cfProcess(self.__oElementsData[sfcElements[eIndex]])
 
-		self.__aggregateDictionary[index] = activeInstance.gfAggregation()
-
-	def __scBoundaryFactor(self):
-
-		factorList = {}
-		maximum = copy.deepcopy(self.__aggregateDictionary[0])
-		minimum = copy.deepcopy(self.__aggregateDictionary[0])
-
-		for index in range(1, len(self.__aggregateDictionary)):
-			for metric in self.__aggregateDictionary[index]:
-				if maximum[metric] < self.__aggregateDictionary[index][metric]:
-					maximum[metric] = self.__aggregateDictionary[index][metric]
-					continue
-				if minimum[metric] > self.__aggregateDictionary[index][metric]:
-					minimum[metric] = self.__aggregateDictionary[index][metric]
-
-		for metric in maximum:
-			factorList[metric] = maximum[metric] - minimum[metric]
-
-		return (factorList, maximum, minimum)
-
-	def __scNormalizeAggregations(self):
-
-		boundaryData = self.__scBoundaryFactor()
-		boundaryFactor = boundaryData[0]
-		boundaryMin = boundaryData[2]
-
-		for index in self.__normalizedDicitionary:
-			for metric in boundaryFactor:
-				if boundaryFactor[metric] != 0:
-					self.__normalizedDicitionary[index][metric] = (self.__normalizedDicitionary[index][metric] - boundaryMin[metric]) / boundaryFactor[metric]
-				else:
-					self.__normalizedDicitionary[index][metric] = 0
-
-	def __scWeightNormalizations(self):
-
-		weights = self.__sfcRequest.crFunctionWeights()
-		goals = self.__sfcRequest.crFunctionGoals()
-
-		for index in self.__normalizedDicitionary:
-			sfcIndex = 0
-			for metric in weights:
-				if goals[metric] == "MIN":
-					sfcIndex += (1 - self.__normalizedDicitionary[index][metric]) * weights[metric]
-					continue
-				if goals[metric] == "MAX":
-					sfcIndex += self.__normalizedDicitionary[index][metric] * weights[metric]
-			self.__indexesDictionary[index] = sfcIndex
+		self.__aggregateDictionary[index] = activeInstance.cfAggregation()
 
 	######## PUBLIC METHODS ########
 
-	def scSetup(self, sfcRequest, sfcList):
+	def scSetup(self, sfcRequest, sfcTopology):
 
 		self.__sfcRequest = sfcRequest
 		self.__sfcOriginal = {}
 		self.__sfcDictionary = {}
+
+		sfcList = CUSCOExpansion(sfcTopology).ceBranches()
+
 		for index in range(len(sfcList)):
 			self.__sfcOriginal[index] = sfcList[index]
 			self.__sfcDictionary[index] = sfcList[index]
+
 		self.__scDependenciesRemove()
 		self.__scBranchesPrepare()
 		self.__scOElementsPrepare()
+		self.__scCHEFPrepare()
 
 		self.__status = 1
 
@@ -216,22 +182,16 @@ class SFCComposition:
 		for index in self.__sfcDictionary:
 			self.__scEvaluateSingle(index)
 
-		self.__normalizedDicitionary = copy.deepcopy(self.__aggregateDictionary)
-		self.__indexesDictionary = {}
-
-		self.__scNormalizeAggregations()
-		self.__scWeightNormalizations()
+		self.__indexesDictionary = self.__chef.cEvaluate(self.__aggregateDictionary)
 
 		self.__status = 2
 
-	def scBestTopology(self):
+	def scSFCKeys(self):
 
-		if self.__status != 2:
+		if self.__status != 1:
 			return None
 
-		key = max(self.__indexesDictionary, key = self.__indexesDictionary.get)
-
-		return self.__sfcOriginal[key]
+		return self.__sfcOriginal
 
 	def scSFCIndexes(self):
 
@@ -244,16 +204,13 @@ class SFCComposition:
 
 		return resultList
 
-	def scStatus(self):
+	def scSFCBest(self):
 
-		return self.__status
-
-	def scSFCKeys(self):
-
-		if self.__status != 1:
+		if self.__status != 2:
 			return None
 
-		return self.__sfcOriginal
+		key = max(self.__indexesDictionary, key = self.__indexesDictionary.get)
+		return self.__sfcOriginal[key]
 
 	def scAggregation(self):
 
@@ -262,13 +219,6 @@ class SFCComposition:
 
 		return self.__aggregateDictionary
 
-	def scNormalizations(self):
-
-		if self.__status != 2:
-			return None
-
-		return self.__normalizedDicitionary
-
 	def scIndexes(self):
 
 		if self.__status != 2:
@@ -276,4 +226,8 @@ class SFCComposition:
 
 		return self.__indexesDictionary
 
-######## SFC COMPOSITION CLASS END ########
+	def scStatus(self):
+
+		return self.__status
+
+######## CUSCO CLASS END ########

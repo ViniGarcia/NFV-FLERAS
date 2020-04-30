@@ -13,212 +13,187 @@
 from os.path import isfile
 from cmd import Cmd
 
-from YAMLR.DomainsData import DomainsData
-from YAMLR.ComposingRequest import ComposingRequest
-from YAMLR.EmbeddingRequest import EmbeddingRequest
-from SCAG.SFCTopology import SFCTopology
-from CUSCO.SFCExpansion import SFCExpansion
-from CUSCO.GoalFunction import GoalFunction
-from CUSCO.SFCComposition import SFCComposition
-from CUSMAP.SFCSplitMap import SFCSplitAndMap
+from CUSTOM.CUSTOM import CUSTOM
+
+from YAMLR.YAMLRDomains import YAMLRDomains
+from YAMLR.YAMLRComposition import YAMLRComposition
+from YAMLR.YAMLREmbedding import YAMLREmbedding
+
+from CUSCO.CUSCO import CUSCO
+from CUSMAP.CUSMAP import CUSMAP
 
 class FLERASCLI(Cmd):
 
 	prompt = "fleras> "
+	
 	domains = None
 	request = None
 	topology = None
-	composition = None
-	mapping = None
-	type = None
+
+	player = None
+	mode = None
 
 	def do_help(self, args):
 
 		print("\n############### HELP #################")
 		print("help -> show this message")
 		print("exit -> ends the execution")
-		print("domains path -> receives a domain data description path, validate and enable its informations for setup")
-		print("setup type path -> receives a request type (C for compose and SM for split and mapping) and a sfc request path, validate and enable the commands below according to setup type")
-		print("compose -> executes the generic composition method in an already informed sfc request, it enables the topologies and advice commands")
-		print("map -> executes the generic split and mappings method in an already informed sfc request, it enables the mappings and advice commands")
-		print("topologies -> show all composed topologies in addition to their suitability indexes")
-		print("mappings -> show all mapped topologies in addition to their suitability indexes and pareto front location")
-		print("advice -> inidicates the best composed/mapped topology considering the goal function")
+		print("setup CUSCO request_file [domains_file] -> receives a mandatory request_file and an optional domains_file and prepare CUSCO execution")
+		print("setup CUSMAP request_file domains_file -> receives mandatory request_file and domains_file and prepare CUSMAP execution")
+		print("execute -> process the provided files with the requested algorithm")
+		print("results -> presents all the results of the last execution")
+		print("advice -> presents the best result of the last execution")
 		print ('######################################\n')
-
-	def do_domains(self, args):
-
-		if len(args) == 0:
-			return
-
-		if not isfile(args):
-			print("INVALID FILE")
-			return
-
-		self.domains = DomainsData(args)
-		if self.domains.ddStatus() != 1:
-			print("DOMAINS VALIDATION FAILED - ERROR " + str(self.domains.ddStatus()))
-			self.domains = None
-			return
-
-		self.request = None
-		self.topology = None
-		self.composition = None
-
-		print("SUCCESS!!")
 
 	def do_setup(self, args):
 
 		args = args.split()
-		if len(args) < 2:
-			print("TOO FEW ARGUMENTS TO SETUP REQUEST")
+		if len(args) < 2 or len(args) > 3:
+			print("ERROR: INVALID ARGUMENTS TO SETUP REQUEST!")
 			return
 
-		if not args[0] in ["C", "SM"]:
-			print("TYPE IS NEED AS FIRST ARGUMENT (C FOR COMPOSING OR SM FOR SPLIT/MAP)")
+		if not args[0] in ["CUSCO", "CUSMAP"]:
+			print("ERROR: DEPLOYMENT SOLUTION MUST BE DEFINED AS THE FIRST ARGUMENT (CUSCO/CUSMAP)!")
 			return
 
-		if self.domains == None:
-			print("DOMAINS SETUP IS REQUIRED")
+		if args[0] == "CUSMAP" and len(args) != 3:
+			print("ERROR: A DOMAINS FILE MUST BE PROVIDED FOR CUSMAP EXECUTION!")
 			return
 
-		if not isfile(args[1]):
-			print("INVALID FILE")
+		if not isfile(args[1]): 
+			print("ERROR: FILE \"" + args[1] + "\" DOES NOT EXIST!")
 			return
 
-		if args[0] == "C":
-			self.request = ComposingRequest(args[1], self.domains.ddDomains())
-			if self.request.crStatus() != 1:
-				print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.crStatus()))
+		if len(args) == 3 and not isfile(args[2]):
+			print("ERROR: FILE \"" + args[2] + "\" DOES NOT EXIST!")
+			return
+
+		domains_list = []
+		if len(args) == 3:
+			self.domains = YAMLRDomains(args[2])
+			if self.domains.ydStatus() != 1:
+				print("YAMLR DOMAINS ERROR " + str(self.domains.ydStatus()) + ": INVALID DOMAINS FILE!")
+				return
+			domains_list = self.domains.ydDomains()
+
+		if args[0] == "CUSCO":
+			self.request = YAMLRComposition(args[1], domains_list)
+			if self.request.ycStatus() != 1:
+				print("YAMLR COMPOSITION ERROR " + str(self.request.ycStatus()) + ": INVALID CUSCO REQUEST FILE!")
 				self.request = None
 				return
-			self.topology = SFCTopology(self.request.crServiceON(), self.request.crServiceOE(), self.domains.ddDomains())
-			self.topology.stValidate(self.request.crServiceTopology())
-			if self.topology.stStatus() != 1:
-				print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.crStatus()))
+
+			self.topology = CUSTOM(self.request.ycServiceNF(), [], domains_list, [], self.request.ycServiceEN())
+			self.topology.cValidate(self.request.ycServiceTopology())
+			if self.topology.cStatus() != 1:
+				print("CUSTOM ERROR " + str(self.topology.cStatus()) + ": INVALID SERVICE TOPOLOGY!")
 				self.request = None
-		else:
-			if args[0] == "SM":
-				self.request = EmbeddingRequest(args[1], self.domains.ddDomains())
-				if self.request.erStatus() != 1:
-					print("REQUEST VALIDATION FAILED - ERROR " + str(self.request.erStatus()))
-					self.request = None
-					return
-				self.topology = SFCTopology(self.request.erServiceON(), self.request.erServiceOE(), self.domains.ddDomains())
-				self.topology.stValidate(self.request.erServiceTopology())
-				if self.topology.stStatus() != 1:
-					print("TOPOLOGY VALIDATION FAILED - ERROR " + str(self.topology.erStatus()))
-					self.request = None
+				return
 
-		self.type = args[0]
-		self.composition = None
+		elif args[0] == "CUSMAP":
+			self.request = YAMLREmbedding(args[1], domains_list)
+			if self.request.yeStatus() != 1:
+				print("YAMLR EMBEDDING ERROR " + str(self.request.yeStatus()) + ": INVALID CUSMAP REQUEST FILE!")
+				self.request = None
+				return
 
-		print("SUCCESS!!")
+			self.topology = CUSTOM(self.request.yeServiceNF(), [], domains_list, [], self.request.yeServiceEN())
+			self.topology.cValidate(self.request.yeServiceTopology())
+			if self.topology.cStatus() != 1:
+				print("CUSTOM ERROR " + str(self.topology.cStatus()) + ": INVALID SERVICE TOPOLOGY!")
+				self.request = None
+				return
 
-	def do_compose(self, args):
+		self.mode = args[0]
+		self.player = None
 
-		if len(args) != 0 or self.type != "C":
+		print("SUCCESS: SETUP IS DONE!")
+
+	def do_execute(self, args):
+
+		if len(args) != 0:
+			print("ERROR: EXECUTE DOES NOT RECEIVE ANY ARGUMENT!")
+			return
+
+		if self.player != None:
+			if (self.mode == "CUSCO" and self.player.scStatus() != 2) or (self.mode == "CUSMAP" and self.player.smStatus() != 2):
+				print("NOTICE: CURRENT SETUP WAS ALREADY EXECUTED AND IT FAILED!")
+			else:
+				print("NOTICE: CURRENT SETUP WAS ALREADY EXECUTED AND IT SUCESSED!")
 			return
 
 		if self.request == None:
-			print("REQUEST SETUP IS REQUIRED")
+			print("ERROR: SETUP MUST BE DONE BEFORE EXECUTION PROCESS!")
 			return
 
-		expand = SFCExpansion(self.topology)
-		self.composition = SFCComposition(self.request, expand.seBranches())
-		self.composition.scEvaluate()
+		if self.mode == "CUSCO":
+			self.player = CUSCO(self.request, self.topology)
+			self.player.scEvaluate()
 
-		print("SUCCESS!!")
+			if self.player.scStatus() != 2:
+				print("CUSCO ERROR " + self.player.scStatus() + ": COMPOSITION FAILED!")
+				return
 
-	def do_map(self, args):
+		elif self.mode == "CUSMAP":
+			self.player = CUSMAP(self.request, self.domains)
+			self.player.smEvaluate()
 
-		if len(args) != 0 or self.type != "SM":
-			return
+			if self.player.smStatus() != 2:
+				print("CUSMAP ERROR " + self.player.smStatus() + ": EMBEDDING FAILED!")
+				return
 
-		if self.request == None:
-			print("REQUEST SETUP IS REQUIRED")
-			return
+		print("SUCCESS: EXECUTION IS DONE!")
 
-		self.mapping = SFCSplitAndMap(self.request, self.domains)
-		self.mapping.ssamNaturalRequest()
-
-	def do_topologies(self, args):
+	def do_results(self, args):
 
 		if len(args) != 0:
+			print("ERROR: RESULTS DOES NOT RECEIVE ANY ARGUMENT!")
 			return
 
-		if self.composition == None:
-			print("COMPOSE TASK IS REQUIRED")
+		if self.player == None:
+			print("NOTICE: EXECUTION MUST BE DONE BEFORE RESUTS REQUEST!")
 			return
 
-		topologies = self.composition.scSFCIndexes()
+		if self.mode == "CUSCO":
+			if self.player.scStatus() != 2:
+				print("ERROR: EXECUTION MUST BE DONE BEFORE RESUTS REQUEST!")
+				return
 
-		print("############### TOPOLOGIES #################")
-		for topo in topologies:
-			print("TOPOLOGY: " + topo[0] + "  " + "INDEX: " + str(topo[1]))
-		print("###########################################")
+			compositions = self.player.scSFCIndexes()
+			print("############### CUSCO RESULTS #################")
+			for index in range(len(compositions)):
+				print(str(index) + ". COMPOSITION: " + compositions[index][0] + "  INDEX: " + str(compositions[index][1]))
+			print("###############################################")
 
-	def do_mappings(self, args):
+		elif self.mode == "CUSMAP":
+			if self.player.smStatus() != 2:
+				print("ERROR: EXECUTION MUST BE DONE BEFORE RESUTS REQUEST!")
+				return
 
-		if len(args) != 0:
-			return
-
-		if self.mapping == None:
-			print("MAPPING TASK IS REQUIRED")
-			return
-
-		maps = self.mapping.ssamKeys()
-		sis = self.mapping.ssamIndexes()
-		front = self.mapping.ssamFrontiers()
-
-		print("################ MAPPINGS ##################")
-		for index in range(len(maps)):
-			print("MAPPING: " + str(maps[index]) + "  INDEX: " + str(sis[index]) + " FRONT: " + str(front[index]))
-		print("###########################################")
+			embeddings = list(self.player.smIndexes().keys())
+			print("################ CUSMAP RESULTS ##################")
+			for index in range(len(embeddings)):
+				print(str(index) + ". EMBEDDING: " + str(embeddings[index]) + "  INDEX: " + str(self.player.smIndexes()[embeddings[index]]))
+			print("##################################################")
 
 	def do_advice(self, args):
 
 		if len(args) != 0:
+			print("ERROR: RESULTS DOES NOT RECEIVE ANY ARGUMENT!")
 			return
 
-		if self.composition == None and self.mapping == None:
-			print("DEPLOYMENT PROCESS IS REQUIRED")
+		if self.player == None:
+			print("NOTICE: EXECUTION MUST BE DONE BEFORE ADVICE REQUEST!")
 			return
+
+		if self.mode == "CUSCO":
+			advice = "COMPOSITION: " + self.player.scSFCBest()
+		elif self.mode == "CUSMAP":
+			advice = "MAPPING: " + self.player.smBest()
 
 		print("############### ADVICE #################")
-		if self.composition != None:
-			print("COMPOSITION: " + self.composition.scBestTopology())
-		if self.mapping != None:
-			print("MAPPING: " + self.mapping.ssamAdvice())
+		print(advice)
 		print("###########################################")
-
-	#xxx - Development
-	def do_report(self, args):
-
-		args = args.split()
-		if len(args) < 2:
-			print("TOO FEW ARGUMENTS TO SETUP REQUEST")
-			return
-
-		if not args[0] in ["C", "SM"]:
-			print("TYPE IS NEED AS FIRST ARGUMENT (C FOR COMPOSING OR SM FOR SPLIT/MAP)")
-			return
-
-		if args[0] == "SM":
-			
-			if self.mapping == None:
-				print("MAPPING TASK IS REQUIRED")
-				return
-
-			maps = self.mapping.ssamKeys()
-			sis = self.mapping.ssamIndexes()
-			front = self.mapping.ssamFrontiers()
-
-			file = open(args[1], "w+")
-			file.write("MAPPING;SUITABILITY;FRONTIER\n")
-			for index in range(len(maps)):
-				file.write(str(maps[index]) + ";" + str(sis[index]) + ";" + str(front[index]) + "\n")
-			file.close()
 
 	def do_exit(self, args):
 
