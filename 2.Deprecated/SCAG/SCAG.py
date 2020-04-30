@@ -1,6 +1,6 @@
 ######## PARTIAL ORDER CLASS DESCRIPTION ########
 
-#PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
+#PROJECT: NFV FLERAS (FLExible Resource Allocation Service) 
 #CREATED BY: VINICIUS FULBER GARCIA
 #CONTACT: vfulber@inf.ufsm.br
 
@@ -9,7 +9,7 @@
 #AND VALIDATE THEM. THIS CLASS WAS DEVELOPED
 #TO BE A SFC TOPOLOGY AND EXPANSION META-CLASS.
 
-#THE CLASS STATUS ATTRIBUTE INDICATE ITS
+#THE CLASS STATUS ATTRIBUTE INDICATE ITS 
 #OPERATIONS RESULTS CODES:
 
 #NORMAL CODES ->
@@ -33,11 +33,10 @@
 
 class PartialOrder:
 	__status = None
-
+	
 	__elements = None
 	__oDependencies = None
 	__cDependencies = None
-	__dDependencies = None
 	__iDependencies = None
 
 	__combinations = None
@@ -45,22 +44,18 @@ class PartialOrder:
 	######## CONSTRUCTOR ########
 
 	def __init__(self, porderPEs, porderODs, porderCDs):
-
+		
 		self.poValidate(porderPEs, porderODs, porderCDs)
 
 	######## PRIVATE METHODS ########
 
 	def __poInfraDependenciesRemove(self):
-
+		
 		while '<' in self.__elements:
 			index = self.__elements.index('<')
-			if self.__elements[index+2] == '>':
-				self.__dDependencies.append((self.__elements[index-1], self.__elements[index+1]))
-				self.__elements = self.__elements[0:index] + self.__elements[index+3:len(self.__elements)]
-			else:
-				self.__iDependencies.append((self.__elements[index-1], self.__elements[index+1], self.__elements[index+3]))
-				self.__elements = self.__elements[0:index] + self.__elements[index+5:len(self.__elements)]
-
+			self.__iDependencies.append((self.__elements[index-1], self.__elements[index+1]))
+			self.__elements = self.__elements[0:index] + self.__elements[index+3:len(self.__elements)]
+	
 	def __poDependenciesElementsValidate(self):
 
 		for cDependency in self.__cDependencies + self.__oDependencies:
@@ -74,7 +69,7 @@ class PartialOrder:
 		hashID = 1
 		elementsHash = {}
 		elementsCouplings = {}
-
+		
 		for element in self.__elements:
 			elementsHash[element] = element
 
@@ -167,14 +162,13 @@ class PartialOrder:
 
 		return True
 
-	######## PUBLIC METHODS ########
+	######## PUBLIC METHODS ######## 
 
 	def poValidate(self, porderPEs, porderODs, porderCDs):
 
 		self.__elements = porderPEs
 		self.__oDependencies = porderODs
 		self.__cDependencies = porderCDs
-		self.__dDependencies = []
 		self.__iDependencies = []
 
 		self.__poInfraDependenciesRemove()
@@ -190,15 +184,10 @@ class PartialOrder:
 		if self.__status != 1:
 			return None
 
-		for dependency in self.__dDependencies:
+		for dependency in self.__iDependencies:
 			for combination in combinations:
 				index = combination.index(dependency[0])
 				combination.insert(index + 1, '< ' + dependency[1] + ' >')
-
-		for dependency in self.__iDependencies:
-			for combination in combinations:
-				 index = combination.index(dependency[0])
-				 combination.insert(index + 1, '< ' + dependency[1] + ' | ' + dependency[2] + ' >')
 
 		self.__combinations = combinations
 
@@ -210,43 +199,37 @@ class PartialOrder:
 			return False
 
 	def poStatus(self):
-
+		
 		return self.__status
 
-	def poElements(self):
-
+	def poOPEs(self):
+		
 		if self.__status != 1:
 			return None
 
 		return self.__elements
 
-	def poODependencies(self):
-
+	def poOD(self):
+		
 		if self.__status != 1:
 			return None
 
 		return self.__oDependencies
 
-	def poCDependencies(self):
-
+	def poCD(self):
+		
 		if self.__status != 1:
 			return None
 
 		return self.__cDependencies
 
-	def poDDependencies(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__dDependencies
-
-	def poIDependencies(self):
+	def poID(self):
 
 		if self.__status != 1:
 			return None
 
 		return self.__iDependencies
+
 
 	def poCombinations(self):
 
@@ -263,9 +246,9 @@ class PartialOrder:
 
 #--------------------------------------------------
 
-########### CUSTOM CLASS DESCRIPTION ############
+######## SCAG CLASS DESCRIPTION ########
 
-#PROJECT: NFV FLERAS (FLExible Resource Allocation Service)
+#PROJECT: NFV FLERAS (FLExible Resource Allocation Service) 
 #CREATED BY: VINICIUS FULBER GARCIA
 #CONTACT: vfulber@inf.ufsm.br
 
@@ -274,7 +257,7 @@ class PartialOrder:
 #ELEMENTS LIST AND END POINTS LISTS. THESE DATA
 #CAN BE RECOVERED FROM THE SFC REQUEST CLASS.
 
-#THE CLASS STATUS ATTRIBUTE INDICATE ITS
+#THE CLASS STATUS ATTRIBUTE INDICATE ITS 
 #OPERATIONS RESULTS CODES:
 
 #NORMAL CODES ->
@@ -282,116 +265,84 @@ class PartialOrder:
 #1: VALID TOPOLOGY
 
 #ERROR CODES ->
-#-1 -> PHYSICAL DEPENDECY WITHOUT DOMAINS DEFINITION
-#-2 -> SYNTAX ERROR IN THE SFC TOPOLOGY
-#-3 (+ PARTIAL ORDER ERROR CODE) -> PARTIAL ORDER ERROR
-#	THIS CODE ERROR IS ALWAYS LESS THAN -3
-#		SUM 3 TO GET THE PARTIAL ORDER ERROR CODE
-#		SUBTRACT THE PARTIAL ORDER CODE TO GET THE SFC TOPOLOGY ERROR (-3)
+#-1 -> SYNTAX ERROR IN THE SFC TOPOLOGY
+#-2 (+ PARTIAL ORDER ERROR CODE) -> PARTIAL ORDER ERROR
+#	THIS CODE ERROR IS ALWAYS LESS THAN -2
+#		SUM 2 TO GET THE PARTIAL ORDER ERROR CODE
+#		SUBTRACT THE PARTIAL ORDER CODE TO GET THE SFC TOPOLOGY ERROR (-2)
 
 #################################################
 
-############## CUSTOM CLASS BEGIN ###############
+######## SCAG CLASS BEGIN ########
 
 import nltk
 
-class CUSTOM:
+class SCAG:
 	__status = None
 
-	__topologyENs = None
-	__topologyVNFs = None
-	__topologyPNFs = None
-	__topologyDomains = None
-	__topologyMachines = None
-
-	__serviceTopology = None
-	__servicePorders = None
+	__sfcParser = None
+	__boundaryEPs = None
+	__operationalPEs = None
+	
+	__sfcTopology = None
+	__sfcPorders = None
 
 	######## CONSTRUCTOR ########
 
-	def __init__(self, topologyVNFs, topologyPNFs, topologyDomains, topologyMachines, topologyENs):
+	def __init__(self, boundaryEPs, operationalPEs, availableDomains):
 
 		kernelGrammar = """
-			START -> "IN" MAIN
+			S 			 -> "IN" OPBLOCK
 
-			MAIN -> TBRANCHING | NTBRANCHING | OPERATIONAL MAIN | OPERATIONAL EN
-			NTBMAIN -> INTBRANCHING | OPERATIONAL NTBMAIN | OPERATIONAL
+			OPBLOCK 	 -> TBRANCH | NTBRANCH | TPBLOCK OPBLOCK | TPBLOCK EN
+			ROPBLOCK	 -> INTBRANCH | TPBLOCK ROPBLOCK | TPBLOCK
+			TPBLOCK  	 -> PORDER | MASKPELEM
+			
+			PORDER 		 -> "[" MASKPELEM NPELEM "]" POEXCEPTION | "[" MASKPELEM NPELEM "]"
+			POEXCEPTION  -> "(" PELEM PELEM ")" POEXCEPTION | "(" PELEM PELEM ")" | "(" PELEM PELEM "*" ")" POEXCEPTION | "(" PELEM PELEM "*" ")"
+			
+			TBRANCH 	 -> TPBLOCK "{" OPBLOCK NEXTTBRANCH "}" 
+			NEXTTBRANCH  -> "/" OPBLOCK NEXTTBRANCH | "/" OPBLOCK
 
-			OPERATIONAL -> PORDER | FUNCTION
+			NTBRANCH	 -> TPBLOCK "{" ROPBLOCK NEXTNTBRANCH "}" OPBLOCK
+			INTBRANCH	 -> TPBLOCK "{" ROPBLOCK NEXTNTBRANCH "}" ROPBLOCK
+			NEXTNTBRANCH -> "/" ROPBLOCK NEXTNTBRANCH | "/" ROPBLOCK
 
-			PORDER -> "[" FUNCTION NFUNCTION "]" EDEPENDENCY | "[" FUNCTION NFUNCTION "]"
-
-			EDEPENDENCY -> EORDERING | ECOUPLING
-			EORDERING -> "(" FUNCTION FUNCTION ")" EDEPENDENCY | "(" FUNCTION FUNCTION ")"
-			ECOUPLING -> "(" FUNCTION FUNCTION "*" ")" EDEPENDENCY | "(" FUNCTION FUNCTION "*" ")"
-
-			TBRANCHING -> OPERATIONAL "{" MAIN TBRANCH "}"
-			TBRANCH -> "/" MAIN TBRANCH | "/" MAIN
-
-			NTBRANCHING -> OPERATIONAL "{" NTBMAIN NTBRANCH "}" MAIN
-			NTBRANCH -> "/" NTBMAIN NTBRANCH | "/" NTBMAIN
-			INTBRANCHING -> OPERATIONAL "{" NTBMAIN NTBRANCH "}" NTBMAIN
-
-			FUNCTION -> SHARABLEVNF | SHARABLEVNF ADDEPENDENCY | SHARABLEVNF PMDEPENDENCY | SHARABLEPNF ADDEPENDECY
-			NFUNCTION -> FUNCTION NFUNCTION | FUNCTION
-
-			ADDEPENDENCY -> "<" ADMDOMAIN ">"
-			PMDEPENDENCY -> "<" PHYMACHINE "|" ADMDOMAIN ">"
-
-			SHARABLEVNF -> "!" VNF | VNF
-			SHARABLEPNF -> "!" PNF | PNF
+			NPELEM 		 -> MASKPELEM NPELEM | MASKPELEM
+			MASKPELEM	 -> PELEM | PELEM "<" DOMAIN ">"
 		"""
 
-		grammarVNF = 'VNF -> '
-		for VNF in topologyVNFs:
-			grammarVNF += ' "' + VNF + '" |'
-		grammarVNF = grammarVNF[:len(grammarVNF)-1] + '\n'
+		grammarPELEM = 'PELEM ->'
+		for PE in operationalPEs:
+			grammarPELEM += ' "' + PE + '" |'
+		grammarPELEM = grammarPELEM[:len(grammarPELEM)-1] + '\n'
 
-		grammarPNF = 'PNF -> '
-		for PNF in topologyPNFs:
-			grammarPNF += ' "' + PNF + '" |'
-		grammarPNF = grammarPNF[:len(grammarPNF)-1] + '\n'
+		grammarEP = 'EN ->'
+		for EN in boundaryEPs:
+			grammarEP += ' "' + EN + '" |'
+		grammarEP = grammarEP[:len(grammarEP)-1] + '\n'
 
-		grammarADomain = 'ADMDOMAIN -> '
-		if len(topologyDomains) != 0:
-			for domain in topologyDomains:
-				grammarADomain += ' "' + domain + '" |'
-		grammarADomain = grammarADomain[:len(grammarADomain)-1] + '\n'
+		grammarDomain = 'DOMAIN ->'
+		if len(availableDomains) != 0:
+			for domain in availableDomains:
+				grammarDomain += ' "' + domain + '" |'
+			grammarDomain = grammarDomain[:len(grammarDomain)-1]
 
-		grammarPMachine = 'PHYMACHINE -> '
-		if len(topologyDomains) != 0 and len(topologyMachines) != 0:
-			for machine in topologyMachines:
-				grammarPMachine += ' "' + machine + '" |'
-		else:
-			if len(topologyMachines) != 0:
-				self.__status = -1
-				return
-		grammarPMachine = grammarPMachine[:len(grammarPMachine)-1] + '\n'
-
-		grammarEN = 'EN -> '
-		for EN in topologyENs:
-			grammarEN += ' "' + EN + '" |'
-		grammarEN = grammarEN[:len(grammarEN)-1]
-
-		self.__topologyVNFs = topologyVNFs
-		self.__topologyPNFs = topologyPNFs
-		self.__topologyDomains = topologyDomains
-		self.__topologyMachines = topologyMachines
-		self.__topologyENs = topologyENs
-
-		self.__mainParser = nltk.ChartParser(nltk.CFG.fromstring(kernelGrammar + grammarVNF + grammarPNF + grammarADomain + grammarPMachine + grammarEN))
+		self.__boundaryEPs = boundaryEPs
+		self.__operationalPEs = operationalPEs
+		self.__mainParser = nltk.ChartParser(nltk.CFG.fromstring(kernelGrammar + grammarPELEM + grammarEP + grammarDomain))
 		self.__status = 0
 
 	######## PRIVATE METHODS ########
 
-	def __cPorders(self):
+	def __sPorders(self):
 
-		self.__servicePorders = []
-		splittedSFC = self.__serviceTopology.split()
+		self.__sfcPorders = []
+		splittedSFC = self.__sfcTopology.split()
 
 		for index in range(0, len(splittedSFC)):
-
-			if splittedSFC[index] == '[':
+			
+			if splittedSFC[index] == '[':	
 				porderPEs = []
 				porderODs = []
 				porderCDs = []
@@ -410,96 +361,53 @@ class CUSTOM:
 						porderCDs.append([splittedSFC[index+1], splittedSFC[index+2]])
 						index += 5
 
-				self.__servicePorders.append(PartialOrder(porderPEs, porderODs, porderCDs))
+				self.__sfcPorders.append(PartialOrder(porderPEs, porderODs, porderCDs))
 
-	######## PUBLIC METHODS ########
+	######## PUBLIC METHODS ######## 
 
-	def cValidate(self, serviceTopology):
+	def sValidate(self, sfcTopology):
+		
+		self.__sfcTopology = None
+		self.__sfcPorders = None
 
-		self.__serviceTopology = None
-		self.__servicePorders = None
-
-		if next(self.__mainParser.parse(serviceTopology.split()), None) == None:
-			self.__status = -2
+		if next(self.__mainParser.parse(sfcTopology.split()), None) == None:
+			self.__status = -1
 			return False
 
-		self.__serviceTopology = serviceTopology
-		self.__cPorders()
+		self.__sfcTopology = sfcTopology
+		self.__sPorders()
 
-		for porder in self.__servicePorders:
+		for porder in self.__sfcPorders:
 			if not porder.poValid():
-				self.__status = -3 + porder.poStatus()
+				self.__status = -2 + porder.poStatus()
 				return False
 
 		self.__status = 1
 		return True
 
-	def cStatus(self):
+	def sStatus(self):
 
 		return self.__status
 
-	def cTopology(self):
+	def sTopology(self):
+		
+		if self.__status != 1:
+			return None
+
+		return self.__sfcTopology
+
+	def sBoundaryEPs(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__serviceTopology
+		return self.__boundaryEPs
 
-	def cVNFs(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__topologyVNFs
-
-	def cPNFs(self):
+	def sPOrder(self):
 
 		if self.__status != 1:
 			return None
 
-		return self.__topologyPNFs
+		return self.__sfcPorders
 
-	def cDomains(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__topologyDomains
-
-	def cMachines(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__topologyMachines
-
-	def cEPs(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__topologyENs
-
-	def cPOrder(self):
-
-		if self.__status != 1:
-			return None
-
-		return self.__servicePorders
-
-############### CUSTOM CLASS END ################
-
-#import sys
-#sys.path.insert(0,'..')
-
-#from YAMLR.YAMLRDomains import YAMLRDomains
-#from YAMLR.YAMLRComposition import YAMLRComposition
-
-#dom = YAMLRDomains("1.Example/Domains[FENDE].yaml")
-#req = YAMLRComposition("1.Example/Service[CUSCO].yaml", dom.ydDomains())
-#print(req.ycStatus())
-
-#test = CUSTOM(req.ycServiceOE(), [], dom.ydDomains(), [], req.ycServiceON())
-
-
-#################################################
+######## SCAG CLASS END ########
