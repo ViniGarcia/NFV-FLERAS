@@ -6,6 +6,7 @@ import time
 import statistics
 import yaml
 import csv
+import math
 
 globalAlgorithms = {"-g":"GeSeMa", "-ex":"Exhaustive", "-sg":"StochasticKGreedy", "-ra":"Random", "-tg":"TraditionalGreedy"}
 
@@ -106,12 +107,18 @@ def timing(rep, file, confs, modes):
     writer = open(file.split(".")[0] + "TIMING.csv", "w+")
     writer.write("ALGORITHM;CONF;TIME;STDEV\n")
 
+    if "-tg" in modes:
+        confs[modes.index("-tg")].append("UNIQUE")
+    if "-ex" in modes:
+        confs[modes.index("-ex")].append("UNIQUE")
+
     for request in modes:
         results[globalAlgorithms[request]] = {}
         for execution in confs[modes.index(request)]:
             timeResults = []
             print("TIMING TEST: " + file + " || " + str(globalAlgorithms[request]) + " (" + execution + ")")
             for test in range(rep):
+                print("ROUND #" + str(test))
                 start = time.time()
                 if request == "-g":
                     subprocess.check_call("python 5.GeSeMa.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
@@ -165,6 +172,7 @@ def definitiveQuality(rep, file, confs, modes):
             quantityFronts = []
             
             for test in range(rep):
+                print("ROUND #" + str(test))
 
                 analyzerFronts = [] 
                 if request == "-g":
@@ -211,7 +219,7 @@ def relativeQuality(rep, file, confs, modes):
     document.close()
 
     writer = open(file.split(".")[0] + "RELQUALITY.csv", "w+")
-    writer.write("ALGORITHM;CONF;TOTAL_FRONTS;MEAN_PARETO_G;STDEV_PARETO_G;\n")
+    writer.write("ALGORITHM;CONF;TOTAL_FRONTS;MEAN_PARETO_G;STDEV_PARETO_G;TOP10_MEAN_PARETO_G;TOP10_STDEV_PARETO_G;PARETO_SIZE\n")
 
     if "-tg" in modes:
         confs[modes.index("-tg")].append("UNIQUE")
@@ -251,13 +259,46 @@ def relativeQuality(rep, file, confs, modes):
                         analyzerColumns[index].append(float(line[index]))
                 analyzerFile.close()
 
-                allCandidates[request][execution][0] = allCandidates[request][execution][0] + analyzerColumns[0]
-                allCandidates[request][execution][1] = allCandidates[request][execution][1] + list(zip(*analyzerColumns[1:]))
+                allCandidates[request][execution][0].append(analyzerColumns[0])
+                allCandidates[request][execution][1].append(list(zip(*analyzerColumns[1:])))
                 os.remove("output.csv")
 
                 if request == "-tg":
                     break
 
+            #=========================== REMOVAL OF OUTLIERS IN RESULTS =========================== 
+            outliers = round(len(allCandidates[request][execution][1]) / 10) #Remove 10% if best and worst results
+            if outliers > 0 and outliers and len(allCandidates[request][execution][1]) > 2*outliers:
+                analysis = sum(allCandidates[request][execution][1], [])
+                analysis = paretoFrontiers(analysis, objectives)
+
+                begin = 0
+                general = []
+                for sample in allCandidates[request][execution][1]:
+                    local = []
+                    end = begin + len(sample)
+
+                    for front in range(len(analysis)):
+                        for candidate in analysis[front]:
+                            if candidate >= begin and candidate < end:
+                                local.append(front)
+                    general.append(local)   
+                    begin = end
+
+                general = [statistics.mean(g) for g in general]
+                for index in range(outliers):
+                    minimum = general.index(min(general))
+                    general.pop(minimum)
+                    allCandidates[request][execution][0].pop(minimum)
+                    allCandidates[request][execution][1].pop(minimum)
+                    maximum = general.index(max(general))
+                    general.pop(maximum)
+                    allCandidates[request][execution][0].pop(maximum)
+                    allCandidates[request][execution][1].pop(maximum)
+            #======================================================================================
+
+            allCandidates[request][execution][0] = sum(allCandidates[request][execution][0], [])
+            allCandidates[request][execution][1] = sum(allCandidates[request][execution][1], [])
             allCandidates[request][execution].append(len(setEvaluation))
             setEvaluation = setEvaluation + allCandidates[request][execution][1]
 
@@ -273,7 +314,8 @@ def relativeQuality(rep, file, confs, modes):
                     if candidate >= frontsBegin and candidate < frontsEnd:
                         frontsLocal.append(front)
 
-            writer.write(globalAlgorithms[request] + ";" + execution + ";" + str(len(frontsCandidates)) + ";" + str(statistics.mean(frontsLocal)) + ";" + str(statistics.stdev(frontsLocal)) + "\n")
+            frontsLocal.sort()
+            writer.write(globalAlgorithms[request] + ";" + execution + ";" + str(len(frontsCandidates)) + ";" + str(statistics.mean(frontsLocal)) + ";" + str(statistics.stdev(frontsLocal)) + ";" + str(statistics.mean(frontsLocal[:10])) + ";" + str(statistics.stdev(frontsLocal[:10])) + ";" + str(len(frontsLocal)) + "\n")
     
     writer.close()
 
