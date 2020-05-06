@@ -209,7 +209,7 @@ class Exhaustive:
 		self.__status = 0
 		self.__mElements = elements
 		self.__mGrammar = grammar
-		self.__mCHEF = CHEF.CHEF({'TR':("min", 1)})
+		self.__mCHEF = CHEF.CHEF({'TR':("MIN", 1)})
 
 	######## PRIVATE METHODS ########
 
@@ -407,12 +407,12 @@ class Heuristic:
 		self.__status = 0
 		self.__mElements = elements
 		self.__mGrammar = grammar
-		self.__mCHEF = CHEF.CHEF({'TR':("min", 1)})
+		self.__mCHEF = CHEF.CHEF({'TR':("MIN", 1)})
 
 	######## PRIVATE METHODS ########
 
 	def __mExpand(self, possibilities):
-		suitability = self.__mCHEF.hEvaluate({candidate:self.__mElements[candidate] for candidate in possibilities})
+		suitability = self.__mCHEF.cEvaluate({candidate:self.__mElements[candidate] for candidate in possibilities})
 
 		compare = suitability[possibilities[0]]
 		chosen = 0
@@ -627,6 +627,10 @@ class Composer:
 			return None
 
 		return self.__cComposer.mCandidates()[self.__cComposer.mFirmSuggestion()]
+
+	def cStatus(self):
+
+		return self.__status
 
 ######### COMPOSER CLASS END #########
 

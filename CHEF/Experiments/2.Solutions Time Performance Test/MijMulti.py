@@ -245,7 +245,7 @@ class Processor:
 			if yamlData["REQUEST"]["METRICS"][metric]["SPEC"][1] <= 0:
 				self.__status = -18
 				return -18
-			if yamlData["REQUEST"]["METRICS"][metric]["SPEC"][0] != "min" and yamlData["REQUEST"]["METRICS"][metric]["SPEC"][0] != "max":
+			if yamlData["REQUEST"]["METRICS"][metric]["SPEC"][0] != "MIN" and yamlData["REQUEST"]["METRICS"][metric]["SPEC"][0] != "MAX":
 				self.__status = -19
 				return -19
 			if yamlData["REQUEST"]["METRICS"][metric]["TYPE"] == "PERSONAL":

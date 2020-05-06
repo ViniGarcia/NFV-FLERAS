@@ -17,7 +17,7 @@ ELEMENTS:
 METRICS:
   TR: !!python/tuple
   - MIN
-  - 1.0
+  - 0.5
   EC: !!python/tuple
   - MIN
   - 1.0

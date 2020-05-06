@@ -78,7 +78,7 @@ class Heuristic:
 	def __hExecute (self, request):
 
 		self.__hMetric = "C"
-		self.__hCHEF = CHEF.CHEF({self.__hMetric:("min", 1)})
+		self.__hCHEF = CHEF.CHEF({self.__hMetric:("MIN", 1)})
 
 		backup = copy.deepcopy(self.__hNetwork)
 		topology = request['TOPOLOGY'].replace(' ', '').split('-')

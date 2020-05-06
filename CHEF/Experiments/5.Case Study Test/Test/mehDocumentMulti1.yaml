@@ -11,6 +11,6 @@ ELEMENTS:
     TR: 1.0
 METRICS:
   TR: !!python/tuple
-  - min
+  - MIN
   - 1.0
 TOPOLOGY: FW - ( IPS DPI TS ) - ADC

@@ -209,7 +209,7 @@ class Exhaustive:
 		self.__status = 0
 		self.__mElements = elements
 		self.__mGrammar = grammar
-		self.__mCHEF = CHEF.CHEF({'TR':("min", 1)})
+		self.__mCHEF = CHEF.CHEF({'TR':("MIN", 1)})
 
 	######## PRIVATE METHODS ########
 
@@ -407,7 +407,7 @@ class Heuristic:
 		self.__status = 0
 		self.__mElements = elements
 		self.__mGrammar = grammar
-		self.__mCHEF = CHEF.CHEF({'TR':("min", 1)})
+		self.__mCHEF = CHEF.CHEF({'TR':("MIN", 1)})
 
 	######## PRIVATE METHODS ########
 

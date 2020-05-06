@@ -20,5 +20,5 @@ METRICS:
   - 1.0
   EC: !!python/tuple
   - MIN
-  - 1.0
+  - 0.5
 TOPOLOGY: FW - ( IPS DPI TS ) - ADC

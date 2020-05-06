@@ -619,6 +619,10 @@ class Composer:
 
 		return self.__cComposer.mCandidates()[self.__cComposer.mFirmSuggestion()]
 
+	def cStatus(self):
+
+		return self.__status
+
 ######### COMPOSER CLASS END #########
 
 #eComposer = Composer(1)

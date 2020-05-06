@@ -70,7 +70,7 @@ REQUEST:
   METRICS:
     C:
       SPEC: !!python/tuple
-      - min
+      - MIN
       - 1.0
       TYPE: CATALOG
   TOPOLOGY: NF0 - NF1 - NF2

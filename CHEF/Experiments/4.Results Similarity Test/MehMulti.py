@@ -602,7 +602,7 @@ class Composer:
 			if yamlData["METRICS"][metric][1] <= 0:
 				self.__status = -11
 				return -11
-			if yamlData["METRICS"][metric][0] != "min" and yamlData["METRICS"][metric][0] != "max":
+			if yamlData["METRICS"][metric][0] != "MIN" and yamlData["METRICS"][metric][0] != "MAX":
 				self.__status = -12
 				return -12
 
@@ -657,6 +657,10 @@ class Composer:
 			return None
 
 		return self.__cComposer.mCandidates()[self.__cComposer.mFirmSuggestion()]
+
+	def cStatus(self):
+
+		return self.__status
 
 ######### COMPOSER CLASS END #########
 

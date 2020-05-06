@@ -100,5 +100,5 @@ class Executer:
         self.mijCompare(filesOriginal, filesMulti)
 
 tester = Executer()
-tester.mehRequest(".\\", "mehDocument", 1, 28)
-tester.mijRequest(".\\", "mijDocument", 1, 8)
+tester.mehRequest("Test/", "mehDocument", 1, 28)
+tester.mijRequest("Test/", "mijDocument", 1, 8)

@@ -612,7 +612,7 @@ class Composer:
 			if yamlData["METRICS"][metric][1] <= 0:
 				self.__status = -11
 				return -11
-			if yamlData["METRICS"][metric][0] != "min" and yamlData["METRICS"][metric][0] != "max":
+			if yamlData["METRICS"][metric][0] != "MIN" and yamlData["METRICS"][metric][0] != "MAX":
 				self.__status = -12
 				return -12
 
@@ -674,13 +674,11 @@ class Composer:
 		if self.__status != 1:
 			return None
 
-		return self.__cComposer.mSI()		
+		return self.__cComposer.mSI()
+
+	def cStatus(self):
+		
+		return self.__status		
 
 ######### COMPOSER CLASS END #########
 
-#eComposer = Composer(1)
-#eComposer.cCompose("MehMulti.yaml")
-#print(eComposer.cFirmSuggestion())
-#hComposer = Composer(2)
-#hComposer.cCompose("MehMulti.yaml")
-#print(hComposer.cFirmSuggestion())

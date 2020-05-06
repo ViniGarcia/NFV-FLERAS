@@ -5,6 +5,6 @@ ELEMENTS:
     TR: 0.719289588215132
 METRICS:
   TR: !!python/tuple
-  - min
+  - MIN
   - 1.0
 TOPOLOGY: ( NF0 NF1 )

@@ -180,6 +180,6 @@ class Executer:
             print(multiFile + " MULTI -> MEAN: " + str(result[2][-2]) + "  STDEV: " + str(result[2][-1]) + "\n")
 
 tester = Executer()
-tester.mehExhRequest("Test/", "mehDocument", 0, 7)
-tester.mehGreRequest("Test/", "mehDocument", 0, 7)
-tester.mijRequest("Test/", "mijDocument", 1, 8)
+tester.mehExhRequest("Test/", "mehDocument", 1, 7)
+tester.mehGreRequest("Test/", "mehDocument", 1, 7)
+tester.mijRequest("Test/", "mijDocument", 1, 7)
