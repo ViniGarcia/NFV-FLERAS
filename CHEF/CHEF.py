@@ -36,7 +36,11 @@
 
 #################################################
 
+from itertools import combinations
+from statistics import mean
 from numpy import array
+from scipy import stats
+from copy import deepcopy
 
 ############### CHEF CLASS BEGIN ################
 
@@ -86,6 +90,68 @@ class CHEF:
 
         return self.__lastIndexing
 
+    def __cPearson(self, samples):
+        #samples: {cKey:{mKey:$float ...}...}
+
+        mKeys = list(self.__evalMetrics.keys())
+        mValues = [[] for key in mKeys]
+        mCoefficients = {}
+
+        for cKey in samples:
+            for index in range(len(mKeys)):
+                mValues[index].append(samples[cKey][mKeys[index]])
+
+        mCombinations = combinations(range(len(mKeys)), 2)
+        for combination in mCombinations:
+            mPearson = stats.pearsonr(mValues[combination[0]], mValues[combination[1]])
+            if self.__evalMetrics[mKeys[combination[0]]][0] == self.__evalMetrics[mKeys[combination[1]]][0]:
+                mCoefficients[mKeys[combination[0]], mKeys[combination[1]]] = (mPearson[0], mPearson[1])
+            else:
+                mCoefficients[mKeys[combination[0]], mKeys[combination[1]]] = (mPearson[0] * -1, mPearson[1])
+
+        return mCoefficients
+
+    def __cBias(self, correlatedBiases):
+
+        def cRecursiveBias(metric, checked, aggregation, weights):
+            for bias in correlatedBiases[metric]:
+                if bias in checked:
+                    continue
+                checked.append(bias)
+                aggregation.append(bias)
+                weights.append(self.__evalMetrics[bias][1])
+                cRecursiveBias(bias, checked, aggregation, weights)
+
+        nonBiasesMetrics = {}
+        checkedMetrics = []
+        reallocWeight = 0
+        for metric in correlatedBiases:
+            
+            if metric in checkedMetrics:
+                continue
+            if len(correlatedBiases[metric]) == 0:
+                nonBiasesMetrics[metric] = self.__evalMetrics[metric][1]
+            else:
+                aggregatedMetrics = []
+                aggregatedWeights = []
+                
+                checkedMetrics.append(metric)
+                aggregatedMetrics.append(metric)
+                aggregatedWeights.append(self.__evalMetrics[metric][1])
+                cRecursiveBias(metric, checkedMetrics, aggregatedMetrics, aggregatedWeights)
+
+                maxWeight = max(aggregatedWeights)
+                sumWeight = sum(aggregatedWeights)
+                reallocWeight += sum(aggregatedWeights) - maxWeight
+
+                for index in range(len(aggregatedMetrics)):
+                    nonBiasesMetrics[aggregatedMetrics[index]] = maxWeight * (aggregatedWeights[index] / sumWeight)
+
+        for metric in nonBiasesMetrics:
+            nonBiasesMetrics[metric] = nonBiasesMetrics[metric] + (nonBiasesMetrics[metric] / (1 - reallocWeight)) * reallocWeight
+        
+        return nonBiasesMetrics
+
     ######## PUBLIC METHODS ########
 
     def cConfigure(self, evalMetrics):
@@ -116,6 +182,21 @@ class CHEF:
             self.__lastIndexing = None
             self.__status = 1
             return 1
+
+    def cPreprocess(self, metricSamples, correlationLevel = 0.95):
+
+        correlatedBiases = {key:[] for key in self.__evalMetrics.keys()}
+        linearInspection = self.__cPearson(metricSamples)
+
+        for inspection in linearInspection:
+            if abs(linearInspection[inspection][0]) >= correlationLevel:
+                if linearInspection[inspection][0] > 0:
+                    correlatedBiases[inspection[0]].append(inspection[1])
+                    correlatedBiases[inspection[1]].append(inspection[0])
+
+        nonBiasesWeights = self.__cBias(correlatedBiases)
+        for metric in nonBiasesWeights:
+            self.__evalMetrics[metric] = (self.__evalMetrics[metric][0], nonBiasesWeights[metric])
 
     def cEvaluate(self, partialResults):
 
