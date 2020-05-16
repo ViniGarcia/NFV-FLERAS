@@ -121,15 +121,15 @@ def timing(rep, file, confs, modes):
                 print("ROUND #" + str(test))
                 start = time.time()
                 if request == "-g":
-                    subprocess.check_call("python 5.GeSeMa.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("5.GeSeMa.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-ex":
-                    subprocess.check_call("python 1.Exhaustive.py " + file, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("1.Exhaustive.py " + file, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-ra":
-                    subprocess.check_call("python 2.Random.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("2.Random.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-tg":
-                    subprocess.check_call("python 3.Greedy.py " + file, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("3.Greedy.py " + file, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-sg":
-                    subprocess.check_call("python 4.SK-Greedy.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("4.SK-Greedy.py " + file + " " + execution, shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 timeResults.append(time.time() - start)
 
             timeResults.sort()
@@ -150,7 +150,7 @@ def definitiveQuality(rep, file, confs, modes):
     writer = open(file.split(".")[0] + "QUALITY.csv", "w+")
     writer.write("ALGORITHM;CONF;MEAN_RESULTS;STDEV_RESULTS;EXH_PARETO;EXH_WORST;MEAN_PARETO_G;STDEV_PARETO_G;MEAN_PARETO_F;STDEV_PARETO_F;REL_PARETO_F;REL_PARETO_WC_F;\n")
 
-    subprocess.check_call("python ExhaustiveMapping.py " + file + " -o parameter.csv ", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+    subprocess.check_call("ExhaustiveMapping.py " + file + " -o parameter.csv ", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
     exhaustiveFile = open("parameter.csv", "r")
     exhaustiveReader = csv.reader(exhaustiveFile, delimiter=';')
     exhaustiveData = [distribution for distribution in exhaustiveReader]
@@ -176,13 +176,13 @@ def definitiveQuality(rep, file, confs, modes):
 
                 analyzerFronts = [] 
                 if request == "-g":
-                    subprocess.check_call("python 5.GeSeMa.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("5.GeSeMa.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-ra":
-                    subprocess.check_call("python 2.Random.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("2.Random.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-tg":
-                    subprocess.check_call("python 3.Greedy.py " + file + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("3.Greedy.py " + file + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-sg":
-                    subprocess.check_call("python 4.SK-Greedy.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("4.SK-Greedy.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
 
                 analyzerFile = open("output.csv", "r")
                 analyzerReader = csv.reader(analyzerFile, delimiter=';')
@@ -241,13 +241,13 @@ def relativeQuality(rep, file, confs, modes):
 
                 analyzerFronts = [] 
                 if request == "-g":
-                    subprocess.check_call("python 5.GeSeMa.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("5.GeSeMa.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-ra":
-                    subprocess.check_call("python 2.Random.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("2.Random.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-tg":
-                    subprocess.check_call("python 3.Greedy.py " + file + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("3.Greedy.py " + file + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
                 elif request == "-sg":
-                    subprocess.check_call("python 4.SK-Greedy.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                    subprocess.check_call("4.SK-Greedy.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
 
                 analyzerFile = open("output.csv", "r")
                 analyzerReader = csv.reader(analyzerFile, delimiter=';')

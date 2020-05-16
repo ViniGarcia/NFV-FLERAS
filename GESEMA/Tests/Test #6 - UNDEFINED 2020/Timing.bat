@@ -1,0 +1,6 @@
+TestFramework.py -t -g "-g 1000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 1000 -cp 0.3 -mp 0.05" "-g 2000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 2000 -cp 0.3 -mp 0.05" "-g 4000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 4000 -cp 0.3 -mp 0.05" "-g 8000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 8000 -cp 0.3 -mp 0.05" "-g 16000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 16000 -cp 0.3 -mp 0.05" -r 30 -f 30x7.yaml
+
+
+TestFramework.py -t -g "-g 1000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 1000 -cp 0.3 -mp 0.05" "-g 2000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 2000 -cp 0.3 -mp 0.05" "-g 4000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 4000 -cp 0.3 -mp 0.05" "-g 8000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 8000 -cp 0.3 -mp 0.05" "-g 16000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 16000 -cp 0.3 -mp 0.05" -r 30 -f 30x9.yaml
+
+TestFramework.py -t -g "-g 1000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 1000 -cp 0.3 -mp 0.05" "-g 2000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 2000 -cp 0.3 -mp 0.05" "-g 4000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 4000 -cp 0.3 -mp 0.05" "-g 8000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 8000 -cp 0.3 -mp 0.05" "-g 16000 -cp 0.3 -mp 0.05" "-gs GREEDY -g 16000 -cp 0.3 -mp 0.05" -r 30 -f 30x11.yaml

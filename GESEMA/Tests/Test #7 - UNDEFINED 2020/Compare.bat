@@ -1,0 +1,3 @@
+TestFramework.py -rq -ra "-r 100000" -g "-gs GREEDY -g 2000 -cp 0.3 -mp 0.05" -sg "-sk 2 -r 50000" "-sk 4 -r 25000" -r 30 -f 30x7.yaml
+TestFramework.py -rq -ra "-r 100000" -g "-gs GREEDY -g 2000 -cp 0.3 -mp 0.05" -sg "-sk 2 -r 50000" "-sk 4 -r 25000" -r 30 -f 30x9.yaml
+TestFramework.py -rq -ra "-r 100000" -g "-gs GREEDY -g 2000 -cp 0.3 -mp 0.05" -sg "-sk 2 -r 50000" "-sk 4 -r 25000" -r 30 -f 30x11.yaml
