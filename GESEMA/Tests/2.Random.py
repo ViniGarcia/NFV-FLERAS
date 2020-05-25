@@ -502,7 +502,13 @@ class Mapping:
 
 	def outputFrontiers(self, filename, result):
 
-		indexFrontiers = self.__paretoFrontiers(result[1])
+		ndResult = [[], []]
+		for index in range(len(result[0])):
+			if not result[0][index] in ndResult[0]:
+				ndResult[0].append(result[0][index])
+				ndResult[1].append(result[1][index])
+		
+		indexFrontiers = self.__paretoFrontiers(ndResult[1])
 		metricList = list(self.__request.getMetrics()["LOCAL"].keys()) + list(self.__request.getMetrics()["TRANSITION"].keys())
 		metricKeys = [self.__request.getMetricDictionary()[index] for index in range(len(metricList))]
 
@@ -514,9 +520,9 @@ class Mapping:
 		file.write("\n")
 
 		for index in indexFrontiers[0]:
-			file.write(str(list(result[0][index])) + ";")
+			file.write(str(list(ndResult[0][index])) + ";")
 			for subindex in range(len(metricKeys)):
-				file.write(str(result[1][index][subindex]) + ";")
+				file.write(str(ndResult[1][index][subindex]) + ";")
 			file.write("0")
 			file.write("\n")
 

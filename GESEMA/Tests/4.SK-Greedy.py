@@ -30,7 +30,6 @@ class RequestProcessor:
 		if not "METRICS" in requestYAML or not "SERVICE" in requestYAML or not "DOMAINS" in requestYAML:
 			return -3
 
-
 		if not "LOCAL" in requestYAML["METRICS"] or not "TRANSITION" in requestYAML["METRICS"]:
 			return -4
 
@@ -299,23 +298,15 @@ class ServiceMapping():
 		self.__status = 1
 
 
-	def __rollback(self, partialCandidate, index, parameter, computation):
-		
-		for resource in computation[index]:
-			computation[partialCandidate[index]][resource] -= self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
-			if resource == parameter:
-				return
-
-	def __evaluate(self, partialCandidate, index, evaluation, computation):
+	def __evaluate(self, partialCandidate, index, evaluation, computation, saveEvaluation, saveComputation):
 
 		for resource in computation[index]:
-			computation[partialCandidate[index]][resource] += self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
-			if computation[partialCandidate[index]][resource] > self.__domains[partialCandidate[index]]["RESOURCE"][resource]:
-				self.__rollback(partialCandidate, index, resource, computation)
+			saveComputation[partialCandidate[index]][resource] = computation[partialCandidate[index]][resource] + self.__service["FUNCTION"][self.__service["STRUCTURE"][index][0]][resource]
+			if saveComputation[partialCandidate[index]][resource] > self.__domains[partialCandidate[index]]["RESOURCE"][resource]:
 				return False
 
 		for metric in self.__metrics["LOCAL"]:
-			evaluation[metric] += self.__domains[partialCandidate[index]]["LOCAL"][metric]
+			saveEvaluation[metric] = evaluation[metric] + self.__domains[partialCandidate[index]]["LOCAL"][metric]
 
 		flag = True
 		for connection in self.__service["STRUCTURE"][index][2]:
@@ -323,6 +314,8 @@ class ServiceMapping():
 				flag = False
 				break
 		if flag:
+			for metric in self.__metrics["TRANSITION"]:
+				saveEvaluation[metric] = evaluation[metric]
 			return True
 
 		meanDictionary = None
@@ -340,7 +333,7 @@ class ServiceMapping():
 					meanDictionary[metric] += self.__domains[partialCandidate[connection]]["TRANSITION"][partialCandidate[index]][metric]
 
 		for metric in self.__metrics["TRANSITION"]:
-			evaluation[metric] += meanDictionary[metric] / meanFactor
+			saveEvaluation[metric] = evaluation[metric] + (meanDictionary[metric] / meanFactor)
 
 		return True
 
@@ -373,44 +366,48 @@ class ServiceMapping():
 		search = {x:list(self.__domains[x]["TRANSITION"].keys()) for x in list(self.__domains.keys())}
 		for domain in search:
 			search[domain].append(domain)
+		
+		skEvaluation = [[0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"])) for index in range(sk)]
+		skComputation = [[{"MEMORY":0, "VCPU":0, "IFACES":0} for iIndex in range(len(self.__domains))] for eIndex in range(sk)]
 
 		for execution in range(rounds):
 			current = []
+			found = True
 			shufller = list(self.__domains.keys())
+
 			evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
 			computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]
-			found = True
 
 			while len(current) < len(self.__service["FUNCTION"]):
 
-				saveEvaluation = copy.deepcopy(evaluation)
-				saveComputation = copy.deepcopy(computation)
 				greedyOptions = []
 				random.shuffle(shufller)
 
+				partial = 0
 				for domain in shufller[:sk]:
-					valid = self.__evaluate(current + [domain], len(current), evaluation, computation)
+					valid = self.__evaluate(current + [domain], len(current), evaluation, computation, skEvaluation[partial], skComputation[partial])
 					if not valid:
 						continue
-					greedyOptions.append((domain, evaluation, computation))
-					evaluation = copy.deepcopy(saveEvaluation)
-					computation = copy.deepcopy(saveComputation)
+					greedyOptions.append((domain, skEvaluation[partial], skComputation[partial]))
+					partial += 1
 
 				if len(greedyOptions) == 0:
 					found = False
 					break
 				
-				index = self.__choose(greedyOptions)
+				index = self.__choose(greedyOptions[:partial])
+				skEvaluation.append(evaluation)
+				evaluation = skEvaluation.pop(index)
+				skComputation.append(computation)
+				computation = skComputation.pop(index)
 				current.append(greedyOptions[index][0])
-				evaluation = greedyOptions[index][1]
-				computation = greedyOptions[index][2]
 				shufller = search[current[-1]]
 
 			if not found:
 				continue
 
-			accepted[0].append(current)
-			accepted[1].append(evaluation)
+			accepted[0].append(tuple(current))
+			accepted[1].append(tuple(evaluation))
 
 		return accepted
 
@@ -552,7 +549,13 @@ class Mapping:
 
 	def outputFrontiers(self, filename, result):
 
-		indexFrontiers = self.__paretoFrontiers(result[1])
+		ndResult = [[], []]
+		for index in range(len(result[0])):
+			if not result[0][index] in ndResult[0]:
+				ndResult[0].append(result[0][index])
+				ndResult[1].append(result[1][index])
+
+		indexFrontiers = self.__paretoFrontiers(ndResult[1])
 		metricList = list(self.__request.getMetrics()["LOCAL"].keys()) + list(self.__request.getMetrics()["TRANSITION"].keys())
 		metricKeys = [self.__request.getMetricDictionary()[index] for index in range(len(metricList))]
 
@@ -564,9 +567,9 @@ class Mapping:
 		file.write("\n")
 
 		for index in indexFrontiers[0]:
-			file.write(str(list(result[0][index])) + ";")
+			file.write(str(list(ndResult[0][index])) + ";")
 			for subindex in range(len(metricKeys)):
-				file.write(str(result[1][index][subindex]) + ";")
+				file.write(str(ndResult[1][index][subindex]) + ";")
 			file.write("0")
 			file.write("\n")
 
