@@ -27,7 +27,7 @@ class gesema_greedy:
 			constraints[dependency[0]] = [dependency[1], []]
 			for domain in search:
 				if dependency[1] in search[domain]:
-					constraints[1][dependency[0]].append(domain)	
+					constraints[dependency[0]][1].append(domain)	
 
 		return constraints
 
