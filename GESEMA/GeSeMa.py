@@ -1,9 +1,10 @@
 import os
 import sys
+import time
 import yaml
 import copy
-import random
 import numpy
+import random
 import statistics
 import local_platypus
 
@@ -14,7 +15,7 @@ import local_platypus
 #STATUS CODES:
 #		0 -> Not evaluated yet
 #		1 -> Succesfully evaluated
-#		-1 to -38 -> Error
+#		-1 to -40 -> Error
 
 class RequestProcessor:
 
@@ -47,51 +48,57 @@ class RequestProcessor:
 			return -8
 
 		for metric in requestYAML["METRICS"]["LOCAL"]:
-			if not "OBJECTIVE" in requestYAML["METRICS"]["LOCAL"][metric] or not "POLICIES" in requestYAML["METRICS"]["LOCAL"][metric]:
+			if not "OBJECTIVE" in requestYAML["METRICS"]["LOCAL"][metric] or not "OPERATION" in requestYAML["METRICS"]["LOCAL"][metric] or not "POLICIES" in requestYAML["METRICS"]["LOCAL"][metric]:
 				return -9
 
 			if not requestYAML["METRICS"]["LOCAL"][metric]["OBJECTIVE"] in ["MAXIMIZATION", "MINIMIZATION"]:
 				return -10
 
-			if not isinstance(requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"], list):
+			if not requestYAML["METRICS"]["LOCAL"][metric]["OPERATION"] in ["SUM", "PRODUCT"]:
 				return -11
+
+			if not isinstance(requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"], list):
+				return -12
 
 			validPolicies = []
 			for policy in requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"]:
 				policy = policy.split(" ")
 				if not policy[0] in ["!=", "==", ">", "<", ">=", "<="]:
-					return -12
+					return -13
 				try:
 					float(policy[1])
 				except:
-					return -13
+					return -14
 				validPolicies.append(policy[0] + policy[1])
 			requestYAML["METRICS"]["LOCAL"][metric]["POLICIES"] = validPolicies
 
 		for metric in requestYAML["METRICS"]["TRANSITION"]:
-			if not "OBJECTIVE" in requestYAML["METRICS"]["TRANSITION"][metric] or not "POLICIES" in requestYAML["METRICS"]["TRANSITION"][metric]:
-				return -14
-
-			if not requestYAML["METRICS"]["TRANSITION"][metric]["OBJECTIVE"] in ["MAXIMIZATION", "MINIMIZATION"]:
+			if not "OBJECTIVE" in requestYAML["METRICS"]["TRANSITION"][metric] or not "OPERATION" in requestYAML["METRICS"]["TRANSITION"][metric] or not "POLICIES" in requestYAML["METRICS"]["TRANSITION"][metric]:
 				return -15
 
-			if not isinstance(requestYAML["METRICS"]["TRANSITION"][metric]["POLICIES"], list):
+			if not requestYAML["METRICS"]["TRANSITION"][metric]["OBJECTIVE"] in ["MAXIMIZATION", "MINIMIZATION"]:
 				return -16
+
+			if not requestYAML["METRICS"]["TRANSITION"][metric]["OPERATION"] in ["SUM", "PRODUCT"]:
+				return -17
+
+			if not isinstance(requestYAML["METRICS"]["TRANSITION"][metric]["POLICIES"], list):
+				return -18
 
 			validPolicies = []
 			for policy in requestYAML["METRICS"]["TRANSITION"][metric]["POLICIES"]:
 				policy = policy.split(" ")
 				if not policy[0] in ["=", ">", "<", ">=", "<="]:
-					return -17
+					return -19
 				try:
 					float(policy[1])
 				except:
-					return -18
+					return -20
 				validPolicies.append(policy[0] + policy[1])
 			requestYAML["METRICS"]["TRANSITION"][metric]["POLICIES"] = validPolicies
 
 		if not isinstance(requestYAML["SERVICE"]["TOPOLOGY"], list) or not isinstance(requestYAML["SERVICE"]["FUNCTION"], dict):
-			return -19
+			return -21
 
 		for member in requestYAML["SERVICE"]["TOPOLOGY"]:
 			if member in ["IN", "{", "}", "/"] or str.startswith(member, "EN"):
@@ -99,61 +106,61 @@ class RequestProcessor:
 			if str.startswith(member, "< ") and str.endswith(member, " >"):
 				dependency = member.split(" ")
 				if len(dependency) != 3:
-					return -20
+					return -22
 				if not dependency[1] in requestYAML["DOMAINS"]:
-					return -21
+					return -23
 				continue
 			if not member in requestYAML["SERVICE"]["FUNCTION"]:
-				return -22
+				return -24
 
 		for member in requestYAML["SERVICE"]["FUNCTION"]:
 			if not member in requestYAML["SERVICE"]["TOPOLOGY"]:
-				return -23
+				return -25
 
 		if not isinstance(requestYAML["DOMAINS"], dict):
-			return -24
+			return -26
 
 		for member in requestYAML["SERVICE"]["FUNCTION"]:
 			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member], dict):
-				return -25
-			if not "MEMORY" in requestYAML["SERVICE"]["FUNCTION"][member] or not "VCPU" in requestYAML["SERVICE"]["FUNCTION"][member] or not "IFACES" in requestYAML["SERVICE"]["FUNCTION"][member]:
-				return -26
-			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"], int):
 				return -27
-			if requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"] < 0:
+			if not "MEMORY" in requestYAML["SERVICE"]["FUNCTION"][member] or not "VCPU" in requestYAML["SERVICE"]["FUNCTION"][member] or not "IFACES" in requestYAML["SERVICE"]["FUNCTION"][member]:
 				return -28
+			if not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"], int) or not isinstance(requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"], int):
+				return -29
+			if requestYAML["SERVICE"]["FUNCTION"][member]["MEMORY"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["VCPU"] < 0 or requestYAML["SERVICE"]["FUNCTION"][member]["IFACES"] < 0:
+				return -30
 
 		for member in requestYAML["DOMAINS"]:
 			if not isinstance(requestYAML["DOMAINS"][member], dict):
-				return -29
-			if not "RESOURCE" in requestYAML["DOMAINS"][member] or not "LOCAL" in requestYAML["DOMAINS"][member] or not "TRANSITION" in requestYAML["DOMAINS"][member]:
-				return -30
-			if not "MEMORY" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "VCPU" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "IFACES" in requestYAML["DOMAINS"][member]["RESOURCE"]:
 				return -31
-			if not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"], int):
+			if not "RESOURCE" in requestYAML["DOMAINS"][member] or not "LOCAL" in requestYAML["DOMAINS"][member] or not "TRANSITION" in requestYAML["DOMAINS"][member]:
 				return -32
-			if requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"] < 0:
+			if not "MEMORY" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "VCPU" in requestYAML["DOMAINS"][member]["RESOURCE"] or not "IFACES" in requestYAML["DOMAINS"][member]["RESOURCE"]:
 				return -33
+			if not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"], int) or not isinstance(requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"], int):
+				return -34
+			if requestYAML["DOMAINS"][member]["RESOURCE"]["MEMORY"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["VCPU"] < 0 or requestYAML["DOMAINS"][member]["RESOURCE"]["IFACES"] < 0:
+				return -35
 
 			for metric in requestYAML["DOMAINS"][member]["LOCAL"]:
 				if not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["LOCAL"][metric], float):
-					return -34
+					return -36
 
 			for metric in requestYAML["METRICS"]["LOCAL"]:
 				if not metric in requestYAML["DOMAINS"][member]["LOCAL"]:
-					return -35
+					return -37
 
 			for domain in requestYAML["DOMAINS"][member]["TRANSITION"]:
 				if not domain in requestYAML["DOMAINS"]:
-					return -36
+					return -38
 
 				for metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
 					if not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], int) and not isinstance(requestYAML["DOMAINS"][member]["TRANSITION"][domain][metric], float):
-						return -37
+						return -39
 
 				for metric in requestYAML["METRICS"]["TRANSITION"]:
 					if not metric in requestYAML["DOMAINS"][member]["TRANSITION"][domain]:
-						return -38
+						return -40
 
 		return 1
 
@@ -413,7 +420,15 @@ class ServiceMapping(local_platypus.Problem):
 			self.__adjust(solution.variables)
 
 		candidate = solution.variables[:]
-		evaluation = [0] * (len(self.__metrics["LOCAL"]) + len(self.__metrics["TRANSITION"]))
+		evaluation = [] 
+		for mode in ["LOCAL", "TRANSITION"]:
+			ordering = list(self.__metrics[mode].keys())
+			ordering.sort()
+			for metric in ordering:
+				if self.__metrics[mode][metric]["OPERATION"] == "SUM":
+					evaluation.insert(metric, 0)
+				else:
+					evaluation.insert(metric, 1)
 		constraints = []
 		computation = [{"MEMORY":0, "VCPU":0, "IFACES":0} for index in range(len(self.__domains))]
 
@@ -428,7 +443,10 @@ class ServiceMapping(local_platypus.Problem):
 					return
 
 			for metric in self.__metrics["LOCAL"]:
-				evaluation[metric] += self.__domains[candidate[index]]["LOCAL"][metric]
+				if self.__metrics["LOCAL"][metric]["OPERATION"] == "SUM":
+					evaluation[metric] += self.__domains[candidate[index]]["LOCAL"][metric]
+				else:
+					evaluation[metric] *= self.__domains[candidate[index]]["LOCAL"][metric]
 
 			flag = True
 			for connection in self.__service["STRUCTURE"][index][2]:
@@ -459,7 +477,10 @@ class ServiceMapping(local_platypus.Problem):
 						meanDictionary[metric] += self.__domains[candidate[connection]]["TRANSITION"][candidate[index]][metric]
 
 			for metric in self.__metrics["TRANSITION"]:
-				evaluation[metric] += meanDictionary[metric] / meanFactor
+				if self.__metrics["TRANSITION"][metric]["OPERATION"] == "SUM":
+					evaluation[metric] += (meanDictionary[metric] / meanFactor)
+				else:
+					evaluation[metric] *= (meanDictionary[metric] / meanFactor)
 
 		solution.objectives[:] = evaluation
 		for policy in self.__policies["INDEX"]:
@@ -488,6 +509,7 @@ class Mapping:
 	__request = None
 	__algorithm = None
 	__problem = None
+	__control = None
 
 	def __translate(self, result):
 		translator = local_platypus.Integer(0, len(self.__request.getDomains())-1)
@@ -553,6 +575,21 @@ class Mapping:
 		return completeList
 
 
+	def __progression(self, execution, mode, step):
+
+		if mode == 0:
+			if self.__control < execution:
+				self.__control += step
+				return True
+			return False
+		elif mode == 1:
+			self.__control += step
+			if self.__control < execution:
+				return True
+			return False
+		else:
+			return False
+
 	def __init__(self, request, algorithm, population, tournament, generator, crossover, crossoverProbability, mutation, mutationProbability):
 
 		self.__request = RequestProcessor(request)
@@ -617,20 +654,23 @@ class Mapping:
 			self.__status = -46
 
 
-	def execute(self, iterations):
+	def execute(self, execution, mode):
 
 		if self.__status != 1 and (self.__status > -30 and self.__status < 0):
 			return self.__status
 
-		if not isinstance(iterations, int):
+		if not isinstance(execution, int):
 			self.__status = -47
 			return -47
 
-		if iterations < 1:
+		if execution < 1:
 			self.__status = -48
 			return -48
 
-		self.__algorithm.run(iterations)
+		if mode == 0:
+			self.__algorithm.run(execution)
+		elif mode == 1:
+			self.__algorithm.run(local_platypus.MaxTime(execution))
 		final = [[], []]
 		nondominated = local_platypus.nondominated(self.__algorithm.result)
 
@@ -643,7 +683,7 @@ class Mapping:
 		return final
 
 
-	def experiment(self, step, iterations):
+	def experiment(self, step, execution, mode):
 
 		if self.__status != 1 and (self.__status > -30 and self.__status < 0):
 			return self.__status
@@ -656,10 +696,19 @@ class Mapping:
 			self.__status = -48
 			return -48
 		
+		self.__control = 0
+		if mode == 0:
+			termination = step
+		elif mode == 1:
+			termination = 0
+
 		last = []
 		results = []
 		index = 0
-		while True:
+		while self.__progression(execution, mode, termination):
+			if mode == 1:
+				startTime = time.time()
+
 			#self.__algorithm.nfe = False #Reset the algorithm population -- only for particular tests
 			index += 1
 			self.__algorithm.run(step)
@@ -681,8 +730,8 @@ class Mapping:
 			
 			results.append(final)
 			
-			if index*step >= iterations:
-				break
+			if mode == 1:
+				termination = time.time() - startTime
 
 		return self.__refine(results)
 
@@ -719,7 +768,8 @@ c = "SBX"
 cp = 1.0
 m = "FLIP"
 mp = 0.1
-g = 1000
+et = None
+em = None
 s = None
 o = None
 
@@ -772,10 +822,21 @@ for flag in range(2, len(sys.argv), 2):
 			exit()
 		continue
 	if sys.argv[flag] == "-g":
+		if sys.argv[flag + 1] == "CONVERGENCE":
+			et = False
+		else:
+			if not sys.argv[flag + 1].isdigit() or sys.argv[flag + 1] == "0":
+				print("ERROR: NUMBER OF GENERATIONS NOT ALLOWED!!\n")
+				exit()
+			et = int(sys.argv[flag + 1])
+		em = 0
+		continue
+	if sys.argv[flag] == "-tt":
 		if not sys.argv[flag + 1].isdigit() or sys.argv[flag + 1] == "0":
-			print("ERROR: NUMBER OF GENERATIONS NOT ALLOWED!!\n")
+			print("ERROR: TOTAL TIME NOT ALLOWED!!\n")
 			exit()
-		g = int(sys.argv[flag + 1])
+		et = int(sys.argv[flag + 1])
+		em = 1
 		continue
 	if sys.argv[flag] == "-s":
 		if not sys.argv[flag + 1].isdigit() or sys.argv[flag + 1] == "0":
@@ -789,11 +850,18 @@ for flag in range(2, len(sys.argv), 2):
 	print("ERROR: INVALID FLAG "+ sys.argv[flag])
 	exit()
 
+if et == None:
+	print("ERROR: NOR -g NEITHER -tt IS DEFINED")
+	exit()
+
 processor = Mapping(sys.argv[1], a, p, t, gs, c, cp, m, mp)
 if s == None:
-	result = processor.execute(g)
+	if et == False:
+		print("ERROR: CONVERGENCE (-g) CAN ONLY BE USED DURING EXPERIMENTATIONS (-s)!!")
+		exit()
+	result = processor.execute(et, em)
 else:
-	result = processor.experiment(s, g)
+	result = processor.experiment(s, et, em)
 
 if o != None:
 	file = open(o, "w+")
@@ -804,7 +872,7 @@ if o != None:
 	file.write("\n")
 
 	for index in range(len(result[0])):
-		file.write(str([int(c) for c in result[0][index]]) + ";")
+		file.write(str([result[0][index]]) + ";")
 		for metric in result[1][index]:
 			file.write(str(result[1][index][metric]) + ";")
 		file.write("\n")
