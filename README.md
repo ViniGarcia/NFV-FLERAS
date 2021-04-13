@@ -60,11 +60,12 @@ Elias Procópio Duarte Júnior (Federal University of Paraná - Brazil)<br/>
 
 ### Publications
 
-<p align="justify">V. F. Garcia; M. C. Luizelli; E. P. Duarte Junior; C. R. P. dos Santos, "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço" in Workshop de Gerência e Operações de Redes e Serviços (Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May. 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf</p>
+<p align="justify">Fulber-Garcia, V.; Luizelli, M. C.; Duarte Jr., E. P.; Santos, C. R. P. d., "Uma Solução Flexível e Personalizável para a Composição de Cadeias de Função de Serviço" in Workshop de Gerência e Operações de Redes e Serviços (Simpósio Brasileiro de Redes e Sistemas Distribuídos), pp. 101-114, May 2019. link: http://sbrc2019.sbc.org.br/wp-content/uploads/2019/05/wgrs2019.pdf</p>
 <p align="justify">Fulber-Garcia, V.; Luizelli, M. C.; Santos, C. R. P. d.; Duarte Jr., E. P., "CUSCO: A Customizable Solution for NFV Composition" in International Conference on Advanced Information Networking and Applications, pp. 204-216, Mar. 2020. link: https://link.springer.com/chapter/10.1007/978-3-030-44041-1_19</p>
 <p align="justify">Fulber-Garcia, V.; Santos, C. R. P. d.; Spinosa, E. J.; Duarte Jr., E. P., "Mapeamento Customizado de Serviços de Rede em Múltiplos Domínios Baseado em Heurísticas Genéticas" in Simpósio Brasileiro de Redes e Sistemas Distribuídos, pp. 491-504, Dec. 2020. link: https://sol.sbc.org.br/index.php/sbrc/article/view/12304</p>
+<p align="justify">Fulber-Garcia, V.; Huff, A.; Santos, C. R. P. d.; Duarte Jr., E. P., "Network Service Topology: Formalization, Taxonomy and the CUSTOM Specification Model" in Computer Networks (ComNet), vol. 178, pp. 107337, 2020. link: https://www.sciencedirect.com/science/article/abs/pii/S1389128619312460</p>
 <p align="justify">Fulber-Garcia, V.; Huff, A.; Marcuzzo, L. d. C.; Luizelli, M. C.; Schaeffer-Filho, A. E.; Granville, L. Z.; Santos, C. R. P. d.; Duarte Jr., E. P., "Customizable Deployment of NFV Services" in Journal of Network and Systems Management (JNSM), vol. [TO APPEAR], pp. [TO APPEAR], 2021, link: [TO APPEAR].</p>
- 
+
 ### References
 
 <p align="justify">[1] J. Gil Herrera and J. F. Botero, "Resource Allocation in NFV: A Comprehensive Survey," in IEEE Transactions on Network and Service Management, vol. 13, no. 3, pp. 518-532, Sept. 2016. doi: 10.1109/TNSM.2016.2598420</p>
