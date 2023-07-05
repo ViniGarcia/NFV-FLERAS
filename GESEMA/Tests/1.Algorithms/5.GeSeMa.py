@@ -563,7 +563,7 @@ class Mapping:
 		completeList = [[], []]
 		for step in range(len(results)):
 			for candidate in range(len(results[step][0])):
-				if not results[step][0][candidate] in completeList[0]:
+				#if not results[step][0][candidate] in completeList[0]:
 					completeList[0].append(results[step][0][candidate])
 					completeList[1].append(results[step][1][candidate])
 					completeList[1][-1]["PARETO"] = results[step][2][candidate]
@@ -724,9 +724,9 @@ class Mapping:
 			check = copy.deepcopy(final[0])
 			check.sort()
 
-			if last == check:
-				break
-			last = check
+			#if last == check: #Stop on convergence -- only for particular tests
+			#	break
+			#last = check
 			
 			results.append(final)
 			

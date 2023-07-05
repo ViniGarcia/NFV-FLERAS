@@ -150,9 +150,9 @@ def timing(rep, file, confs, modes):
 def definitiveQuality(rep, file, confs, modes):
 
     writer = open(file.split(".")[0] + "QUALITY.csv", "w+")
-    writer.write("ALGORITHM;CONF;MEAN_RESULTS;STDEV_RESULTS;EXH_PARETO;EXH_WORST;MEAN_PARETO_G;STDEV_PARETO_G;MEAN_PARETO_F;STDEV_PARETO_F;REL_PARETO_F;REL_PARETO_WC_F;\n")
+    writer.write("ALGORITHM;CONF;MEAN_RESULTS;STDEV_RESULTS;EXH_PARETO;EXH_WORST;MEAN_PARETO_G;STDEV_PARETO_G;MEAN_PARETO_G_TOP10;STDEV_PARETO_G_TOP10;PARETO_G_TOP1;MEAN_PARETO_F;STDEV_PARETO_F;REL_PARETO_F;REL_PARETO_WC_F;\n")
 
-    subprocess.check_call("ExhaustiveMapping.py " + file + " -o parameter.csv ", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+    subprocess.check_call("python3 1.Exhaustive.py " + file + " -o parameter.csv ", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
     exhaustiveFile = open("parameter.csv", "r")
     exhaustiveReader = csv.reader(exhaustiveFile, delimiter=';')
     exhaustiveData = [distribution for distribution in exhaustiveReader]
@@ -198,7 +198,7 @@ def definitiveQuality(rep, file, confs, modes):
                 analyzerFile.close()
 
                 for distribution in analyzerData:
-                    analyzerFronts.append(exhaustiveFronts[exhaustiveDists.index(distribution)])
+                    analyzerFronts.append(exhaustiveFronts[exhaustiveDists.index(distribution[1:-1])])
 
                 generalFronts = generalFronts + [int(f) for f in analyzerFronts]
                 realPareto.append(analyzerFronts.count(0))
@@ -208,11 +208,138 @@ def definitiveQuality(rep, file, confs, modes):
                 if request == "-tg":
                     break
 
-            writer.write(globalAlgorithms[request] + ";" + execution + ";" + str(statistics.mean(quantityFronts)) + ";" + str(statistics.stdev(quantityFronts)) + ";" + str(pfCandidates) + ";" + str(pfWorst) + ";" + str(statistics.mean(generalFronts)) + ";" + str(statistics.stdev(generalFronts)) + ";" + str(statistics.mean(realPareto)) + ";" + str(statistics.stdev(realPareto)) + ";" + str(statistics.mean(realPareto)/pfCandidates) + ";" + str((statistics.mean(realPareto) - statistics.stdev(realPareto))/pfCandidates) + "\n")
+            try:
+                m_quantityFronts = statistics.mean(quantityFronts)
+                s_quantityFronts = statistics.stdev(quantityFronts)
+            except:
+                m_quantityFronts = quantityFronts[0]
+                s_quantityFronts = 0
+            
+            generalFronts.sort()
+            try:
+                m_generalFronts = statistics.mean(generalFronts)
+                s_generalFronts = statistics.stdev(generalFronts)
+                m_top10Fronts = statistics.mean(generalFronts[:10])
+                s_top10Fronts = statistics.stdev(generalFronts[:10])
+            except:
+                m_generalFronts = generalFronts[0]
+                s_generalFronts = 0
+                m_top10Fronts = generalFronts[0]
+                s_top10Fronts = 0
+
+            try:
+                m_realPareto = statistics.mean(realPareto)
+                s_realPareto = statistics.stdev(realPareto)
+            except:
+                m_realPareto = realPareto[0]
+                s_realPareto = 0
+
+
+            writer.write(globalAlgorithms[request] + ";" + execution + ";" + str(m_quantityFronts) + ";" + str(s_quantityFronts) + ";" + str(pfCandidates) + ";" + str(pfWorst) + ";" + str(m_generalFronts) + ";" + str(s_generalFronts) + ";" + str(m_top10Fronts) + ";" + str(s_top10Fronts) + ";" + str(generalFronts[0]) + ";" + str(m_realPareto) + ";" + str(s_realPareto) + ";" + str(m_realPareto/pfCandidates) + ";" + str((m_realPareto - s_realPareto)/pfCandidates) + "\n")
 
     os.remove("parameter.csv")
     writer.close()
 
+def progressiveQuality(rep, file, confs, modes):
+
+    writer = open(file.split(".")[0] + "QUALITY.csv", "w+")
+    writer.write("ALGORITHM;CONF;STEP;MEAN_RESULTS;STDEV_RESULTS;EXH_PARETO;EXH_WORST;MEAN_PARETO_G;STDEV_PARETO_G;MIN_PARETO_G;MAX_PARETO_G\n")
+
+    subprocess.check_call("python3 1.Exhaustive.py " + file + " -o parameter.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+    exhaustiveFile = open("parameter.csv", "r")
+    exhaustiveReader = csv.reader(exhaustiveFile, delimiter=';')
+    exhaustiveHeader = next(exhaustiveReader)
+    exhaustiveData = [distribution for distribution in exhaustiveReader]
+    exhaustiveFile.close()
+    exhaustiveDists = [distribution[0] for distribution in exhaustiveData]
+    exhaustiveDists.pop()
+    pfCandidates = int(exhaustiveData[-1][1])
+    exhaustiveFronts = [int(distribution[-1]) for distribution in exhaustiveData]
+    pfWorst = max([int(f) for f in exhaustiveFronts[1:]])
+
+    if "-tg" in modes:
+        confs[modes.index("-tg")].append("UNIQUE")
+
+    for request in modes:
+        for execution in confs[modes.index(request)]:
+            print("QUALITY TEST: " + file + " || " + str(globalAlgorithms[request]) + " (" + execution + ")")
+            generalFronts = []
+            realPareto = []
+            quantityFronts = []
+            
+            for test in range(rep):
+                print("ROUND #" + str(test))
+
+                analyzerFronts = []
+                analyzerTiming = []
+                startTime = time.time()
+                if request == "-g":
+                    subprocess.check_call("python3 5.GeSeMa.py " + file + " " + execution + " -o output.csv", shell=True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+                elif request == "-ra":
+                    print("NOT SUPPORTED ALGORITHM!")
+                elif request == "-tg":
+                    print("NOT SUPPORTED ALGORITHM!")
+                elif request == "-sg":
+                    print("NOT SUPPORTED ALGORITHM!")
+                elif request == "-gl":
+                    print("NOT SUPPORTED ALGORITHM!")
+                analyzerTiming.append(time.time() - startTime)
+
+                analyzerFile = open("output.csv", "r")
+                analyzerReader = csv.reader(analyzerFile, delimiter=';')
+                analyzerHeader = next(analyzerReader)
+                if not "STEP" in analyzerHeader:
+                    print("NOT SUPPORTED EXECUTION!")
+                    break
+                analyzerData = [(distribution[0][1:-1], int(distribution[-2]))for distribution in analyzerReader]
+                analyzerFile.close()
+
+                for distribution in analyzerData:
+                    while len(analyzerFronts) < distribution[1] + 1:
+                        analyzerFronts.append([])
+                    analyzerFronts[distribution[1]].append(exhaustiveFronts[exhaustiveDists.index(distribution[0])])
+
+                generalFronts.append(analyzerFronts)
+                realPareto.append([step.count(0) for step in analyzerFronts])
+                quantityFronts.append([len(step) for step in analyzerFronts])
+                os.remove("output.csv")
+
+                if request == "-tg":
+                    break
+
+            try:
+                m_quantityFronts = []
+                s_quantityFronts = []
+                for step in range(len(quantityFronts[0])):
+                    stepQuantity = [executionResults[step] for executionResults in quantityFronts]
+                    m_quantityFronts.append(statistics.mean(stepQuantity))
+                    s_quantityFronts.append(statistics.stdev(stepQuantity))
+                
+            except:
+                m_quantityFronts = quantityFronts[0]
+                s_quantityFronts = [0 for step in range(len(quantityFronts[0]))]
+            
+            min_generalFronts = []
+            max_generalFronts = []
+            m_generalFronts = []
+            s_generalFronts = []
+            
+            for step in range(len(generalFronts[0])):
+                stepFronts = []
+                for executionResults in generalFronts:
+                    stepFronts.extend(executionResults[step])
+                try:
+                    m_generalFronts.append(statistics.mean(stepFronts))
+                    s_generalFronts.append(statistics.stdev(stepFronts))
+                except:
+                    m_generalFronts.append(stepFronts[0])
+                    s_generalFronts.append(0)
+
+                min_generalFronts.append(min(stepFronts))
+                max_generalFronts.append(max(stepFronts))
+
+            for step in range(len(m_quantityFronts)):
+                writer.write(globalAlgorithms[request] + ";" + execution + ";" + str(step) + ";" + str(m_quantityFronts[step]) + ";" + str(s_quantityFronts[step]) + ";" + str(pfCandidates) + ";" + str(pfWorst) + ";" + str(m_generalFronts[step]) + ";" + str(s_generalFronts[step]) + ";" + str(min_generalFronts[step]) + ";" + str(max_generalFronts[step]) + "\n")                
 
 def relativeQuality(rep, file, confs, modes):
     
@@ -392,7 +519,7 @@ if sys.argv[1] == "-t":
             cConf.append(sys.argv[index])
     timing(rep, file, confs, modes)
 
-elif sys.argv[1] == "-dq" or sys.argv[1] == "-rq":
+elif sys.argv[1] == "-dq" or sys.argv[1] == "-pq" or sys.argv[1] == "-rq":
     cConf = []
     cMode = sys.argv[2]
     if not cMode in ["-g", "-sg", "-ra", "-tg", "-gl"]:
@@ -411,7 +538,9 @@ elif sys.argv[1] == "-dq" or sys.argv[1] == "-rq":
             continue
         else:
             cConf.append(sys.argv[index])
-    if sys.argv[1] == "dq":
-        definitiveQuality(rep, file, conf, modes)
+    if sys.argv[1] == "-dq":
+        definitiveQuality(rep, file, confs, modes)
+    elif sys.argv[1] == "-pq":
+        progressiveQuality(rep, file, confs, modes)
     else:
         relativeQuality(rep, file, confs, modes)

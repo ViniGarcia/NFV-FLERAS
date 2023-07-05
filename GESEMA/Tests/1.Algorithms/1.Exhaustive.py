@@ -322,6 +322,7 @@ class ServiceMapping():
 			if flag:
 				continue
 
+
 			meanDictionary = None
 			meanFactor = 0
 			for connection in self.__service["STRUCTURE"][index][2]:
@@ -509,6 +510,7 @@ class Mapping:
 		indexFrontiers = self.__paretoFrontiers(result[1])
 		metricList = list(self.__request.getMetrics()["LOCAL"].keys()) + list(self.__request.getMetrics()["TRANSITION"].keys())
 		metricKeys = [self.__request.getMetricDictionary()[index] for index in range(len(metricList))]
+		domainsDictionary = self.__request.getDomainDictionary()
 
 		file = open(filename, "w+")
 		file.write("MAPPING;")
@@ -519,7 +521,8 @@ class Mapping:
 
 		for front in range(len(indexFrontiers)):
 			for index in indexFrontiers[front]:
-				file.write(str(list(result[0][index])) + ";")
+				translatedResult = [domainsDictionary[code] for code in result[0][index]]
+				file.write(str(translatedResult) + ";")
 				for subindex in range(len(metricKeys)):
 					file.write(str(result[1][index][subindex]) + ";")
 				file.write(str(front))

@@ -13,7 +13,7 @@ class RequestGenerator:
 
 		for mtype in skeleton["METRICS"]:
 			for metric in self.__metrics[mtype]:
-				skeleton["METRICS"][mtype][metric] = {"OBJECTIVE":"MINIMIZATION", "POLICIES":[]}
+				skeleton["METRICS"][mtype][metric] = {"OBJECTIVE":"MAXIMIZATION", "OPERATION": "SUM", "POLICIES":[]}
 
 		return skeleton
 
@@ -336,7 +336,7 @@ class RequestGenerator:
 		return self.__status
 
 
-test = RequestGenerator({"RESOURCE":{"MEMORY":{"BEGIN":512, "END":512}, "VCPU":{"BEGIN":1, "END":1}, "IFACES":{"BEGIN":2, "END":2}}, "LOCAL":{}, "TRANSITION":{"DEN":{"BEGIN":1000, "END":5000}, "DIST":{"BEGIN":500, "END": 2500}}})
-network = test.completeGraph(50)
-service = test.serviceGraph(["F1", "F2", "F3"], {"MEMORY":{"BEGIN":512, "END":512}, "VCPU":{"BEGIN":1, "END":1}, "IFACES":{"BEGIN":2, "END":2}}, "LINEAR")
-test.requestDocument("50x3.yaml", service, network)
+test = RequestGenerator({"RESOURCE":{"MEMORY":{"BEGIN":512, "END":512}, "VCPU":{"BEGIN":1, "END":1}, "IFACES":{"BEGIN":2, "END":2}}, "LOCAL":{"DEN":{"BEGIN":1000, "END":5000}}, "TRANSITION":{"DIST":{"BEGIN":500, "END": 2500}}})
+network = test.completeGraph(15)
+service = test.serviceGraph(["F1", "F2", "F3", "F4", "F5"], {"MEMORY":{"BEGIN":512, "END":512}, "VCPU":{"BEGIN":1, "END":1}, "IFACES":{"BEGIN":2, "END":2}}, "LINEAR")
+test.requestDocument("15x5.yaml", service, network)

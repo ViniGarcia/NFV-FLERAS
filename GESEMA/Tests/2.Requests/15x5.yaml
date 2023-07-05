@@ -1,0 +1,582 @@
+DOMAINS:
+  '0':
+    LOCAL:
+      DEN: 4930
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '1':
+        DIST: 1594
+      '10':
+        DIST: 2282
+      '11':
+        DIST: 1728
+      '12':
+        DIST: 1329
+      '13':
+        DIST: 2168
+      '14':
+        DIST: 2149
+      '2':
+        DIST: 1326
+      '3':
+        DIST: 985
+      '4':
+        DIST: 724
+      '5':
+        DIST: 1848
+      '6':
+        DIST: 2367
+      '7':
+        DIST: 979
+      '8':
+        DIST: 1274
+      '9':
+        DIST: 1524
+  '1':
+    LOCAL:
+      DEN: 2772
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 969
+      '10':
+        DIST: 811
+      '11':
+        DIST: 1266
+      '12':
+        DIST: 2381
+      '13':
+        DIST: 1628
+      '14':
+        DIST: 2121
+      '2':
+        DIST: 674
+      '3':
+        DIST: 829
+      '4':
+        DIST: 2025
+      '5':
+        DIST: 644
+      '6':
+        DIST: 1665
+      '7':
+        DIST: 2125
+      '8':
+        DIST: 1129
+      '9':
+        DIST: 1068
+  '10':
+    LOCAL:
+      DEN: 2509
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 2099
+      '1':
+        DIST: 1251
+      '11':
+        DIST: 2023
+      '12':
+        DIST: 1092
+      '13':
+        DIST: 1479
+      '14':
+        DIST: 1344
+      '2':
+        DIST: 2450
+      '3':
+        DIST: 673
+      '4':
+        DIST: 1788
+      '5':
+        DIST: 1335
+      '6':
+        DIST: 2291
+      '7':
+        DIST: 1109
+      '8':
+        DIST: 1452
+      '9':
+        DIST: 1326
+  '11':
+    LOCAL:
+      DEN: 1573
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 1490
+      '1':
+        DIST: 883
+      '10':
+        DIST: 1657
+      '12':
+        DIST: 602
+      '13':
+        DIST: 581
+      '14':
+        DIST: 2103
+      '2':
+        DIST: 708
+      '3':
+        DIST: 2005
+      '4':
+        DIST: 655
+      '5':
+        DIST: 762
+      '6':
+        DIST: 1419
+      '7':
+        DIST: 2107
+      '8':
+        DIST: 959
+      '9':
+        DIST: 2075
+  '12':
+    LOCAL:
+      DEN: 1297
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 2022
+      '1':
+        DIST: 927
+      '10':
+        DIST: 1809
+      '11':
+        DIST: 2023
+      '13':
+        DIST: 1154
+      '14':
+        DIST: 920
+      '2':
+        DIST: 1101
+      '3':
+        DIST: 1161
+      '4':
+        DIST: 1931
+      '5':
+        DIST: 2253
+      '6':
+        DIST: 1411
+      '7':
+        DIST: 1425
+      '8':
+        DIST: 1431
+      '9':
+        DIST: 1614
+  '13':
+    LOCAL:
+      DEN: 4975
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 1124
+      '1':
+        DIST: 2152
+      '10':
+        DIST: 2061
+      '11':
+        DIST: 712
+      '12':
+        DIST: 2411
+      '14':
+        DIST: 1158
+      '2':
+        DIST: 2059
+      '3':
+        DIST: 535
+      '4':
+        DIST: 840
+      '5':
+        DIST: 2185
+      '6':
+        DIST: 657
+      '7':
+        DIST: 2086
+      '8':
+        DIST: 1780
+      '9':
+        DIST: 554
+  '14':
+    LOCAL:
+      DEN: 3201
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 1064
+      '1':
+        DIST: 1568
+      '10':
+        DIST: 1438
+      '11':
+        DIST: 1273
+      '12':
+        DIST: 1420
+      '13':
+        DIST: 952
+      '2':
+        DIST: 1709
+      '3':
+        DIST: 727
+      '4':
+        DIST: 1480
+      '5':
+        DIST: 2027
+      '6':
+        DIST: 1681
+      '7':
+        DIST: 1439
+      '8':
+        DIST: 1073
+      '9':
+        DIST: 945
+  '2':
+    LOCAL:
+      DEN: 2114
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 879
+      '1':
+        DIST: 1282
+      '10':
+        DIST: 910
+      '11':
+        DIST: 869
+      '12':
+        DIST: 1452
+      '13':
+        DIST: 1084
+      '14':
+        DIST: 1531
+      '3':
+        DIST: 2091
+      '4':
+        DIST: 1716
+      '5':
+        DIST: 674
+      '6':
+        DIST: 1911
+      '7':
+        DIST: 1942
+      '8':
+        DIST: 728
+      '9':
+        DIST: 1642
+  '3':
+    LOCAL:
+      DEN: 2412
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 531
+      '1':
+        DIST: 1237
+      '10':
+        DIST: 2327
+      '11':
+        DIST: 1944
+      '12':
+        DIST: 518
+      '13':
+        DIST: 1244
+      '14':
+        DIST: 2284
+      '2':
+        DIST: 2384
+      '4':
+        DIST: 1872
+      '5':
+        DIST: 1293
+      '6':
+        DIST: 893
+      '7':
+        DIST: 906
+      '8':
+        DIST: 702
+      '9':
+        DIST: 2275
+  '4':
+    LOCAL:
+      DEN: 3502
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 1662
+      '1':
+        DIST: 1054
+      '10':
+        DIST: 1076
+      '11':
+        DIST: 1194
+      '12':
+        DIST: 696
+      '13':
+        DIST: 1564
+      '14':
+        DIST: 1830
+      '2':
+        DIST: 1039
+      '3':
+        DIST: 2046
+      '5':
+        DIST: 1159
+      '6':
+        DIST: 611
+      '7':
+        DIST: 1368
+      '8':
+        DIST: 949
+      '9':
+        DIST: 719
+  '5':
+    LOCAL:
+      DEN: 1834
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 2257
+      '1':
+        DIST: 2391
+      '10':
+        DIST: 1789
+      '11':
+        DIST: 1072
+      '12':
+        DIST: 1522
+      '13':
+        DIST: 2238
+      '14':
+        DIST: 895
+      '2':
+        DIST: 1558
+      '3':
+        DIST: 2051
+      '4':
+        DIST: 1081
+      '6':
+        DIST: 2160
+      '7':
+        DIST: 1106
+      '8':
+        DIST: 2032
+      '9':
+        DIST: 2408
+  '6':
+    LOCAL:
+      DEN: 1166
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 619
+      '1':
+        DIST: 907
+      '10':
+        DIST: 982
+      '11':
+        DIST: 1608
+      '12':
+        DIST: 2429
+      '13':
+        DIST: 1534
+      '14':
+        DIST: 912
+      '2':
+        DIST: 1084
+      '3':
+        DIST: 1203
+      '4':
+        DIST: 1175
+      '5':
+        DIST: 1344
+      '7':
+        DIST: 1109
+      '8':
+        DIST: 2346
+      '9':
+        DIST: 2297
+  '7':
+    LOCAL:
+      DEN: 2801
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 1444
+      '1':
+        DIST: 784
+      '10':
+        DIST: 1567
+      '11':
+        DIST: 1485
+      '12':
+        DIST: 1691
+      '13':
+        DIST: 1211
+      '14':
+        DIST: 732
+      '2':
+        DIST: 1359
+      '3':
+        DIST: 1351
+      '4':
+        DIST: 1393
+      '5':
+        DIST: 1855
+      '6':
+        DIST: 1869
+      '8':
+        DIST: 1715
+      '9':
+        DIST: 893
+  '8':
+    LOCAL:
+      DEN: 2453
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 999
+      '1':
+        DIST: 1106
+      '10':
+        DIST: 2186
+      '11':
+        DIST: 911
+      '12':
+        DIST: 946
+      '13':
+        DIST: 1826
+      '14':
+        DIST: 1744
+      '2':
+        DIST: 2154
+      '3':
+        DIST: 997
+      '4':
+        DIST: 1285
+      '5':
+        DIST: 935
+      '6':
+        DIST: 972
+      '7':
+        DIST: 1381
+      '9':
+        DIST: 1765
+  '9':
+    LOCAL:
+      DEN: 1450
+    RESOURCE:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    TRANSITION:
+      '0':
+        DIST: 1357
+      '1':
+        DIST: 1975
+      '10':
+        DIST: 2171
+      '11':
+        DIST: 1605
+      '12':
+        DIST: 2098
+      '13':
+        DIST: 1617
+      '14':
+        DIST: 2400
+      '2':
+        DIST: 565
+      '3':
+        DIST: 815
+      '4':
+        DIST: 883
+      '5':
+        DIST: 1243
+      '6':
+        DIST: 693
+      '7':
+        DIST: 1092
+      '8':
+        DIST: 1972
+METRICS:
+  LOCAL:
+    DEN:
+      OBJECTIVE: MAXIMIZATION
+      OPERATION: SUM
+      POLICIES: []
+  TRANSITION:
+    DIST:
+      OBJECTIVE: MAXIMIZATION
+      OPERATION: SUM
+      POLICIES: []
+SERVICE:
+  FUNCTION:
+    F1:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    F2:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    F3:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    F4:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+    F5:
+      IFACES: 2
+      MEMORY: 512
+      VCPU: 1
+  TOPOLOGY:
+  - IN
+  - F1
+  - F2
+  - F3
+  - F4
+  - F5
+  - EN
