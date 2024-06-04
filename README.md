@@ -44,7 +44,7 @@ FLERAS is being developed using standard Python 3 language and other libraries s
 
 ### Support
 
-Contact us towards git issues requests or by the e-mail vfulber@inf.ufsm.br.
+Contact us towards git issues requests or by the e-mail vinicius@inf.ufpr.br.
 
 ### FLERAS Research Group
 
