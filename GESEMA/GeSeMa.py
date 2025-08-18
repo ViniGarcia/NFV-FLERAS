@@ -1,3 +1,4 @@
+import re
 import os
 import sys
 import time
@@ -497,6 +498,46 @@ class ServiceMapping(local_platypus.Problem):
 
 ##------##------##------##------##-----##-----##-----##------##------##------##------##------##
 
+##------##------##------##------ IMPUTATION CLASS ------##------##------##------##
+
+class Imputation:
+
+	__domainDictionary = None
+
+	def __init__(self, domainDictionary):
+
+		self.__domainDictionary = {v:k for k, v in domainDictionary.items()}	
+
+	def generate(self, candidateSource):
+
+		try:
+			candidateFile = open(candidateSource)
+			candidateData = candidateFile.readlines()[1:]
+		except:
+			-49
+		
+		try:
+			imputationList = []
+			for candidate in candidateData:
+				candidate = re.search(r"\[\[(.*?)\]\]", candidate)
+				if candidate != None:
+					candidate = candidate.group(0)[2:-2].replace("'", "").replace(" ", "").split(",")
+					flag = True
+
+					for index in range(len(candidate)):
+						if candidate[index] in self.__domainDictionary:
+							candidate[index] = self.__domainDictionary[candidate[index]]
+						else:
+							flag = False
+							break
+					if flag:
+						imputationList.append(candidate)
+		except:
+			return -50
+
+		return imputationList
+
+##------##------##------##------##-----##-----##-----##------##------##------##------##------##
 
 ##------##------##------##------ MAPPING CLASS ------##------##------##------##
 #NAME: Mapping
@@ -510,6 +551,7 @@ class Mapping:
 	__algorithm = None
 	__problem = None
 	__control = None
+	__ancestors = None
 
 	def __translate(self, result):
 		translator = local_platypus.Integer(0, len(self.__request.getDomains())-1)
@@ -590,7 +632,7 @@ class Mapping:
 		else:
 			return False
 
-	def __init__(self, request, algorithm, population, tournament, generator, crossover, crossoverProbability, mutation, mutationProbability):
+	def __init__(self, request, algorithm, population, tournament, generator, crossover, crossoverProbability, mutation, mutationProbability, imputation):
 
 		self.__request = RequestProcessor(request)
 		self.__status = self.__request.getStatus()
@@ -635,11 +677,21 @@ class Mapping:
 			mutation = local_platypus.operators.ConstrainedBitSwap(probability = float(mutationProbability), constraints = mutationConstraints)
 
 		domains = self.__request.getDomains()
+
+		if imputation != None:
+			ancestors = Imputation(self.__request.getDomainDictionary())
+			self.__ancestors = ancestors.generate(imputation)
+			if type(self.__ancestors) == int:
+				self.__status = self.__ancestors
+				return
+		else:
+			self.__ancestors = []
+
 		search = {x:list(domains[x]["TRANSITION"].keys()) for x in list(domains.keys())}
 		if generator == "GREEDY":
-			generation = local_platypus.operators.GreedyConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"], self.__request.getMetrics(), self.__request.getService(), domains)
+			generation = local_platypus.operators.GreedyConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"], self.__request.getMetrics(), self.__request.getService(), domains, self.__ancestors)
 		elif generator == "RANDOM":
-			generation = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"])
+			generation = local_platypus.operators.ConstrainedRandomGenerator(search, self.__request.getService()["DEPENDENCY"], self.__ancestors)
 
 		self.__problem = ServiceMapping(self.__request.getMetrics(), self.__request.getService(), self.__request.getDomains(), generation)
 		if local_platypus.Problem.MAXIMIZE in self.__problem.directions and algorithm == "NSGA2":
@@ -652,7 +704,6 @@ class Mapping:
 			self.__algorithm = local_platypus.SPEA2(self.__problem, population_size = population, generator = generation, selector = local_platypus.operators.TournamentSelector(tournament, dominance = local_platypus.core.AttributeDominance(local_platypus.core.fitness_key)), variator = local_platypus.operators.GAOperator(crossover, mutation))
 		else:
 			self.__status = -46
-
 
 	def execute(self, execution, mode):
 
@@ -756,6 +807,7 @@ def usage():
 	print("\t-mp mutation_probability: 0 <= crossover_probability <= 1 (std: 0.1)")
 	print("\t-g generations: 0 < generations < +n (std:1000)")
 	print("\t\t-s step_generations: 0 < generations < +n (for experimentation, uses -g to maximum)")
+	print("\t-i ancestry: a compatible output file -- from -o option (std: None)")
 	print("\t-o output: output file name (std: None)")
 	print("======================================================================")
 
@@ -772,6 +824,7 @@ et = None
 em = None
 s = None
 o = None
+i = None
 
 if len(sys.argv) < 2 or len(sys.argv)%2 != 0:
 	usage()
@@ -847,6 +900,9 @@ for flag in range(2, len(sys.argv), 2):
 	if sys.argv[flag] == "-o":
 		o = sys.argv[flag + 1]
 		continue
+	if sys.argv[flag] == "-i":
+		i = sys.argv[flag + 1]
+		continue
 	print("ERROR: INVALID FLAG "+ sys.argv[flag])
 	exit()
 
@@ -854,7 +910,11 @@ if et == None:
 	print("ERROR: NOR -g NEITHER -tt IS DEFINED")
 	exit()
 
-processor = Mapping(sys.argv[1], a, p, t, gs, c, cp, m, mp)
+processor = Mapping(sys.argv[1], a, p, t, gs, c, cp, m, mp, i)
+if processor.getStatus() < 0:
+	print("ERROR: INVALID ARGUMENT FOR PROCESSOR CREATION (CODE " + str(processor.getStatus()) + ")")
+	exit()
+
 if s == None:
 	if et == False:
 		print("ERROR: CONVERGENCE (-g) CAN ONLY BE USED DURING EXPERIMENTATIONS (-s)!!")
