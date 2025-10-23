@@ -620,7 +620,7 @@ class Mapping:
 	def __progression(self, execution, mode, step):
 
 		if mode == 0:
-			if self.__control < execution:
+			if self.__control < execution or execution == -1:
 				self.__control += step
 				return True
 			return False
@@ -775,9 +775,10 @@ class Mapping:
 			check = copy.deepcopy(final[0])
 			check.sort()
 
-			if last == check:
-				break
-			last = check
+			if execution == -1:
+				if last == check:
+					break
+				last = check
 			
 			results.append(final)
 			
@@ -876,7 +877,7 @@ for flag in range(2, len(sys.argv), 2):
 		continue
 	if sys.argv[flag] == "-g":
 		if sys.argv[flag + 1] == "CONVERGENCE":
-			et = False
+			et = -1
 		else:
 			if not sys.argv[flag + 1].isdigit() or sys.argv[flag + 1] == "0":
 				print("ERROR: NUMBER OF GENERATIONS NOT ALLOWED!!\n")
@@ -922,6 +923,7 @@ if s == None:
 	result = processor.execute(et, em)
 else:
 	result = processor.experiment(s, et, em)
+	print(result)
 
 if o != None:
 	file = open(o, "w+")
