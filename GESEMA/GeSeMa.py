@@ -568,10 +568,51 @@ class Mapping:
 			result[1][index] = values
 
 
-	def __pareto(self, aggregations):
+	def __pareto_max(self, aggregations):
 
 		aggregations = numpy.array(aggregations)
 		i_dominates_j = numpy.all(aggregations[:,None] >= aggregations, axis=-1) & numpy.any(aggregations[:,None] > aggregations, axis=-1)
+		remaining = numpy.arange(len(aggregations))
+		fronts = numpy.empty(len(aggregations), int)
+		frontier_index = 0
+
+		while remaining.size > 0:
+			dominated = numpy.any(i_dominates_j[remaining[:,None], remaining], axis=0)
+			fronts[remaining[~dominated]] = frontier_index
+			remaining = remaining[dominated]
+			frontier_index += 1
+
+		return fronts.tolist()
+
+
+	def __pareto_min(self, aggregations):
+
+		aggregations = numpy.array(aggregations)
+		i_dominates_j = numpy.all(aggregations[:,None] <= aggregations, axis=-1) & numpy.any(aggregations[:,None] < aggregations, axis=-1)
+		remaining = numpy.arange(len(aggregations))
+		fronts = numpy.empty(len(aggregations), int)
+		frontier_index = 0
+
+		while remaining.size > 0:
+			dominated = numpy.any(i_dominates_j[remaining[:,None], remaining], axis=0)
+			fronts[remaining[~dominated]] = frontier_index
+			remaining = remaining[dominated]
+			frontier_index += 1
+
+		return fronts.tolist()
+
+
+	def __pareto(self, aggregations):
+
+		min_columns = [index for index, element in enumerate(self.__problem.directions) if element == -1]
+		max_columns = [index for index, element in enumerate(self.__problem.directions) if element == 1]
+
+		aggregations = numpy.array(aggregations)
+		aggregations_min = aggregations[:,min_columns]
+		aggregations_max = aggregations[:,max_columns]
+
+		i_dominates_j = numpy.all(aggregations_min[:,None] <= aggregations_min, axis=-1) & numpy.any(aggregations_min[:,None] < aggregations_min, axis=-1) & numpy.all(aggregations_max[:,None] >= aggregations_max, axis=-1) & numpy.any(aggregations_max[:,None] > aggregations_max, axis=-1)
+
 		remaining = numpy.arange(len(aggregations))
 		fronts = numpy.empty(len(aggregations), int)
 		frontier_index = 0
@@ -592,12 +633,11 @@ class Mapping:
 			for data in step[1]:
 				include = []
 				keys = list(data.keys())
-				keys.sort()
 				for metric in keys:
 					include.append(data[metric])
 				aggregations.append(include)
-		pareto = self.__pareto(aggregations)
 
+		pareto = self.__pareto(aggregations)
 		for step in results:
 			step.append(pareto[:len(step[0])])
 			pareto = pareto[len(step[0]):]
@@ -923,7 +963,6 @@ if s == None:
 	result = processor.execute(et, em)
 else:
 	result = processor.experiment(s, et, em)
-	print(result)
 
 if o != None:
 	file = open(o, "w+")
@@ -938,3 +977,5 @@ if o != None:
 		for metric in result[1][index]:
 			file.write(str(result[1][index][metric]) + ";")
 		file.write("\n")
+
+print("==== COMPLETED ====")
