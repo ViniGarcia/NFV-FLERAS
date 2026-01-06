@@ -498,9 +498,9 @@ class ServiceMapping(local_platypus.Problem):
 
 ##------##------##------##------##-----##-----##-----##------##------##------##------##------##
 
-##------##------##------##------ IMPUTATION CLASS ------##------##------##------##
+##------##------##------##------ STEM CLASS ------##------##------##------##
 
-class Imputation:
+class Stem:
 
 	__domainDictionary = None
 
@@ -517,7 +517,7 @@ class Imputation:
 			-49
 		
 		try:
-			imputationList = []
+			stemList = []
 			for candidate in candidateData:
 				candidate = re.search(r"\[\[(.*?)\]\]", candidate)
 				if candidate != None:
@@ -531,11 +531,11 @@ class Imputation:
 							flag = False
 							break
 					if flag:
-						imputationList.append(candidate)
+						stemList.append(candidate)
 		except:
 			return -50
 
-		return imputationList
+		return stemList
 
 ##------##------##------##------##-----##-----##-----##------##------##------##------##------##
 
@@ -672,7 +672,7 @@ class Mapping:
 		else:
 			return False
 
-	def __init__(self, request, algorithm, population, tournament, generator, crossover, crossoverProbability, mutation, mutationProbability, imputation):
+	def __init__(self, request, algorithm, population, tournament, generator, crossover, crossoverProbability, mutation, mutationProbability, stem):
 
 		self.__request = RequestProcessor(request)
 		self.__status = self.__request.getStatus()
@@ -718,9 +718,9 @@ class Mapping:
 
 		domains = self.__request.getDomains()
 
-		if imputation != None:
-			ancestors = Imputation(self.__request.getDomainDictionary())
-			self.__ancestors = ancestors.generate(imputation)
+		if stem != None:
+			ancestors = Stem(self.__request.getDomainDictionary())
+			self.__ancestors = ancestors.generate(stem)
 			if type(self.__ancestors) == int:
 				self.__status = self.__ancestors
 				return
@@ -848,7 +848,7 @@ def usage():
 	print("\t-mp mutation_probability: 0 <= crossover_probability <= 1 (std: 0.1)")
 	print("\t-g generations: 0 < generations < +n (std:1000)")
 	print("\t\t-s step_generations: 0 < generations < +n (for experimentation, uses -g to maximum)")
-	print("\t-i ancestry: a compatible output file -- from -o option (std: None)")
+	print("\t-i stem: a compatible output file -- from -o option (std: None)")
 	print("\t-o output: output file name (std: None)")
 	print("======================================================================")
 
