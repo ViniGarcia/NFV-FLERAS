@@ -37,11 +37,12 @@ class GreedyConstrainedRandomGenerator(Generator):
     __search = None
     __constraints = None
     __size = None
+    __ancestors = None
 
     __gcandidates = None
     __gcontrol = None
 
-    def __init__(self, search, constraints, metrics, service, domains):
+    def __init__(self, search, constraints, metrics, service, domains, ancestors):
         super(GreedyConstrainedRandomGenerator, self).__init__()
         self.__metrics = metrics
         self.__service = service
@@ -49,6 +50,7 @@ class GreedyConstrainedRandomGenerator(Generator):
 
         self.__search = search
         self.__constraints = constraints
+        self.__ancestors = copy.copy(ancestors)
 
         self.__gcandidates = ((gesema_greedy(metrics, service, domains)).execute())[0]
         self.__gcontrol = len(self.__gcandidates) - 1
@@ -58,19 +60,38 @@ class GreedyConstrainedRandomGenerator(Generator):
         solution = Solution(problem)
         translator = Integer(0, len(self.__search) - 1)
         self.__size = len(problem.types)
+        
+        flag = True
         genome = []
 
-        if self.__gcontrol >= 0:
-            for alele in self.__gcandidates[self.__gcontrol]:
-                genome.append(translator.encode(alele))
-            solution.variables = genome
-            self.__gcontrol -= 1
-            return solution
-
-        domain = random.randint(0, len(self.__search) - 1)
-        for alele in range(self.__size):
+        if len(self.__ancestors) > 0:
+            flag = False
+            ancestor = self.__ancestors.pop(0)[:self.__size]
+            domain = ancestor.pop(0)
             genome.append(translator.encode(domain))
-            domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
+
+            while len(genome) < self.__size:
+                if len(ancestor) > 0:
+                    if not ancestor[0] in self.__search[domain]:
+                        genome = []
+                        flag = True
+                        break
+                    domain = ancestor.pop(0)
+                else:
+                    domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
+                genome.append(translator.encode(domain))
+        if flag:
+            if self.__gcontrol >= 0:
+                for alele in self.__gcandidates[self.__gcontrol]:
+                    genome.append(translator.encode(alele))
+                solution.variables = genome
+                self.__gcontrol -= 1
+                return solution
+
+            domain = random.randint(0, len(self.__search) - 1)
+            for alele in range(self.__size):
+                genome.append(translator.encode(domain))
+                domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
         solution.variables = genome
 
         for constraint in self.__constraints:
@@ -97,11 +118,13 @@ class ConstrainedRandomGenerator(Generator):
     __search = None
     __constraints = None
     __size = None
+    __ancestors = None
 
-    def __init__(self, search, constraints):
+    def __init__(self, search, constraints, ancestors):
         super(ConstrainedRandomGenerator, self).__init__()
         self.__search = search
         self.__constraints = constraints
+        self.__ancestors = copy.copy(ancestors)
 
     def generate(self, problem):
         solution = Solution(problem)
@@ -109,10 +132,30 @@ class ConstrainedRandomGenerator(Generator):
         self.__size = len(problem.types)
 
         genome = []
-        domain = random.randint(0, len(self.__search) - 1)
-        for alele in range(self.__size):
+        flag = True
+
+        if len(self.__ancestors) > 0:
+            flag = False
+            ancestor = self.__ancestors.pop(0)[:self.__size]
+            domain = ancestor.pop(0)
             genome.append(translator.encode(domain))
-            domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
+
+            while len(genome) < self.__size:
+                if len(ancestor) > 0:
+                    if not ancestor[0] in self.__search[domain]:
+                        genome = []
+                        flag = True
+                        break
+                    domain = ancestor.pop(0)
+                else:
+                    domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
+                genome.append(translator.encode(domain))
+        
+        if flag:
+            domain = random.randint(0, len(self.__search) - 1)
+            for alele in range(self.__size):
+                genome.append(translator.encode(domain))
+                domain = self.__search[domain][random.randint(0, len(self.__search[domain]) - 1)]
         solution.variables = genome
 
         for constraint in self.__constraints:

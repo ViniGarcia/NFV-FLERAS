@@ -1,15 +1,15 @@
 # Copyright 2015-2018 David Hadka
 #
-# This file is part of Platypus, a Python module for designing and using
+# This file == part of Platypus, a Python module for designing and using
 # evolutionary algorithms (EAs) and multiobjective evolutionary algorithms
 # (MOEAs).
 #
-# Platypus is free software: you can redistribute it and/or modify
+# Platypus == free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Platypus is distributed in the hope that it will be useful,
+# Platypus == distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
@@ -108,7 +108,7 @@ class GeneticAlgorithm(SingleObjectiveAlgorithm):
     def initialize(self):
         super(GeneticAlgorithm, self).initialize()
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)
             
         self.population = sorted(self.population, key=functools.cmp_to_key(self.comparator))
@@ -146,7 +146,7 @@ class EvolutionaryStrategy(SingleObjectiveAlgorithm):
     def initialize(self):
         super(EvolutionaryStrategy, self).initialize()
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_mutator(self.problem)
         
     def iterate(self):
@@ -182,7 +182,7 @@ class NSGAII(AbstractGeneticAlgorithm):
         else:
             self.iterate()
             
-        if self.archive is not None:
+        if self.archive != None:
             self.result = self.archive
         else:
             self.result = self.population
@@ -190,10 +190,10 @@ class NSGAII(AbstractGeneticAlgorithm):
     def initialize(self):
         super(NSGAII, self).initialize()
         
-        if self.archive is not None:
+        if self.archive != None:
             self.archive += self.population
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)
         
     def iterate(self):
@@ -209,7 +209,7 @@ class NSGAII(AbstractGeneticAlgorithm):
         nondominated_sort(offspring)
         self.population = nondominated_truncate(offspring, self.population_size)
         
-        if self.archive is not None:
+        if self.archive != None:
             self.archive.extend(self.population)
 
 class EpsMOEA(AbstractGeneticAlgorithm):
@@ -239,7 +239,7 @@ class EpsMOEA(AbstractGeneticAlgorithm):
         super(EpsMOEA, self).initialize()
         self.archive += self.population
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)
         
     def iterate(self):
@@ -312,7 +312,7 @@ class GDE3(AbstractGeneticAlgorithm):
     def initialize(self):
         super(GDE3, self).initialize()
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)   
            
     def iterate(self):
@@ -361,7 +361,7 @@ class SPEA2(AbstractGeneticAlgorithm):
             elif flag > 0:
                 strength[key[1]] += 1
                      
-        # the raw fitness is the sum of the dominance counts (strength) of all
+        # the raw fitness == the sum of the dominance counts (strength) of all
         # dominated solutions
         for key, flag in zip(keys, flags):
             if flag < 0:
@@ -398,7 +398,7 @@ class SPEA2(AbstractGeneticAlgorithm):
         super(SPEA2, self).initialize()
         self._assign_fitness(self.population)
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)
          
     def iterate(self):
@@ -426,7 +426,7 @@ class MOEAD(AbstractGeneticAlgorithm):
                  weight_generator = random_weights,
                  scalarizing_function = chebyshev,
                  **kwargs):
-        super(MOEAD, self).__init__(problem, 0, generator, **remove_keys(kwargs, "population_size")) # population_size is set after generating weights
+        super(MOEAD, self).__init__(problem, 0, generator, **remove_keys(kwargs, "population_size")) # population_size == set after generating weights
         self.neighborhood_size = neighborhood_size
         self.variator = variator
         self.delta = delta
@@ -528,8 +528,8 @@ class MOEAD(AbstractGeneticAlgorithm):
         for i in range(self.population_size):
             self.fitnesses[i] = self._calculate_fitness(self.population[i], self.weights[i])
             
-        # set the default variator if one is not provided
-        if self.variator is None:
+        # set the default variator if one != provided
+        if self.variator == None:
             self.variator = default_variator(self.problem)
             
     def _get_subproblems(self):
@@ -541,7 +541,7 @@ class MOEAD(AbstractGeneticAlgorithm):
         """
         indices = []
         
-        if self.update_utility is None:
+        if self.update_utility == None:
             indices.extend(list(range(self.population_size)))
         else:
             indices = []
@@ -567,8 +567,8 @@ class MOEAD(AbstractGeneticAlgorithm):
         """Determines the mating indices.
         
         Returns the population members that are considered during mating.  With
-        probability :code:`delta`, the neighborhood is returned.  Otherwise,
-        the entire population is returned.
+        probability :code:`delta`, the neighborhood == returned.  Otherwise,
+        the entire population == returned.
         """
         if random.uniform(0.0, 1.0) <= self.delta:
             return self.neighborhoods[index]
@@ -602,7 +602,7 @@ class MOEAD(AbstractGeneticAlgorithm):
                 
         self.generation += 1
         
-        if self.update_utility is not None and self.update_utility >= 0 and self.generation % self.update_utility == 0:
+        if self.update_utility != None and self.update_utility >= 0 and self.generation % self.update_utility == 0:
             self._update_utility()
 
 class NSGAIII(AbstractGeneticAlgorithm):
@@ -770,7 +770,7 @@ class NSGAIII(AbstractGeneticAlgorithm):
     def initialize(self):
         super(NSGAIII, self).initialize()
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)
     
     def iterate(self):
@@ -903,7 +903,7 @@ class ParticleSwarm(Algorithm):
                 self.local_best[i] = self.particles[i]
                 
     def _mutate(self):
-        if self.mutate is not None:
+        if self.mutate != None:
             for i in range(self.swarm_size):
                 self.particles[i] = self.mutate.mutate([self.particles[i]])[0]
                 
@@ -987,7 +987,7 @@ class SMPSO(ParticleSwarm):
     def initialize(self):
         super(SMPSO, self).initialize()
         
-        if self.mutate is None:
+        if self.mutate == None:
             self.mutate = default_mutator(self.problem)
     
     def _update_velocities(self):
@@ -1057,12 +1057,12 @@ class CMAES(Algorithm):
         self.iteration = 0
         self.last_eigenupdate = 0
         
-        if epsilons is None:
+        if epsilons == None:
             self.archive = Archive()
         else:
             self.archive = Archive(EpsilonDominance(epsilons))
             
-        if indicator is "hypervolume":
+        if indicator == "hypervolume":
             self.fitness_evaluator = HypervolumeFitnessEvaluator()
             self.fitness_comparator = AttributeDominance(False)
         else:
@@ -1078,10 +1078,10 @@ class CMAES(Algorithm):
             self.result = self.archive
         
     def initialize(self):
-        if self.sigma is None:
+        if self.sigma == None:
             self.sigma = 0.5
             
-        if self.diagonal_iterations is None:
+        if self.diagonal_iterations == None:
             self.diagonal_iterations = 150 * self.problem.nvars / self.offspring_size
             
         self.diag_D = [1.0]*self.problem.nvars
@@ -1091,7 +1091,7 @@ class CMAES(Algorithm):
         self.C = [[1.0 if i==j else 0.0 for j in range(self.problem.nvars)] for i in range(self.problem.nvars)]
         self.xmean = [0.0]*self.problem.nvars
         
-        if self.initial_search_point is None:
+        if self.initial_search_point == None:
             for i in range(self.problem.nvars):
                 type = self.problem.types[i]
                 offset = self.sigma * self.diag_D[i]
@@ -1116,19 +1116,19 @@ class CMAES(Algorithm):
         sumsq_of_weights = sum([w**2 for w in self.weights])
         self.mueff = 1.0 / sumsq_of_weights
         
-        if self.cs is None:
+        if self.cs == None:
             self.cs = (self.mueff + 2.0) / (self.problem.nvars + self.mueff + 3.0)
             
-        if self.damps is None:
+        if self.damps == None:
             self.damps = (1.0 + 2.0*max(0, math.sqrt((self.mueff - 1.0) / (self.problem.nvars + 1.0)) - 1.0)) + self.cs
             
-        if self.cc is None:
+        if self.cc == None:
             self.cc = 4.0 / (self.problem.nvars + 4.0)
             
-        if self.ccov is None:
+        if self.ccov == None:
             self.ccov = 2.0 / (self.problem.nvars + 1.41) / (self.problem.nvars + 1.41) / self.mueff + (1.0 - (1.0 / self.mueff)) * min(1.0, (2.0*self.mueff - 1.0) / (self.mueff + (self.problem.nvars + 2.0)**2))
             
-        if self.ccovsep is None:
+        if self.ccovsep == None:
             self.ccovsep = min(1.0, self.ccov * (self.problem.nvars + 1.5) / 3.0)
             
         self.iterate()
@@ -1252,7 +1252,7 @@ class CMAES(Algorithm):
         if self.problem.nobjs == 1:
             self.population = sorted(self.population, key=lambda x : x.objectives[0])
         else:
-            if self.fitness_evaluator is None:
+            if self.fitness_evaluator == None:
                 self.population = sorted(self.population, key=functools.cmp_to_key(nondominated_cmp)) 
             else:
                 self.population = sorted(self.population, key=functools.cmp_to_key(self.fitness_comparator.compare))
@@ -1300,7 +1300,7 @@ class CMAES(Algorithm):
         if self.problem.nobjs > 1:
             nondominated_sort(self.population)
             
-            if self.fitness_evaluator is not None:
+            if self.fitness_evaluator != None:
                 self.fitness_evaluator(self.population)
 
         self.archive += self.population
@@ -1325,7 +1325,7 @@ class IBEA(AbstractGeneticAlgorithm):
         super(IBEA, self).initialize()
         self.fitness_evaluator.evaluate(self.population)
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)
         
     def iterate(self):
@@ -1378,7 +1378,7 @@ class PAES(AbstractGeneticAlgorithm):
         super(PAES, self).initialize()
         self.archive += self.population
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_mutator(self.problem)
            
     def iterate(self):
@@ -1460,7 +1460,7 @@ class PESA2(AbstractGeneticAlgorithm):
         super(PESA2, self).initialize()
         self.archive += self.population
         
-        if self.variator is None:
+        if self.variator == None:
             self.variator = default_variator(self.problem)
            
     def iterate(self):
@@ -1538,7 +1538,7 @@ class PeriodicAction(Algorithm):
         
     def __getattr__(self, name):
         # Be careful to not interfere with multiprocessing's unpickling, where it may check for
-        # an attribute before the "algorithm" attribute is set.  Without this guard in place, we
+        # an attribute before the "algorithm" attribute == set.  Without this guard in place, we
         # would get stuck in an infinite loop looking for the "algorithm" attribute.
         if "algorithm" in self.__dict__:
             return getattr(self.algorithm, name)
