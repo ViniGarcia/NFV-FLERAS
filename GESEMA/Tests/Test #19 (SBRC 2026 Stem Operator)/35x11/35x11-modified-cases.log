@@ -1,0 +1,985 @@
+###################################################
+Increasing network demand (Mods 1, 2, 3, 11, 12, 13)
+###################################################
+
+Mod_1-------------------------------------------
+2% of domains:
+	+2% cost
+	-2% bdw
+	
+Domains modified: 1
+	Selected domains: ['33']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 33: 83 -> 84.66 (2%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 33:
+			To Domain 0: 841 -> 824.18 (-2%)
+			To Domain 1: 352 -> 344.96 (-2%)
+			To Domain 2: 341 -> 334.18 (-2%)
+			... and 31 more transitions
+
+Mod_2-------------------------------------------
+5% of domains:
+	+5% cost
+	-5% bdw
+
+Domains modified: 2
+	Selected domains: ['20', '19']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 20: 28 -> 29.400000000000002 (5%)
+		Domain 19: 40 -> 42.0 (5%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 20:
+			To Domain 0: 281 -> 266.95 (-5%)
+			To Domain 1: 756 -> 718.1999999999999 (-5%)
+			To Domain 2: 803 -> 762.8499999999999 (-5%)
+			... and 31 more transitions
+		From Domain 19:
+			To Domain 0: 639 -> 607.05 (-5%)
+			To Domain 1: 209 -> 198.54999999999998 (-5%)
+			To Domain 2: 729 -> 692.55 (-5%)
+			... and 31 more transitions
+
+Mod_3-------------------------------------------
+10% of domains:
+	+10% cost
+	-10% bdw
+	    
+Domains modified: 4
+	Selected domains: ['22', '7', '30', '15']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 22: 39 -> 42.900000000000006 (10%)
+		Domain 7: 79 -> 86.9 (10%)
+		Domain 30: 15 -> 16.5 (10%)
+		Domain 15: 69 -> 75.9 (10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 22:
+			To Domain 0: 748 -> 673.2 (-10%)
+			To Domain 1: 237 -> 213.3 (-10%)
+			To Domain 2: 581 -> 522.9 (-10%)
+			... and 31 more transitions
+		From Domain 7:
+			To Domain 0: 719 -> 647.1 (-10%)
+			To Domain 1: 954 -> 858.6 (-10%)
+			To Domain 2: 800 -> 720.0 (-10%)
+			... and 31 more transitions
+		From Domain 30:
+			To Domain 0: 408 -> 367.2 (-10%)
+			To Domain 1: 691 -> 621.9 (-10%)
+			To Domain 2: 339 -> 305.1 (-10%)
+			... and 31 more transitions
+		From Domain 15:
+			To Domain 0: 244 -> 219.6 (-10%)
+			To Domain 1: 219 -> 197.1 (-10%)
+			To Domain 2: 203 -> 182.70000000000002 (-10%)
+			... and 31 more transitions
+
+Mod_11-------------------------------------------
+2 domains (in best heritage):
+	+10% cost
+	-10% bdw
+	
+Domains modified: 2
+	Selected domains: ['19', '6']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 19: 40 -> 44.0 (10%)
+		Domain 6: 10 -> 11.0 (10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 19:
+			To Domain 0: 639 -> 575.1 (-10%)
+			To Domain 1: 209 -> 188.1 (-10%)
+			To Domain 2: 729 -> 656.1 (-10%)
+			... and 31 more transitions
+		From Domain 6:
+			To Domain 0: 350 -> 315.0 (-10%)
+			To Domain 1: 227 -> 204.3 (-10%)
+			To Domain 2: 392 -> 352.8 (-10%)
+			... and 31 more transitions
+
+2 domains (in random heritage):
+	+10% cost
+	-10% bdw
+	
+Domains modified: 2
+	Selected domains: ['31', '23']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 31: 14 -> 15.400000000000002 (10%)
+		Domain 23: 32 -> 35.2 (10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 31:
+			To Domain 0: 920 -> 828.0 (-10%)
+			To Domain 1: 348 -> 313.2 (-10%)
+			To Domain 2: 451 -> 405.90000000000003 (-10%)
+			... and 31 more transitions
+		From Domain 23:
+			To Domain 0: 920 -> 828.0 (-10%)
+			To Domain 1: 834 -> 750.6 (-10%)
+			To Domain 2: 349 -> 314.1 (-10%)
+			... and 31 more transitions
+
+Mod_12-------------------------------------------
+4 domains (in best heritage):
+	+10% cost
+	-10% bdw
+	
+Domains modified: 4
+	Selected domains: ['19', '6', '26', '22']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 19: 40 -> 44.0 (10%)
+		Domain 6: 10 -> 11.0 (10%)
+		Domain 26: 19 -> 20.900000000000002 (10%)
+		Domain 22: 39 -> 42.900000000000006 (10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 19:
+			To Domain 0: 639 -> 575.1 (-10%)
+			To Domain 1: 209 -> 188.1 (-10%)
+			To Domain 2: 729 -> 656.1 (-10%)
+			... and 31 more transitions
+		From Domain 6:
+			To Domain 0: 350 -> 315.0 (-10%)
+			To Domain 1: 227 -> 204.3 (-10%)
+			To Domain 2: 392 -> 352.8 (-10%)
+			... and 31 more transitions
+		From Domain 26:
+			To Domain 0: 452 -> 406.8 (-10%)
+			To Domain 1: 155 -> 139.5 (-10%)
+			To Domain 2: 757 -> 681.3000000000001 (-10%)
+			... and 31 more transitions
+		From Domain 22:
+			To Domain 0: 748 -> 673.2 (-10%)
+			To Domain 1: 237 -> 213.3 (-10%)
+			To Domain 2: 581 -> 522.9 (-10%)
+			... and 31 more transitions
+
+4 domains (in random heritage):
+	+10% cost
+	-10% bdw
+	
+Domains modified: 4
+	Selected domains: ['31', '23', '26', '24']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 31: 14 -> 15.400000000000002 (10%)
+		Domain 23: 32 -> 35.2 (10%)
+		Domain 26: 19 -> 20.900000000000002 (10%)
+		Domain 24: 12 -> 13.200000000000001 (10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 31:
+			To Domain 0: 920 -> 828.0 (-10%)
+			To Domain 1: 348 -> 313.2 (-10%)
+			To Domain 2: 451 -> 405.90000000000003 (-10%)
+			... and 31 more transitions
+		From Domain 23:
+			To Domain 0: 920 -> 828.0 (-10%)
+			To Domain 1: 834 -> 750.6 (-10%)
+			To Domain 2: 349 -> 314.1 (-10%)
+			... and 31 more transitions
+		From Domain 26:
+			To Domain 0: 452 -> 406.8 (-10%)
+			To Domain 1: 155 -> 139.5 (-10%)
+			To Domain 2: 757 -> 681.3000000000001 (-10%)
+			... and 31 more transitions
+		From Domain 24:
+			To Domain 0: 787 -> 708.3000000000001 (-10%)
+			To Domain 1: 737 -> 663.3000000000001 (-10%)
+			To Domain 2: 591 -> 531.9 (-10%)
+			... and 31 more transitions
+
+Mod_13-------------------------------------------
+6 domains (in best heritage):
+	+10% cost
+	-10% bdw
+	
+Domains modified: 6
+	Selected domains: ['19', '6', '26', '22', '24', '23']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 19: 40 -> 44.0 (10%)
+		Domain 6: 10 -> 11.0 (10%)
+		Domain 26: 19 -> 20.900000000000002 (10%)
+		Domain 22: 39 -> 42.900000000000006 (10%)
+		Domain 24: 12 -> 13.200000000000001 (10%)
+		Domain 23: 32 -> 35.2 (10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 19:
+			To Domain 0: 639 -> 575.1 (-10%)
+			To Domain 1: 209 -> 188.1 (-10%)
+			To Domain 2: 729 -> 656.1 (-10%)
+			... and 31 more transitions
+		From Domain 6:
+			To Domain 0: 350 -> 315.0 (-10%)
+			To Domain 1: 227 -> 204.3 (-10%)
+			To Domain 2: 392 -> 352.8 (-10%)
+			... and 31 more transitions
+		From Domain 26:
+			To Domain 0: 452 -> 406.8 (-10%)
+			To Domain 1: 155 -> 139.5 (-10%)
+			To Domain 2: 757 -> 681.3000000000001 (-10%)
+			... and 31 more transitions
+		From Domain 22:
+			To Domain 0: 748 -> 673.2 (-10%)
+			To Domain 1: 237 -> 213.3 (-10%)
+			To Domain 2: 581 -> 522.9 (-10%)
+			... and 31 more transitions
+		From Domain 24:
+			To Domain 0: 787 -> 708.3000000000001 (-10%)
+			To Domain 1: 737 -> 663.3000000000001 (-10%)
+			To Domain 2: 591 -> 531.9 (-10%)
+			... and 31 more transitions
+		From Domain 23:
+			To Domain 0: 920 -> 828.0 (-10%)
+			To Domain 1: 834 -> 750.6 (-10%)
+			To Domain 2: 349 -> 314.1 (-10%)
+			... and 31 more transitions
+
+6 domains (in random heritage):
+	+10% cost
+	-10% bdw
+	
+Domains modified: 6
+	Selected domains: ['31', '23', '26', '24', '32', '7']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 31: 14 -> 15.400000000000002 (10%)
+		Domain 23: 32 -> 35.2 (10%)
+		Domain 26: 19 -> 20.900000000000002 (10%)
+		Domain 24: 12 -> 13.200000000000001 (10%)
+		Domain 32: 21 -> 23.1 (10%)
+		Domain 7: 79 -> 86.9 (10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 31:
+			To Domain 0: 920 -> 828.0 (-10%)
+			To Domain 1: 348 -> 313.2 (-10%)
+			To Domain 2: 451 -> 405.90000000000003 (-10%)
+			... and 31 more transitions
+		From Domain 23:
+			To Domain 0: 920 -> 828.0 (-10%)
+			To Domain 1: 834 -> 750.6 (-10%)
+			To Domain 2: 349 -> 314.1 (-10%)
+			... and 31 more transitions
+		From Domain 26:
+			To Domain 0: 452 -> 406.8 (-10%)
+			To Domain 1: 155 -> 139.5 (-10%)
+			To Domain 2: 757 -> 681.3000000000001 (-10%)
+			... and 31 more transitions
+		From Domain 24:
+			To Domain 0: 787 -> 708.3000000000001 (-10%)
+			To Domain 1: 737 -> 663.3000000000001 (-10%)
+			To Domain 2: 591 -> 531.9 (-10%)
+			... and 31 more transitions
+		From Domain 32:
+			To Domain 0: 811 -> 729.9 (-10%)
+			To Domain 1: 605 -> 544.5 (-10%)
+			To Domain 2: 970 -> 873.0 (-10%)
+			... and 31 more transitions
+		From Domain 7:
+			To Domain 0: 719 -> 647.1 (-10%)
+			To Domain 1: 954 -> 858.6 (-10%)
+			To Domain 2: 800 -> 720.0 (-10%)
+			... and 31 more transitions
+
+###################################################
+Decreasing network demand (Mods 4, 5, 6, 7, 8, 9, 10)
+###################################################
+
+Mod_4-------------------------------------------
+2% of domains:
+	-2% cost
+	+2% bdw
+    
+Domains modified: 1
+	Selected domains: ['23']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 23: 32 -> 31.36 (-2%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 23:
+			To Domain 0: 920 -> 938.4 (2%)
+			To Domain 1: 834 -> 850.6800000000001 (2%)
+			To Domain 2: 349 -> 355.98 (2%)
+			... and 31 more transitions
+
+Mod_5-------------------------------------------
+5% of domains:
+	-5% cost
+	+5% bdw
+
+Domains modified: 2
+	Selected domains: ['7', '16']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 7: 79 -> 75.05 (-5%)
+		Domain 16: 68 -> 64.6 (-5%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 7:
+			To Domain 0: 719 -> 754.95 (5%)
+			To Domain 1: 954 -> 1001.7 (5%)
+			To Domain 2: 800 -> 840.0 (5%)
+			... and 31 more transitions
+		From Domain 16:
+			To Domain 0: 472 -> 495.6 (5%)
+			To Domain 1: 222 -> 233.10000000000002 (5%)
+			To Domain 2: 655 -> 687.75 (5%)
+			... and 31 more transitions
+
+Mod_6-------------------------------------------
+10% of domains:
+	-10% cost
+	+10% bdw
+
+Domains modified: 4
+	Selected domains: ['5', '25', '32', '28']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 5: 17 -> 15.3 (-10%)
+		Domain 25: 80 -> 72.0 (-10%)
+		Domain 32: 21 -> 18.900000000000002 (-10%)
+		Domain 28: 43 -> 38.7 (-10%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 5:
+			To Domain 0: 744 -> 818.4000000000001 (10%)
+			To Domain 1: 459 -> 504.90000000000003 (10%)
+			To Domain 2: 922 -> 1014.2 (10%)
+			... and 31 more transitions
+		From Domain 25:
+			To Domain 0: 256 -> 281.6 (10%)
+			To Domain 1: 176 -> 193.60000000000002 (10%)
+			To Domain 2: 614 -> 675.4000000000001 (10%)
+			... and 31 more transitions
+		From Domain 32:
+			To Domain 0: 811 -> 892.1 (10%)
+			To Domain 1: 605 -> 665.5 (10%)
+			To Domain 2: 970 -> 1067.0 (10%)
+			... and 31 more transitions
+		From Domain 28:
+			To Domain 0: 330 -> 363.00000000000006 (10%)
+			To Domain 1: 387 -> 425.70000000000005 (10%)
+			To Domain 2: 271 -> 298.1 (10%)
+			... and 31 more transitions
+
+Mod_7-------------------------------------------
+25% of domains:
+	-10% ~ -30% cost
+	+10% ~ +30% bdw
+
+Domains modified: 9
+	Selected domains: ['10', '33', '19', '3', '0', '5', '25', '27', '24']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 10: 42 -> 35.28 (-16%)
+		Domain 33: 83 -> 62.25 (-25%)
+		Domain 19: 40 -> 36.0 (-10%)
+		Domain 3: 69 -> 61.410000000000004 (-11%)
+		Domain 0: 32 -> 28.8 (-10%)
+		Domain 5: 17 -> 14.11 (-17%)
+		Domain 25: 80 -> 71.2 (-11%)
+		Domain 27: 65 -> 57.2 (-12%)
+		Domain 24: 12 -> 8.64 (-28%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 10:
+			To Domain 0: 812 -> 1023.12 (26%)
+			To Domain 1: 869 -> 981.9699999999999 (13%)
+			To Domain 2: 608 -> 766.08 (26%)
+			... and 31 more transitions
+		From Domain 33:
+			To Domain 0: 841 -> 950.3299999999999 (13%)
+			To Domain 1: 352 -> 432.96 (23%)
+			To Domain 2: 341 -> 395.55999999999995 (16%)
+			... and 31 more transitions
+		From Domain 19:
+			To Domain 0: 639 -> 734.8499999999999 (15%)
+			To Domain 1: 209 -> 244.52999999999997 (17%)
+			To Domain 2: 729 -> 852.93 (17%)
+			... and 31 more transitions
+		From Domain 3:
+			To Domain 0: 443 -> 553.75 (25%)
+			To Domain 1: 165 -> 199.65 (21%)
+			To Domain 2: 585 -> 713.6999999999999 (22%)
+			... and 31 more transitions
+		From Domain 0:
+			To Domain 1: 904 -> 1084.8 (20%)
+			To Domain 2: 974 -> 1110.3600000000001 (14%)
+			To Domain 3: 745 -> 968.5 (30%)
+			... and 31 more transitions
+		From Domain 5:
+			To Domain 0: 744 -> 959.76 (29%)
+			To Domain 1: 459 -> 532.4399999999999 (16%)
+			To Domain 2: 922 -> 1134.06 (23%)
+			... and 31 more transitions
+		From Domain 25:
+			To Domain 0: 256 -> 332.8 (30%)
+			To Domain 1: 176 -> 204.16 (16%)
+			To Domain 2: 614 -> 687.6800000000001 (12%)
+			... and 31 more transitions
+		From Domain 27:
+			To Domain 0: 264 -> 324.71999999999997 (23%)
+			To Domain 1: 335 -> 385.24999999999994 (15%)
+			To Domain 2: 930 -> 1023.0000000000001 (10%)
+			... and 31 more transitions
+		From Domain 24:
+			To Domain 0: 787 -> 960.14 (22%)
+			To Domain 1: 737 -> 854.92 (16%)
+			To Domain 2: 591 -> 697.38 (18%)
+			... and 31 more transitions
+
+Mod_8-------------------------------------------
+50% of domains:
+	-10% ~ -30% cost
+	+10% ~ +30% bdw
+
+Domains modified: 18
+	Selected domains: ['34', '32', '12', '25', '9', '27', '0', '14', '1', '6', '20', '7', '5', '24', '28', '2', '17', '26']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 34: 51 -> 45.39 (-11%)
+		Domain 32: 21 -> 17.220000000000002 (-18%)
+		Domain 12: 85 -> 61.199999999999996 (-28%)
+		Domain 25: 80 -> 64.0 (-20%)
+		Domain 9: 51 -> 43.35 (-15%)
+		Domain 27: 65 -> 58.5 (-10%)
+		Domain 0: 32 -> 26.56 (-17%)
+		Domain 14: 45 -> 33.75 (-25%)
+		Domain 1: 94 -> 74.26 (-21%)
+		Domain 6: 10 -> 8.5 (-15%)
+		Domain 20: 28 -> 21.560000000000002 (-23%)
+		Domain 7: 79 -> 60.83 (-23%)
+		Domain 5: 17 -> 13.940000000000001 (-18%)
+		Domain 24: 12 -> 10.2 (-15%)
+		Domain 28: 43 -> 30.529999999999998 (-29%)
+		Domain 2: 42 -> 35.28 (-16%)
+		Domain 17: 64 -> 47.36 (-26%)
+		Domain 26: 19 -> 15.010000000000002 (-21%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 34:
+			To Domain 0: 751 -> 826.1 (10%)
+			To Domain 1: 669 -> 849.63 (27%)
+			To Domain 2: 178 -> 217.16 (22%)
+			... and 31 more transitions
+		From Domain 32:
+			To Domain 0: 811 -> 1054.3 (30%)
+			To Domain 1: 605 -> 732.05 (21%)
+			To Domain 2: 970 -> 1096.1 (13%)
+			... and 31 more transitions
+		From Domain 12:
+			To Domain 0: 299 -> 346.84 (16%)
+			To Domain 1: 982 -> 1099.8400000000001 (12%)
+			To Domain 2: 399 -> 438.90000000000003 (10%)
+			... and 31 more transitions
+		From Domain 25:
+			To Domain 0: 256 -> 327.68 (28%)
+			To Domain 1: 176 -> 197.12 (12%)
+			To Domain 2: 614 -> 742.9399999999999 (21%)
+			... and 31 more transitions
+		From Domain 9:
+			To Domain 0: 654 -> 824.04 (26%)
+			To Domain 1: 500 -> 625.0 (25%)
+			To Domain 2: 813 -> 1032.51 (27%)
+			... and 31 more transitions
+		From Domain 27:
+			To Domain 0: 264 -> 290.40000000000003 (10%)
+			To Domain 1: 335 -> 435.5 (30%)
+			To Domain 2: 930 -> 1088.1 (17%)
+			... and 31 more transitions
+		From Domain 0:
+			To Domain 1: 904 -> 1084.8 (20%)
+			To Domain 2: 974 -> 1120.1 (15%)
+			To Domain 3: 745 -> 841.8499999999999 (13%)
+			... and 31 more transitions
+		From Domain 14:
+			To Domain 0: 846 -> 1006.74 (19%)
+			To Domain 1: 846 -> 1049.04 (24%)
+			To Domain 2: 355 -> 454.40000000000003 (28%)
+			... and 31 more transitions
+		From Domain 1:
+			To Domain 0: 568 -> 721.36 (27%)
+			To Domain 2: 327 -> 359.70000000000005 (10%)
+			To Domain 3: 132 -> 153.11999999999998 (16%)
+			... and 31 more transitions
+		From Domain 6:
+			To Domain 0: 350 -> 409.5 (17%)
+			To Domain 1: 227 -> 276.94 (22%)
+			To Domain 2: 392 -> 442.96 (13%)
+			... and 31 more transitions
+		From Domain 20:
+			To Domain 0: 281 -> 317.53 (13%)
+			To Domain 1: 756 -> 899.64 (19%)
+			To Domain 2: 803 -> 971.63 (21%)
+			... and 31 more transitions
+		From Domain 7:
+			To Domain 0: 719 -> 869.99 (21%)
+			To Domain 1: 954 -> 1240.2 (30%)
+			To Domain 2: 800 -> 984.0 (23%)
+			... and 31 more transitions
+		From Domain 5:
+			To Domain 0: 744 -> 937.44 (26%)
+			To Domain 1: 459 -> 514.08 (12%)
+			To Domain 2: 922 -> 1023.4200000000001 (11%)
+			... and 31 more transitions
+		From Domain 24:
+			To Domain 0: 787 -> 873.57 (11%)
+			To Domain 1: 737 -> 899.14 (22%)
+			To Domain 2: 591 -> 715.11 (21%)
+			... and 31 more transitions
+		From Domain 28:
+			To Domain 0: 330 -> 389.4 (18%)
+			To Domain 1: 387 -> 425.70000000000005 (10%)
+			To Domain 2: 271 -> 325.2 (20%)
+			... and 31 more transitions
+		From Domain 2:
+			To Domain 0: 807 -> 1000.68 (24%)
+			To Domain 1: 423 -> 524.52 (24%)
+			To Domain 3: 513 -> 569.4300000000001 (11%)
+			... and 31 more transitions
+		From Domain 17:
+			To Domain 0: 588 -> 746.76 (27%)
+			To Domain 1: 904 -> 1030.5600000000002 (14%)
+			To Domain 2: 952 -> 1190.0 (25%)
+			... and 31 more transitions
+		From Domain 26:
+			To Domain 0: 452 -> 546.92 (21%)
+			To Domain 1: 155 -> 201.5 (30%)
+			To Domain 2: 757 -> 908.4 (20%)
+			... and 31 more transitions
+
+Mod_9-------------------------------------------
+75% of domains:
+	-10% ~ -30% cost
+	+10% ~ +30% bdw
+
+Domains modified: 26
+	Selected domains: ['4', '22', '33', '26', '31', '18', '17', '8', '34', '9', '10', '2', '28', '24', '7', '20', '6', '14', '0', '1', '15', '3', '30', '19', '21', '16']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 4: 24 -> 20.88 (-13%)
+		Domain 22: 39 -> 33.15 (-15%)
+		Domain 33: 83 -> 63.910000000000004 (-23%)
+		Domain 26: 19 -> 14.63 (-23%)
+		Domain 31: 14 -> 12.04 (-14%)
+		Domain 18: 83 -> 60.589999999999996 (-27%)
+		Domain 17: 64 -> 56.32 (-12%)
+		Domain 8: 40 -> 33.6 (-16%)
+		Domain 34: 51 -> 44.88 (-12%)
+		Domain 9: 51 -> 43.86 (-14%)
+		Domain 10: 42 -> 31.92 (-24%)
+		Domain 2: 42 -> 35.28 (-16%)
+		Domain 28: 43 -> 33.11 (-23%)
+		Domain 24: 12 -> 9.0 (-25%)
+		Domain 7: 79 -> 58.46 (-26%)
+		Domain 20: 28 -> 23.8 (-15%)
+		Domain 6: 10 -> 8.100000000000001 (-19%)
+		Domain 14: 45 -> 32.4 (-28%)
+		Domain 0: 32 -> 23.36 (-27%)
+		Domain 1: 94 -> 74.26 (-21%)
+		Domain 15: 69 -> 55.2 (-20%)
+		Domain 3: 69 -> 51.06 (-26%)
+		Domain 30: 15 -> 13.05 (-13%)
+		Domain 19: 40 -> 32.800000000000004 (-18%)
+		Domain 21: 45 -> 40.05 (-11%)
+		Domain 16: 68 -> 57.12 (-16%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 4:
+			To Domain 0: 722 -> 794.2 (10%)
+			To Domain 1: 202 -> 250.48 (24%)
+			To Domain 2: 260 -> 288.6 (11%)
+			... and 31 more transitions
+		From Domain 22:
+			To Domain 0: 748 -> 905.0799999999999 (21%)
+			To Domain 1: 237 -> 272.54999999999995 (15%)
+			To Domain 2: 581 -> 679.77 (17%)
+			... and 31 more transitions
+		From Domain 33:
+			To Domain 0: 841 -> 1000.79 (19%)
+			To Domain 1: 352 -> 432.96 (23%)
+			To Domain 2: 341 -> 429.66 (26%)
+			... and 31 more transitions
+		From Domain 26:
+			To Domain 0: 452 -> 565.0 (25%)
+			To Domain 1: 155 -> 179.79999999999998 (16%)
+			To Domain 2: 757 -> 870.55 (15%)
+			... and 31 more transitions
+		From Domain 31:
+			To Domain 0: 920 -> 1085.6 (18%)
+			To Domain 1: 348 -> 421.08 (21%)
+			To Domain 2: 451 -> 505.12000000000006 (12%)
+			... and 31 more transitions
+		From Domain 18:
+			To Domain 0: 564 -> 631.6800000000001 (12%)
+			To Domain 1: 425 -> 518.5 (22%)
+			To Domain 2: 647 -> 821.69 (27%)
+			... and 31 more transitions
+		From Domain 17:
+			To Domain 0: 588 -> 652.6800000000001 (11%)
+			To Domain 1: 904 -> 1130.0 (25%)
+			To Domain 2: 952 -> 1161.44 (22%)
+			... and 31 more transitions
+		From Domain 8:
+			To Domain 0: 189 -> 234.35999999999999 (24%)
+			To Domain 1: 292 -> 341.64 (17%)
+			To Domain 2: 931 -> 1145.1299999999999 (23%)
+			... and 31 more transitions
+		From Domain 34:
+			To Domain 0: 751 -> 833.6100000000001 (11%)
+			To Domain 1: 669 -> 849.63 (27%)
+			To Domain 2: 178 -> 215.38 (21%)
+			... and 31 more transitions
+		From Domain 9:
+			To Domain 0: 654 -> 791.34 (21%)
+			To Domain 1: 500 -> 645.0 (29%)
+			To Domain 2: 813 -> 1048.77 (29%)
+			... and 31 more transitions
+		From Domain 10:
+			To Domain 0: 812 -> 909.44 (12%)
+			To Domain 1: 869 -> 1077.56 (24%)
+			To Domain 2: 608 -> 735.68 (21%)
+			... and 31 more transitions
+		From Domain 2:
+			To Domain 0: 807 -> 976.47 (21%)
+			To Domain 1: 423 -> 482.22 (14%)
+			To Domain 3: 513 -> 579.6899999999999 (13%)
+			... and 31 more transitions
+		From Domain 28:
+			To Domain 0: 330 -> 415.8 (26%)
+			To Domain 1: 387 -> 448.91999999999996 (16%)
+			To Domain 2: 271 -> 322.49 (19%)
+			... and 31 more transitions
+		From Domain 24:
+			To Domain 0: 787 -> 873.57 (11%)
+			To Domain 1: 737 -> 958.1 (30%)
+			To Domain 2: 591 -> 703.29 (19%)
+			... and 31 more transitions
+		From Domain 7:
+			To Domain 0: 719 -> 812.4699999999999 (13%)
+			To Domain 1: 954 -> 1125.72 (18%)
+			To Domain 2: 800 -> 1024.0 (28%)
+			... and 31 more transitions
+		From Domain 20:
+			To Domain 0: 281 -> 311.91 (11%)
+			To Domain 1: 756 -> 922.3199999999999 (22%)
+			To Domain 2: 803 -> 971.63 (21%)
+			... and 31 more transitions
+		From Domain 6:
+			To Domain 0: 350 -> 437.5 (25%)
+			To Domain 1: 227 -> 279.21 (23%)
+			To Domain 2: 392 -> 450.79999999999995 (15%)
+			... and 31 more transitions
+		From Domain 14:
+			To Domain 0: 846 -> 947.5200000000001 (12%)
+			To Domain 1: 846 -> 1006.74 (19%)
+			To Domain 2: 355 -> 411.79999999999995 (16%)
+			... and 31 more transitions
+		From Domain 0:
+			To Domain 1: 904 -> 1093.84 (21%)
+			To Domain 2: 974 -> 1081.14 (11%)
+			To Domain 3: 745 -> 961.0500000000001 (29%)
+			... and 31 more transitions
+		From Domain 1:
+			To Domain 0: 568 -> 670.24 (18%)
+			To Domain 2: 327 -> 421.83 (29%)
+			To Domain 3: 132 -> 167.64000000000001 (27%)
+			... and 31 more transitions
+		From Domain 15:
+			To Domain 0: 244 -> 290.36 (19%)
+			To Domain 1: 219 -> 258.41999999999996 (18%)
+			To Domain 2: 203 -> 251.72 (24%)
+			... and 31 more transitions
+		From Domain 3:
+			To Domain 0: 443 -> 567.04 (28%)
+			To Domain 1: 165 -> 211.20000000000002 (28%)
+			To Domain 2: 585 -> 719.55 (23%)
+			... and 31 more transitions
+		From Domain 30:
+			To Domain 0: 408 -> 473.28 (16%)
+			To Domain 1: 691 -> 843.02 (22%)
+			To Domain 2: 339 -> 383.06999999999994 (13%)
+			... and 31 more transitions
+		From Domain 19:
+			To Domain 0: 639 -> 747.63 (17%)
+			To Domain 1: 209 -> 231.99 (11%)
+			To Domain 2: 729 -> 874.8 (20%)
+			... and 31 more transitions
+		From Domain 21:
+			To Domain 0: 195 -> 249.6 (28%)
+			To Domain 1: 430 -> 520.3 (21%)
+			To Domain 2: 435 -> 513.3 (18%)
+			... and 31 more transitions
+		From Domain 16:
+			To Domain 0: 472 -> 552.24 (17%)
+			To Domain 1: 222 -> 266.4 (20%)
+			To Domain 2: 655 -> 733.6 (12%)
+			... and 31 more transitions
+
+Mod_10-------------------------------------------
+100% of domains:
+	-10% ~ -30% cost
+	+10% ~ +30% bdw
+
+Domains modified: 35
+	Selected domains: ['32', '30', '22', '4', '9', '2', '25', '11', '29', '10', '34', '3', '0', '33', '14', '5', '20', '24', '21', '23', '7', '8', '19', '31', '27', '1', '16', '6', '13', '15', '18', '12', '17', '26', '28']
+
+LOCAL METRICS MODIFICATIONS:
+	COST:
+		Domain 32: 21 -> 18.06 (-14%)
+		Domain 30: 15 -> 13.5 (-10%)
+		Domain 22: 39 -> 28.47 (-27%)
+		Domain 4: 24 -> 16.799999999999997 (-30%)
+		Domain 9: 51 -> 37.74 (-26%)
+		Domain 2: 42 -> 31.5 (-25%)
+		Domain 25: 80 -> 67.2 (-16%)
+		Domain 11: 73 -> 63.51 (-13%)
+		Domain 29: 72 -> 56.160000000000004 (-22%)
+		Domain 10: 42 -> 31.5 (-25%)
+		Domain 34: 51 -> 37.23 (-27%)
+		Domain 3: 69 -> 57.96 (-16%)
+		Domain 0: 32 -> 24.96 (-22%)
+		Domain 33: 83 -> 71.38 (-14%)
+		Domain 14: 45 -> 40.05 (-11%)
+		Domain 5: 17 -> 15.13 (-11%)
+		Domain 20: 28 -> 23.52 (-16%)
+		Domain 24: 12 -> 10.2 (-15%)
+		Domain 21: 45 -> 36.0 (-20%)
+		Domain 23: 32 -> 22.72 (-29%)
+		Domain 7: 79 -> 68.73 (-13%)
+		Domain 8: 40 -> 34.4 (-14%)
+		Domain 19: 40 -> 36.0 (-10%)
+		Domain 31: 14 -> 10.219999999999999 (-27%)
+		Domain 27: 65 -> 46.15 (-29%)
+		Domain 1: 94 -> 73.32000000000001 (-22%)
+		Domain 16: 68 -> 55.760000000000005 (-18%)
+		Domain 6: 10 -> 8.8 (-12%)
+		Domain 13: 37 -> 29.970000000000002 (-19%)
+		Domain 15: 69 -> 59.339999999999996 (-14%)
+		Domain 18: 83 -> 66.4 (-20%)
+		Domain 12: 85 -> 70.55 (-17%)
+		Domain 17: 64 -> 46.08 (-28%)
+		Domain 26: 19 -> 15.580000000000002 (-18%)
+		Domain 28: 43 -> 34.4 (-20%)
+
+TRANSITION METRICS MODIFICATIONS:
+	BDW:
+		From Domain 32:
+			To Domain 0: 811 -> 965.0899999999999 (19%)
+			To Domain 1: 605 -> 671.5500000000001 (11%)
+			To Domain 2: 970 -> 1231.9 (27%)
+			... and 31 more transitions
+		From Domain 30:
+			To Domain 0: 408 -> 477.35999999999996 (17%)
+			To Domain 1: 691 -> 849.93 (23%)
+			To Domain 2: 339 -> 420.36 (24%)
+			... and 31 more transitions
+		From Domain 22:
+			To Domain 0: 748 -> 897.6 (20%)
+			To Domain 1: 237 -> 300.99 (27%)
+			To Domain 2: 581 -> 668.15 (15%)
+			... and 31 more transitions
+		From Domain 4:
+			To Domain 0: 722 -> 851.9599999999999 (18%)
+			To Domain 1: 202 -> 224.22000000000003 (11%)
+			To Domain 2: 260 -> 327.6 (26%)
+			... and 31 more transitions
+		From Domain 9:
+			To Domain 0: 654 -> 784.8 (20%)
+			To Domain 1: 500 -> 585.0 (17%)
+			To Domain 2: 813 -> 934.9499999999999 (15%)
+			... and 31 more transitions
+		From Domain 2:
+			To Domain 0: 807 -> 1024.89 (27%)
+			To Domain 1: 423 -> 473.76000000000005 (12%)
+			To Domain 3: 513 -> 625.86 (22%)
+			... and 31 more transitions
+		From Domain 25:
+			To Domain 0: 256 -> 281.6 (10%)
+			To Domain 1: 176 -> 221.76 (26%)
+			To Domain 2: 614 -> 712.2399999999999 (16%)
+			... and 31 more transitions
+		From Domain 11:
+			To Domain 0: 446 -> 566.42 (27%)
+			To Domain 1: 604 -> 730.84 (21%)
+			To Domain 2: 398 -> 501.48 (26%)
+			... and 31 more transitions
+		From Domain 29:
+			To Domain 0: 502 -> 627.5 (25%)
+			To Domain 1: 472 -> 590.0 (25%)
+			To Domain 2: 368 -> 478.40000000000003 (30%)
+			... and 31 more transitions
+		From Domain 10:
+			To Domain 0: 812 -> 958.16 (18%)
+			To Domain 1: 869 -> 1121.01 (29%)
+			To Domain 2: 608 -> 753.92 (24%)
+			... and 31 more transitions
+		From Domain 34:
+			To Domain 0: 751 -> 931.24 (24%)
+			To Domain 1: 669 -> 735.9000000000001 (10%)
+			To Domain 2: 178 -> 229.62 (29%)
+			... and 31 more transitions
+		From Domain 3:
+			To Domain 0: 443 -> 567.04 (28%)
+			To Domain 1: 165 -> 209.55 (27%)
+			To Domain 2: 585 -> 672.75 (15%)
+			... and 31 more transitions
+		From Domain 0:
+			To Domain 1: 904 -> 994.4000000000001 (10%)
+			To Domain 2: 974 -> 1217.5 (25%)
+			To Domain 3: 745 -> 908.9 (22%)
+			... and 31 more transitions
+		From Domain 33:
+			To Domain 0: 841 -> 1076.48 (28%)
+			To Domain 1: 352 -> 390.72 (11%)
+			To Domain 2: 341 -> 385.33 (13%)
+			... and 31 more transitions
+		From Domain 14:
+			To Domain 0: 846 -> 1091.34 (29%)
+			To Domain 1: 846 -> 989.8199999999999 (17%)
+			To Domain 2: 355 -> 454.40000000000003 (28%)
+			... and 31 more transitions
+		From Domain 5:
+			To Domain 0: 744 -> 825.84 (11%)
+			To Domain 1: 459 -> 518.67 (13%)
+			To Domain 2: 922 -> 1032.64 (12%)
+			... and 31 more transitions
+		From Domain 20:
+			To Domain 0: 281 -> 342.82 (22%)
+			To Domain 1: 756 -> 899.64 (19%)
+			To Domain 2: 803 -> 1019.8100000000001 (27%)
+			... and 31 more transitions
+		From Domain 24:
+			To Domain 0: 787 -> 881.44 (12%)
+			To Domain 1: 737 -> 869.66 (18%)
+			To Domain 2: 591 -> 709.1999999999999 (20%)
+			... and 31 more transitions
+		From Domain 21:
+			To Domain 0: 195 -> 214.50000000000003 (10%)
+			To Domain 1: 430 -> 511.7 (19%)
+			To Domain 2: 435 -> 526.35 (21%)
+			... and 31 more transitions
+		From Domain 23:
+			To Domain 0: 920 -> 1104.0 (20%)
+			To Domain 1: 834 -> 925.7400000000001 (11%)
+			To Domain 2: 349 -> 411.82 (18%)
+			... and 31 more transitions
+		From Domain 7:
+			To Domain 0: 719 -> 812.4699999999999 (13%)
+			To Domain 1: 954 -> 1192.5 (25%)
+			To Domain 2: 800 -> 1000.0 (25%)
+			... and 31 more transitions
+		From Domain 8:
+			To Domain 0: 189 -> 236.25 (25%)
+			To Domain 1: 292 -> 365.0 (25%)
+			To Domain 2: 931 -> 1024.1000000000001 (10%)
+			... and 31 more transitions
+		From Domain 19:
+			To Domain 0: 639 -> 779.5799999999999 (22%)
+			To Domain 1: 209 -> 252.89 (21%)
+			To Domain 2: 729 -> 867.51 (19%)
+			... and 31 more transitions
+		From Domain 31:
+			To Domain 0: 920 -> 1039.6 (13%)
+			To Domain 1: 348 -> 448.92 (29%)
+			To Domain 2: 451 -> 527.67 (17%)
+			... and 31 more transitions
+		From Domain 27:
+			To Domain 0: 264 -> 314.15999999999997 (19%)
+			To Domain 1: 335 -> 378.54999999999995 (13%)
+			To Domain 2: 930 -> 1143.9 (23%)
+			... and 31 more transitions
+		From Domain 1:
+			To Domain 0: 568 -> 647.5200000000001 (14%)
+			To Domain 2: 327 -> 398.94 (22%)
+			To Domain 3: 132 -> 163.68 (24%)
+			... and 31 more transitions
+		From Domain 16:
+			To Domain 0: 472 -> 566.4 (20%)
+			To Domain 1: 222 -> 253.08000000000004 (14%)
+			To Domain 2: 655 -> 740.15 (13%)
+			... and 31 more transitions
+		From Domain 6:
+			To Domain 0: 350 -> 416.5 (19%)
+			To Domain 1: 227 -> 261.04999999999995 (15%)
+			To Domain 2: 392 -> 470.4 (20%)
+			... and 31 more transitions
+		From Domain 13:
+			To Domain 0: 208 -> 235.03999999999996 (13%)
+			To Domain 1: 181 -> 235.3 (30%)
+			To Domain 2: 657 -> 788.4 (20%)
+			... and 31 more transitions
+		From Domain 15:
+			To Domain 0: 244 -> 314.76 (29%)
+			To Domain 1: 219 -> 275.94 (26%)
+			To Domain 2: 203 -> 247.66 (22%)
+			... and 31 more transitions
+		From Domain 18:
+			To Domain 0: 564 -> 648.5999999999999 (15%)
+			To Domain 1: 425 -> 497.24999999999994 (17%)
+			To Domain 2: 647 -> 789.34 (22%)
+			... and 31 more transitions
+		From Domain 12:
+			To Domain 0: 299 -> 370.76 (24%)
+			To Domain 1: 982 -> 1207.86 (23%)
+			To Domain 2: 399 -> 502.74 (26%)
+			... and 31 more transitions
+		From Domain 17:
+			To Domain 0: 588 -> 764.4 (30%)
+			To Domain 1: 904 -> 1175.2 (30%)
+			To Domain 2: 952 -> 1180.48 (24%)
+			... and 31 more transitions
+		From Domain 26:
+			To Domain 0: 452 -> 506.24000000000007 (12%)
+			To Domain 1: 155 -> 189.1 (22%)
+			To Domain 2: 757 -> 908.4 (20%)
+			... and 31 more transitions
+		From Domain 28:
+			To Domain 0: 330 -> 369.6 (12%)
+			To Domain 1: 387 -> 491.49 (27%)
+			To Domain 2: 271 -> 319.78 (18%)
+			... and 31 more transitions
+			
