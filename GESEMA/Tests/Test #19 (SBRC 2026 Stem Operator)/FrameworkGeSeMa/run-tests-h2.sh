@@ -7,7 +7,7 @@ executeGeSeMa(){
 	heritage="../$1/heritage_base/$6/heritage-$1-g_$3-p_$4-h_30-$5%.csv"
 	target="../$1/h2/heritage_$6/$1-Mod_$2-RELQUALITY(g_$3-p_$4-h_30-$6-$5%).csv"
 	
-	python3 TestFramework.py -rq -g "-tt 30 -p $4" "-tt 30 -p $4 -i $heritage" -r $exec -f $file
+	python3 TestFramework.py -rq -g "-g CONVERGENCE -s 1500 -p $4" "-g CONVERGENCE -s 1500 -p $4 -i $heritage" -r $exec -f $file
 
 	cp -v RELQUALITY.csv $target
 	rm -vf RELQUALITY.csv
@@ -18,9 +18,9 @@ case="35x11"
 g=30000
 p=100
 
-mods=1
+mods=4
 
-mod=6
+mod=7
 for (( i=0; i<$mods; i++ ))
 do
 	h=50
