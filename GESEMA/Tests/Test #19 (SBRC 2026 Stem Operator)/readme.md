@@ -105,7 +105,7 @@ Para sua execução é necessário realizar o seguinte comando:
 Os seguintes arquivos de saída, após a finalização da execução, serão movidos automaticamente para seus respectivos diretórios:
 * Melhores Fronteiras `/35x11/h1/heritage_bests`: 
     * 35x11-Mod_5-RELQUALITY(g_30000-p_100-h_30-bests-50%).csv;
-    * 35x11-Mod_5-RELQUALITY(g_30000-p_100-h_30-bests-100%); 
+    * 35x11-Mod_5-RELQUALITY(g_30000-p_100-h_30-bests-100%).csv; 
     * 35x11-Mod_6-RELQUALITY(g_30000-p_100-h_30-bests-50%).csv;
     * 35x11-Mod_6-RELQUALITY(g_30000-p_100-h_30-bests-100%).csv.
 * Fronteiras Aleatórias `/35x11/h1/heritage_random`: 
