@@ -22,7 +22,9 @@ No diretório `35x11` encontram-se os seguintes arquivos e subdiretórios:
 * `heritage_base`: arquivos referentes aos dados históricos utilizados. *output-[0]-unified.csv*, arquivo original proveniente de 30 execuções do GeSeMa; `bests`, contendo a seleção das melhores fronteiras de Pareto segundo sua média; e `random`, contendo a seleção de forma aleatória; 
 * `h1`, `h2` e `h3`: respectivos diretórios dos cenários 1, 2 e 3. Seus subdiretórios estão organizados entre as melhores fronteiras `heritage_bests` e as aleatórias `heritage_random`. Em cada um deles é possível encontrar os arquivos de saída gerados pelo `FrameworkGeSeMa`. A fim de auxiliar a análise dos dados, os aquivos sumary-Mod_n.csv foram gerados apenas sumarizando as saídas pertinentes.
 
-Já no diretório `FrameworkGeSeMa` estão o *framework* desenvolvido para a execução e a comparação dos testes e os *scripts* que realizam a automação para os cenários citados anteriormente.
+Já no diretório `FrameworkGeSeMa` estão o GeSeMa (*5.GeSeMa.py*), o *framework* (*TestFramework.py*) desenvolvido para a execução e a comparação dos testes e os *scripts* (*run-tests-h1.sh, run-tests-h2.sh, run-tests-h3.sh* e *run-experiments.sh*) que realizam a automação para os cenários citados anteriormente.
+
+Vale ressaltar, também, que as alterações trazidas pelo operador Tronco ao GeSeMa neste trabalho estão implementadas na classe Imputation.
 
 ## Selos Considerados
 Os autores consideram os seguintes selos para o processo de avaliação:
@@ -38,11 +40,11 @@ Os resultados provenientes dos testes apresentados no artigo são de um ambiente
 * Ubuntu 24.04.3 LTS (kernel 6.14.0-37-generic).
 
 ## Dependências
-Para a reprodução dos experimentos é necessário que as seguintes bibliotecas e seus módulos externos estejam instalados:
-* Python 3.12.3;
-* Numpy.
+Para a reprodução dos experimentos é necessário que o Python 3.12.3 esteja instalado e os módulos descritos no arquivo *requirements.txt* estejam devidamente configurados.
 
-### Python
+Também, o módulo [Platypus](https://platypus.readthedocs.io/) (algoritmos de otimização multiobjetivo para computação evolutiva) na versão 1.0.2 é requisitado. No entanto, ele é utilizado localmente (diretório `local_platypus`) e nenhuma configuração adicional é necessária.
+
+### Python e Módulos
 Inicialmente, é necessário verificar se a biblioteca do Python está instalada e na versão correta com o seguinte comando:
 
 ```
@@ -58,25 +60,16 @@ Se a saída não for como a anterior, instalar com o comando:
 sudo apt install python3.12
 ```
 
-### Numpy
-Em seguida, é ncessário verificar se o módulo Numpy está instalado:
-```
-sudo apt list --installed | grep python3-numpy
-```
-A saída deve conter algo próximo à: 
-```
-python3-numpy/noble,now 1:1.26.4+ds-6ubuntu1 amd64 [instalado]
-```
+Após a configuração do Python, é necessário realizar a instalação dos módulos externos contidos no arquivo *requirements.txt*. Para isso, execute o seguinte comando:
 
-Se a saída não for como a anterior, instalar o respectivo módulo com o comando:
 ```
-sudo apt install python3-numpy
+xargs -a requirements.txt sudo apt install -y
 ```
 
 Também é requisitado que cada arquivo *.sh* tenha a permissão de execução no sistema. Para isso, execute o seguinte comando no terminal, estando no mesmo diretório dos arquivos:
 
 ```
-sudo chmod +x run-tests-h1.sh run-tests-h2.sh run-tests-h3.sh
+sudo chmod +x run-tests-h1.sh run-tests-h2.sh run-tests-h3.sh run-experiments.sh
 ```
 
 ## Preocupações com Segurança
@@ -196,6 +189,11 @@ Os arquivos de saída já disponibilizados nos respectivos diretórios foram os 
 ### Observação 2
 Os valores contidos nos arquivos de saída serão distintos a cada execução. Isso se deve à característica aleatória da abordagem genética considerada. No entanto, os valores não devem ser muito distantes dos já disponibilizados, pois os testes consideram um intervalo de confiança de 95%.
 
+### Observação 3
+Também é possível executar as três reivindicação de forma única por meio do *script* run-experiments.sh. Para isso é necessário realizar o seguinte comando:
+```
+./run-experiments.sh
+```
 
 ## Licença
 Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](https://github.com/ViniGarcia/NFV-FLERAS/blob/GesemaExperiments/LICENSE) para mais detalhes.
